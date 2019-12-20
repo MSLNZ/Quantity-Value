@@ -12,6 +12,13 @@ Release Notes
     Authors <authors>
     Change Log <changelog>
 
+Guide
+-----
+.. toctree::
+   :maxdepth: 2
+
+    Introduction <introduction>
+
 Indices and tables
 ==================
 
