@@ -15,20 +15,7 @@ from quantity_value.dimension import *
 from quantity_value.context import *
 
 #----------------------------------------------------------------------------
-class TestKindOfQuantity(unittest.TestCase):
-
-    def test_construction(self):
-        name = 'Length'
-        term = 'L'
-        
-        Length = KindOfQuantity(name,term) 
-        
-        self.assertTrue( type(Length) is KindOfQuantity )
-        self.assertEqual( Length.name, name )
-        self.assertEqual( str(Length), term )
-
-#----------------------------------------------------------------------------
-class TestDimension(unittest.TestCase):
+class TestContext(unittest.TestCase):
 
     def test_construction(self):
 
@@ -41,6 +28,7 @@ class TestDimension(unittest.TestCase):
         
         d1 = context.dimension(Length)
         self.assertEqual( d1, Dimension( (1,0) ) )
+        
         d2 = context.dimension(Time)
         self.assertEqual( d2, Dimension( (0,1) ) )
 
@@ -108,7 +96,7 @@ class TestDimension(unittest.TestCase):
             Length*Length/Length    # reduces to Length, which is already in use
         )
         
-        # The dimension must resolve to a base or declared quantity 
+        # The dimension must be resolved to a base or declared quantity 
         self.assertRaises(
             RuntimeError,
             context.evaluate,

@@ -70,22 +70,6 @@ class TestMetricQuantity(unittest.TestCase):
         self.assertRaises( RuntimeError, deci, centimetre )
         
 
-# #----------------------------------------------------------------------------
-# class TestQuantityValue(unittest.TestCase):
-
-    # def test_construction(self):
- 
-        # Length = KindOfQuantity('Length','L') 
-        # metre = Quantity(Length,'metre','m')
-        
-        # value = 1.234
-        # qv = QuantityValue(value,metre)
-        
-        # self.assertTrue( type(qv) is QuantityValue )
-        # self.assertAlmostEqual( qv.value, value, 15 )
-        # self.assertTrue( qv.scale is metre  )
-        
- 
 #============================================================================
 if __name__ == '__main__':
     unittest.main()
