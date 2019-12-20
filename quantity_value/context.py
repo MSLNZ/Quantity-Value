@@ -12,17 +12,16 @@ from dimension import Dimension
 class Context(object):
 
     """
-    A context tracks KindOfQuantity instances,
-    and associates each each with a unique dimension.  
-    A set of 'independent'  KindOfQuantity instances 
+    A Context keeps track of KindOfQuantity instances,
+    and associates each instance with a unique dimension.  
+    A set of 'independent' KindOfQuantity instances will
     form an n-dimensional basis. Other KindOfQuantity instances 
-    are declared as products and quotients of the base quantities. Their
-    dimensions are evaluated from the corresponding base-quantity dimensions.
+    can be declared as products and quotients of the base quantities. 
     """
     
     def __init__(self,*argv):
         assert len(argv) > 0,\
-            "Provide a sequence of `KindOfQuantity` instances for the basis"
+            "Provide a sequence of `KindOfQuantity` instances"
             
         self._basis = tuple(argv)
         self._koq_dimension = bidict()
@@ -30,8 +29,11 @@ class Context(object):
         # For conversions between different unit systems
         self._conversion_factors = dict()
         
-        # Assign dimensions to base quantities
+        # Assign an independent dimension to each base quantity
         dimension = [0] * len(argv)
+        
+        # Dimensionless case is included by default
+        self._koq_dimension[Numeric] = Dimension(dimension)
         
         for i,koq in enumerate( self._basis ):
             if koq in self._koq_dimension:
@@ -42,22 +44,22 @@ class Context(object):
                     )
                 )
             else:
-                # Each kind of quantity must refer to this context
+                # Every kind of quantity known to the context 
+                # must carry a reference to it.
                 koq.context = self
                 
                 dimension[i] = 1
                 self._koq_dimension[koq] = Dimension(dimension)
                 dimension[i] = 0
-  
-        # Dimensionless case is always included
-        self._koq_dimension[Numeric] = Dimension(dimension)
         
     # The `expression` is a sequence of binary multiplication
-    # and division operations represented as a tree of objects.
-    # The `self.dimension` method resolves `KindOfQuantity` objects 
-    # at the leaves of this tree into their dimension. Execution 
-    # of the expression reduces the tree into a single dimension result,
-    # corresponding to the dimension for the resultant KindOfQuantity.
+    # and division operations, represented as a tree of 
+    # KindOfQuantity objects. 
+    # The `self.dimension` method resolves 
+    # the dimension of KindOfQuantity objects at the leaves of this tree. 
+    # Executing the expression produces a single 
+    # dimension, corresponding to the dimension for the 
+    # resultant KindOfQuantity.
     def _evaluate_dimension(self,expression):
         stack = list()
         expression.execute(stack,self.dimension)
@@ -97,7 +99,7 @@ class Context(object):
         
     def evaluate(self,expression):
         """
-        Evaluate a quantity expression and return the corresponding quantity
+        Evaluate `expression` and return the corresponding kind of quantity
         
         """
         dim = self._evaluate_dimension(expression)

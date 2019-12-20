@@ -6,8 +6,8 @@ __all__ = (
 class Quantity(object):
 
     """
-    A quantity is a specific instance of a KindOfQuantity. Such as 
-    the metre is a specific instance of Length.   
+    A Quantity is an specific KindOfQuantity. 
+    Such as the metre is a specific Length.   
     """
     
     def __init__(self,kind_of_quantity,name,term):
@@ -38,8 +38,9 @@ class Quantity(object):
 class Unit(Quantity):
 
     """
-    A unit is a quantity belonging to a system of units.  
+    A Unit is a Quantity associated with a system of units.  
     For instance, the metre is the unit of length in the SI system.  
+    Mathematical operations are defined between Unit objects.
     """
 
     def __init__(self,kind_of_quantity,name,term):
@@ -48,7 +49,7 @@ class Unit(Quantity):
         # We associate a unit system with a quantity because  
         # the realisation of a unit may differ between systems. 
         # Although this is rare, it suits our implementation to 
-        # carry a reference to the unit system here.
+        # carry a reference to the unit system.
         
         self._system = None
         
@@ -70,7 +71,7 @@ class Unit(Quantity):
             self._system = system
         else:
             raise RuntimeError(
-                "System of units already assigned: {}".format(self.system)
+                "System of units is assigned: {}".format(self.system)
             )
         
     def __repr__(self):
@@ -98,10 +99,23 @@ class Unit(Quantity):
         return Simplify(self)
 
 #----------------------------------------------------------------------------
+# The following classes support simple manipulation of units by
+# multiplication and division. Declaring a ratio of units 
+# and of simplifying a ratio of units is also supported. 
+# The base classes  `UnaryOp` and `BinaryOp` establish method requirements.  
+# These classes provide a temporary representation for 
+# an equation involving units.
+#
+# Operations implement manipulations of multipliers and kinds
+# of quantity simultaneously. The latter depends on 
+# operations defined in kind_of_quantity.py, construct a tree
+# of KoQ objects and then reduce it to a single resultant KoQ object.
+#----------------------------------------------------------------------------
 class UnaryOp(object):   
 
     def __init__(self,arg):
         self.arg = arg
+        self._system = arg.system
 
     @property 
     def system(self):
@@ -123,31 +137,13 @@ class UnaryOp(object):
         return Simplify(self)
 
 #----------------------------------------------------------------------------
-class Simplify(UnaryOp):
-
-    def __init__(self,arg):
-        UnaryOp.__init__(self,arg) 
-        
-    def __repr__(self):
-        return "simplify({!r})".format(self.arg)
-
-    def __str__(self):
-        return "simplify({!s})".format(self.arg)
-           
-    @property 
-    def kind_of_quantity(self):  
-        return self.arg.kind_of_quantity.simplify()
-        
-    @property 
-    def multiplier(self):
-        return self.arg.multiplier
-
-#----------------------------------------------------------------------------
 class BinaryOp(object):   
 
     def __init__(self,lhs,rhs):
         self.lhs = lhs
         self.rhs = rhs
+        
+        assert lhs.system is rhs.system
         self._system = lhs.system
         
     @property 
@@ -169,6 +165,26 @@ class BinaryOp(object):
     def simplify(self):
         return Simplify(self)
        
+#----------------------------------------------------------------------------
+class Simplify(UnaryOp):
+
+    def __init__(self,arg):
+        UnaryOp.__init__(self,arg) 
+        
+    def __repr__(self):
+        return "simplify({!r})".format(self.arg)
+
+    def __str__(self):
+        return "simplify({!s})".format(self.arg)
+           
+    @property 
+    def kind_of_quantity(self):  
+        return self.arg.kind_of_quantity.simplify()
+        
+    @property 
+    def multiplier(self):
+        return self.arg.multiplier
+
 #----------------------------------------------------------------------------
 class Ratio(BinaryOp):   
 

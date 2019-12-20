@@ -11,9 +11,8 @@ __all__ = (
 class RationalUnit(Unit):
 
     """
-    A rational unit will be related to a reference by a rational multiplier. 
+    A rational unit is related to a reference unit by a rational multiplier. 
     Such as, feet to inches.
-    
     """
     
     def __init__(self,kind_of_quantity,name,term):
@@ -31,6 +30,7 @@ def alternative_unit(unit,fraction,name,term):
     """
     Define and register a rational multiple of the system  
     reference unit for the same quantity.
+    
     """
     kind_of_quantity = unit._kind_of_quantity
     system = unit._system 
@@ -42,16 +42,16 @@ def alternative_unit(unit,fraction,name,term):
 
     fraction = Fraction( fraction )
     
-    rational_unit = AltRationalUnit(
+    alt_rational_unit = AltRationalUnit(
         kind_of_quantity,
         name,
         term,
         system,
         fraction
     )
-    system._register_by_name(rational_unit)
+    system._register_by_name(alt_rational_unit)
     
-    return rational_unit
+    return alt_rational_unit
     
 #----------------------------------------------------------------------------
 class AltRationalUnit(RationalUnit):

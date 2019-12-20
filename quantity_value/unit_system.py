@@ -11,14 +11,15 @@ from quantity import Unit
 __all__ = (
     'UnitSystem',
 )
+
 #----------------------------------------------------------------------------
 class UnitSystem(object):
 
     """
     A unit system holds a 1-to-1 bi-directional map between KindOfQuantity 
     instances and Unit instances. Such as Length <-> metre.
-    It also maps 1-to-1 between unit names and unit objects. Such as, 
-    `SI.centimetre` or `SI['centimetre']`
+    Objects also behave as a map from unit names to unit objects. 
+    Such as, `SI.centimetre` or `SI['centimetre']` or 'centimetre' in SI.
     """
     
     def __init__(self,name,unit_class):
@@ -85,13 +86,10 @@ class UnitSystem(object):
     def __getitem__(self,name):
         return self._name_to_unit[name]
         
-    def get(self,kind_of_quantity,default=None):
-        try:
-            return self.__getitem__(kind_of_quantity)
-        except KeyError:
-            return default 
+    def get(self,name,default=None):
+            return self._name_to_unit.get(name,default)
             
-    def register(self,unit):
+    def _register_unit(self,unit):
         # key: koq; value: unit
         koq = unit._kind_of_quantity
         
@@ -125,26 +123,28 @@ class UnitSystem(object):
         
     def unit(self,kind_of_quantity,name,term):
         """
-        Create a reference unit for `kind_of_quantity`
+        Create a reference unit in this system for `kind_of_quantity`
+        The unit will be identified by `name`, and abbreviation `term`.
         """
         u = self._unit_cls(kind_of_quantity,name,term)
-        self.register(u) 
+        self._register_unit(u) 
         return u
   
     def from_to(self,source_unit,target_unit):
         """
-        Conversion factor for `source_unit` to `target_unit`
+        Return a multiplier to convert from `source_unit` to `target_unit`
         """
         assert source_unit.name in self,\
-            "{!r} is not registered in this system".format(source_unit)
+            "{!r} is not registered".format(source_unit)
+            
         assert target_unit.name in self,\
-            "{!r} is not registered in this system".format(target_unit)
+            "{!r} is not registered".format(target_unit)
             
         src_koq = source_unit._kind_of_quantity
         dst_koq = target_unit._kind_of_quantity
         if not src_koq is dst_koq:
             raise RuntimeError(
-                "{} and {} are different quantities".format(src_koq,dst_koq)
+                "{} and {} are different kinds of quantity".format(src_koq,dst_koq)
             )
             
         multiplier = target_unit.multiplier         # ref * k_dst -> unit_dst

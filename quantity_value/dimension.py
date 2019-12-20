@@ -1,8 +1,10 @@
 from __future__ import print_function
 from __future__ import division 
 
-from itertools import izip_longest as zip_longest       # Python 2
-# from itertools import zip_longest                     # Python 3
+try:
+    from itertools import zip_longest                   # Python 3
+except ImportError:
+    from itertools import izip_longest as zip_longest   # Python 2
 
 __all__ = (
     'Dimension',
@@ -15,8 +17,8 @@ class Dimension(object):
     Dimension holds the dimensional exponents of a KindOfQuantity instance. 
     
     Multiplication and division of Dimension adds and subtracts dimensional 
-    exponents. However, there is also provision made to retain the dimension 
-    of 'dimensionless' quantities.
+    exponents, but there is also provision made to retain the dimension 
+    of 'dimensionless' quantities as a ratio.
     
     Dimension objects may be used as keys in Python dictionaries.
     """
@@ -128,8 +130,9 @@ class Dimension(object):
 
     def ratio(self,rhs):
         """
-        Avoid simplifying the dimensions of `self` and `rhs` but  
-        ratio the numerator with the denominator.
+        Avoid simplifying the dimensions of `self` and `rhs`.
+        Retain them as a ratio, with the dimension of `self` in 
+        the numerator and the dimension of `rhs` in the denominator.
         
         """
         if not rhs.denominator:
@@ -154,8 +157,9 @@ class Dimension(object):
 
     def simplify(self):
         """
-        Simplify the dimensional exponents in the numerator 
-        by those in the denominator 
+        Return the dimension of the object. 
+        If there are dimensions for both the numerator and
+        denominator they will be combined and simplified. 
         
         """
         return Dimension(

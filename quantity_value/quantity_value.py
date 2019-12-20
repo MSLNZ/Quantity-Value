@@ -1,9 +1,3 @@
-__all__ = (
-    'QuantityValue',
-    'value',
-    'quantity',
-)
-
 #----------------------------------------------------------------------------
 class QuantityValue(object):
 
@@ -87,12 +81,10 @@ class QuantityValue(object):
             raise NotImplemented
   
     # Multiplication and division create QuantityValue 
-    # objects in which the quantity attribute is an 
-    # expression that has not not been
-    # resolved to a single unit within the system. 
+    # objects in which the quantity is a temporary 
+    # object that has not not been resolved to a unit. 
     # This temporary object has an interface that exposes
-    # `multiplier`, `system` and `kind_of_quantity` attributes, 
-    # which are also present in the Unit interface. 
+    # `multiplier`, `system` and `kind_of_quantity` attributes. 
     # These allow a unit to be resolved later.
     def __mul__(self,rhs):
         tmp = self.q * rhs.q 
@@ -112,12 +104,12 @@ class QuantityValue(object):
         return QuantityValue(v,tmp)
         
     def __rmul__(self,lhs):
-        # Assume that the `lhs` behaves as a numeric 
+        # Assume that the `lhs` behaves as a number 
         q = self.q.system.unity * self.q
         return QuantityValue(lhs * self.x, q)
             
     def __rdiv__(self,lhs):
-        # Assume that the `lhs` behaves as a numeric 
+        # Assume that the `lhs` behaves as a number 
         q = self.q.system.unity / self.q
         return QuantityValue(lhs / self.x, q)
         
@@ -129,11 +121,12 @@ class QuantityValue(object):
         quantity = self.q
         us = quantity.system 
         koq_expression = quantity.kind_of_quantity
-        c = koq_expression.context
+        
+        # c = koq_expression.context
         
         unit = us.reference_unit_for( koq_expression ) 
         
-        return QuantityValue(self.q.multiplier*self.x,unit)
+        return QuantityValue( quantity.multiplier*self.x, unit )
         
 #----------------------------------------------------------------------------
 def value(qv):
@@ -147,6 +140,8 @@ def quantity(qv):
     try:
         return qv.q 
     except AttributeError:
+        # TODO: This must be interpreted as being  
+        # equivalent to `unity`, the Numeric unit.
         return None 
        
              

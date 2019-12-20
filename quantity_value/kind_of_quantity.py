@@ -81,6 +81,11 @@ class KindOfQuantity(object):
 Numeric = KindOfQuantity('Numeric','1')
 
 #----------------------------------------------------------------------------
+# The following classes support simple manipulation of KindOfQuantity objects 
+# by multiplication and division. The operation of declaring a ratio 
+# and of simplifying a ratio is also supported. The base classes 
+# `UnaryOp` and `BinaryOp` establish the method requirements.  
+#----------------------------------------------------------------------------
 class UnaryOp(object):   
 
     def __init__(self,arg):

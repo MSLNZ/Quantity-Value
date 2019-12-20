@@ -2,15 +2,15 @@ from quantity import *
 
 __all__ = ( 
     'MetricUnit',
-    'MetricPrefix',
 )
 
 #----------------------------------------------------------------------------
 class MetricUnit(Unit):
 
     """
-    A metric unit may have a metric prefix applied. Such as decilitre, 
-    centimetre, etc.
+    A MetricUnit will instantiate the reference unit for a kind of quantity.
+    A metric prefix may be applied to a MetricUnit object to define related  
+    (PrefixedMetricUnit) units. Such as decilitre, centimetre, etc.
     """
     
     def __init__(self,kind_of_quantity,name,term):
@@ -57,6 +57,10 @@ class MetricUnit(Unit):
 class PrefixedMetricUnit(MetricUnit):
 
     """
+    A PrefixedMetricUnit is related to a reference unit of the same 
+    kind of quantity in the unit system by a multiplier. 
+    Such as, centimetre to metre.
+    
     Instances are only created by MetricUnit
     """
     
@@ -83,29 +87,6 @@ class PrefixedMetricUnit(MetricUnit):
         raise RuntimeError(
             "Illegal operation: '{}' already has a prefix".format(self.name)  
         )
-        
-#----------------------------------------------------------------------------
-class MetricPrefix(object):
-    
-    def __init__(self,name,term,value):
-        self.name = name 
-        self.term = term 
-        self.value = value
-        
-    def __repr__(self):
-        return "{!s}({!r},{!r},{:.0E})".format(
-            self.__class__.__name__,
-            self.name,
-            self.term,
-            self.value
-        )
-        
-    def __str__(self):
-        return str(self.term) 
-        
-    def __call__(self,quantity):
-        return quantity._apply_prefix(self)
-        
         
 
 

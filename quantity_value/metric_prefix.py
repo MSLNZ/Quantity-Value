@@ -1,5 +1,28 @@
-from metric_quantity import *
-
+#----------------------------------------------------------------------------
+class MetricPrefix(object):
+    
+    def __init__(self,name,term,value):
+        self.name = name 
+        self.term = term 
+        self.value = value
+        
+    def __repr__(self):
+        return "{!s}({!r},{!r},{:.0E})".format(
+            self.__class__.__name__,
+            self.name,
+            self.term,
+            self.value
+        )
+        
+    def __str__(self):
+        return str(self.term) 
+        
+    def __call__(self,metric_reference_unit):
+        return metric_reference_unit._apply_prefix(self)
+        
+#============================================================================
+# Common metric prefixes
+#
 pico =      MetricPrefix('pico','p',1E-12)
 nano =      MetricPrefix('nano','n',1E-9)
 micro =     MetricPrefix('micro','u',1E-6)
@@ -13,6 +36,7 @@ mega =      MetricPrefix('mega','M',1E6)
 giga =      MetricPrefix('giga','G',1E9)
 tera =      MetricPrefix('tera','T',1E12)
 
+# Useful to iterate over all prefixes
 metric_prefixes = (
     pico,
     nano,
@@ -28,11 +52,14 @@ metric_prefixes = (
     tera
 )
 
+# Common prefixes for numbers
+#
 percent = MetricPrefix('per-cent','%',1E-2)
 per_mille = MetricPrefix('per-mille','%%',1E-3)
 per_million = MetricPrefix('per-million','ppm',1E-6)
 per_billion = MetricPrefix('per-billion','ppb',1E-9)
 
+# Useful to iterate over all prefixes
 number_prefixes = (
     percent,
     per_mille,
