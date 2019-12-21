@@ -18,8 +18,8 @@ class UnitSystem(object):
     """
     A unit system holds a 1-to-1 bi-directional map between KindOfQuantity 
     instances and Unit instances. Such as Length <-> metre.
-    Objects also behave as a map from unit names to unit objects. 
-    Such as, `SI.centimetre` or `SI['centimetre']` or 'centimetre' in SI.
+    UnitSystem objects also behave like a map from unit names to unit objects. 
+    Such as, `SI.centimetre` or `SI['centimetre']` or `'centimetre' in SI`.
     """
     
     def __init__(self,name,unit_class):

@@ -35,6 +35,14 @@ class Quantity(object):
         return self._kind_of_quantity
         
 #----------------------------------------------------------------------------
+# TODO: There is similarity Unit and ValueUnit.
+# If a unit has a multiplier, it might as well be a ValueUnit?
+# Perhaps there is an opportunity to re-factor. However, a Unit  
+# differs from a ValueUnit by:
+#    * its association with a system of units 
+#    * the properties `name` and `kind_of_quantity`
+#    * the representation and string formating
+#
 class Unit(Quantity):
 
     """
@@ -98,11 +106,15 @@ class Unit(Quantity):
     def simplify(self):
         return Simplify(self)
 
+    def reference_unit_for(self):
+        return self.system.reference_unit_for( self.kind_of_quantity ) 
+
 #----------------------------------------------------------------------------
 # The following classes support simple manipulation of units by
-# multiplication and division. Declaring a ratio of units 
+# multiplication and division, declaring a ratio of units 
 # and of simplifying a ratio of units is also supported. 
-# The base classes  `UnaryOp` and `BinaryOp` establish method requirements.  
+# The base classes  `UnaryOp` and `BinaryOp` establish the method 
+# interface requirements.  
 # These classes provide a temporary representation for 
 # an equation involving units.
 #
@@ -136,6 +148,9 @@ class UnaryOp(object):
     def simplify(self):
         return Simplify(self)
 
+    def reference_unit_for(self):
+        return self.system.reference_unit_for( self.kind_of_quantity ) 
+    
 #----------------------------------------------------------------------------
 class BinaryOp(object):   
 
@@ -164,6 +179,9 @@ class BinaryOp(object):
 
     def simplify(self):
         return Simplify(self)
+
+    def reference_unit_for(self):
+        return self.system.reference_unit_for( self.kind_of_quantity ) 
        
 #----------------------------------------------------------------------------
 class Simplify(UnaryOp):

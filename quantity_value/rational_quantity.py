@@ -8,6 +8,8 @@ __all__ = (
 )
 
 #----------------------------------------------------------------------------
+# There are no special features of RationalUnit. 
+#
 class RationalUnit(Unit):
 
     """

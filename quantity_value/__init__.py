@@ -11,9 +11,10 @@ from .context import *
 #----------------------------------------------------------------------------
 
 __all__ = (
-    'QuantityValue',
+    'ValueUnit',
     'value',
-    'quantity',
+    'unit',
+    'result',
     'KindOfQuantity',
     'Context',
     'UnitSystem',

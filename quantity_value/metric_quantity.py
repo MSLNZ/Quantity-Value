@@ -5,10 +5,15 @@ __all__ = (
 )
 
 #----------------------------------------------------------------------------
+# The only special feature of MetricUnit is that the metric prefixes can be
+# applied to create related units. Those related units cannot have the 
+# same prefixes applied. This functionality could be implemented in the same 
+# way as in rational_unit.py, with a function instead of methods.
+#
 class MetricUnit(Unit):
 
     """
-    A MetricUnit will instantiate the reference unit for a kind of quantity.
+    A MetricUnit will represent the reference unit for a kind of quantity.
     A metric prefix may be applied to a MetricUnit object to define related  
     (PrefixedMetricUnit) units. Such as decilitre, centimetre, etc.
     """
