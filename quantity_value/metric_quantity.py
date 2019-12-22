@@ -5,7 +5,7 @@ __all__ = (
 )
 
 #----------------------------------------------------------------------------
-# The only special feature of MetricUnit is that the metric prefixes can be
+# The special feature of MetricUnit is that metric prefixes can be
 # applied to create related units. Those related units cannot have the 
 # same prefixes applied. This functionality could be implemented in the same 
 # way as in rational_unit.py, with a function instead of methods.
@@ -18,33 +18,37 @@ class MetricUnit(Unit):
     (PrefixedMetricUnit) units. Such as decilitre, centimetre, etc.
     """
     
-    def __init__(self,kind_of_quantity,name,term):
+    def __init__(self,kind_of_quantity,name,term,system,multiplier=1):
         super(MetricUnit,self).__init__(
             kind_of_quantity,
             name,
-            term
+            term,
+            system,
+            multiplier
         )    
-        
-        self._prefixed_quantities = dict() 
-        self._multiplier = 1        
 
     def _apply_prefix(self,prefix):
+        # Things like `centi(centi(metre))` are not permitted
+        # So check that `self` is a reference unit in the system.
+        if not self is self.system.reference_unit_for(self.kind_of_quantity):
+            raise RuntimeError(
+                "Illegal operation: '{}' already has a prefix".format(self.name)  
+            )     
             
-        try:
-            return self._prefixed_quantities[prefix]
-            
-        except KeyError:
-            
+        name = "{!s}{!s}".format(
+            prefix.name,
+            self.name
+        )
+        
+        if name in self.system:
+            return self.system[name]
+        else:
             term = "{!s}{!s}".format(
-                prefix,
+                prefix.term,
                 self
             )
-            name = "{!s}{!s}".format(
-                prefix.name,
-                self.name
-            )
             
-            pq = PrefixedMetricUnit(
+            pq = MetricUnit(
                 self._kind_of_quantity,
                 name,
                 term,
@@ -53,45 +57,44 @@ class MetricUnit(Unit):
             )
             
             # Buffer related quantities        
-            self._prefixed_quantities[prefix] = pq 
             self.system._register_by_name(pq)
             
             return pq 
     
-#----------------------------------------------------------------------------
-class PrefixedMetricUnit(MetricUnit):
+# #----------------------------------------------------------------------------
+# class PrefixedMetricUnit(MetricUnit):
 
-    """
-    A PrefixedMetricUnit is related to a reference unit of the same 
-    kind of quantity in the unit system by a multiplier. 
-    Such as, centimetre to metre.
+    # """
+    # A PrefixedMetricUnit is related to a reference unit of the same 
+    # kind of quantity in the unit system by a multiplier. 
+    # Such as, centimetre to metre.
     
-    Instances are only created by MetricUnit
-    """
+    # Instances are only created by MetricUnit
+    # """
     
-    def __init__(self,kind_of_quantity,name,term,system,multiplier): 
-        super(PrefixedMetricUnit,self).__init__(
-            kind_of_quantity,
-            name,
-            term 
-        )
-        self._multiplier = multiplier
-        self.system = system        
+    # def __init__(self,kind_of_quantity,name,term,system,multiplier): 
+        # super(PrefixedMetricUnit,self).__init__(
+            # kind_of_quantity,
+            # name,
+            # term 
+        # )
+        # self._multiplier = multiplier
+        # self.system = system        
                 
-    def __repr__(self):
-        return "{!s}({!s},{!s},{!s},{})".format(
-            self.__class__.__name__,
-            self._kind_of_quantity.name,
-            self.name,
-            self,
-            self._multiplier
-        )
+    # def __repr__(self):
+        # return "{!s}({!s},{!s},{!s},{})".format(
+            # self.__class__.__name__,
+            # self._kind_of_quantity.name,
+            # self.name,
+            # self,
+            # self._multiplier
+        # )
         
-    def _apply_prefix(self,prefix):
-        # Things like `centi(centi(metre))` are not permitted
-        raise RuntimeError(
-            "Illegal operation: '{}' already has a prefix".format(self.name)  
-        )
+    # def _apply_prefix(self,prefix):
+        # # Things like `centi(centi(metre))` are not permitted
+        # raise RuntimeError(
+            # "Illegal operation: '{}' already has a prefix".format(self.name)  
+        # )
         
 
 
