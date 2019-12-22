@@ -6,7 +6,6 @@ import unittest
 from quantity_value.kind_of_quantity import * 
 from quantity_value.unit_system import *
 from quantity_value.quantity import * 
-from quantity_value.metric_quantity import *
 from quantity_value.metric_prefix import *
 from quantity_value.context import *
 from quantity_value.quantity_value import *
@@ -15,7 +14,7 @@ from quantity_value.quantity_value import *
 class TestQuantityValue(unittest.TestCase):
 
     def test_construction(self):
-        SIUnits =  UnitSystem("SI",MetricUnit)
+        SIUnits =  UnitSystem("SI")
         Length = KindOfQuantity('Length','L') 
         metre = SIUnits.unit(Length,'metre','m')
         
@@ -28,7 +27,7 @@ class TestQuantityValue(unittest.TestCase):
  
     def test_simple_addition_subtraction(self):
         
-        SIUnits = UnitSystem("SI",MetricUnit)
+        SIUnits = UnitSystem("SI")
         Length = KindOfQuantity('Length','L') 
         metre = SIUnits.unit(Length,'metre','m')
 
@@ -39,12 +38,12 @@ class TestQuantityValue(unittest.TestCase):
         qv2 = ValueUnit(x2,metre)
         
         vu = qv1 + qv2 
-        self.assertAlmostEqual( vu.x, x1 + x2, 15 )       
-        self.assertTrue( vu.u is metre )
+        self.assertAlmostEqual( vu.value, x1 + x2, 15 )       
+        self.assertTrue( vu.unit is metre )
   
         vu = qv1 - qv2 
-        self.assertAlmostEqual( vu.x, x1 - x2, 15 )       
-        self.assertTrue( vu.u is metre )
+        self.assertAlmostEqual( vu.value, x1 - x2, 15 )       
+        self.assertTrue( vu.unit is metre )
         
         # When the units have different prefixes
         qv2 = ValueUnit(x2,centi(metre))
@@ -54,11 +53,11 @@ class TestQuantityValue(unittest.TestCase):
         self.assertTrue( unit(vu) is centi(metre) )
 
         vu = qv1 - qv2 
-        self.assertAlmostEqual( vu.x, x1*100 - x2, 15 )       
-        self.assertTrue( vu.u is centi(metre) )
+        self.assertAlmostEqual( vu.value, x1*100 - x2, 15 )       
+        self.assertTrue( vu.unit is centi(metre) )
 
         # Illegal case 
-        Imperial = UnitSystem("Imperial",Unit)
+        Imperial = UnitSystem("Imperial")
         foot = Imperial.unit(Length,'foot','ft')
         qv3 = ValueUnit(x1,foot)
         

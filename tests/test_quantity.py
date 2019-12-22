@@ -6,7 +6,6 @@ import unittest
 from quantity_value.kind_of_quantity import * 
 from quantity_value.unit_system import *
 from quantity_value.quantity import * 
-from quantity_value.metric_quantity import *
 from quantity_value.metric_prefix import *
 from quantity_value.context import *
 
@@ -46,19 +45,19 @@ class TestMetricQuantity(unittest.TestCase):
     def test_construction(self):
         Length = KindOfQuantity('Length','L') 
 
-        SIUnits =  UnitSystem("SI",MetricUnit)
+        SIUnits =  UnitSystem("SI")
 
         name = 'metre'
         symbol = 'm' 
         metre = SIUnits.unit(Length,name,symbol)  
 
-        self.assertTrue( type(metre) is MetricUnit )
+        self.assertTrue( type(metre) is Unit )
         self.assertEqual( str(metre), symbol )
         self.assertEqual( metre.name, name  )
 
         centimetre = centi( metre )
 
-        self.assertTrue( isinstance(centimetre,MetricUnit) )
+        self.assertTrue( isinstance(centimetre,Unit) )
         self.assertEqual( str(centimetre), 'cm' )
         self.assertEqual( centimetre.name, 'centimetre' )
         
