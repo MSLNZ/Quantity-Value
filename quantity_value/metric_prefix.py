@@ -1,3 +1,5 @@
+from .unit_system import metric_unit
+
 #----------------------------------------------------------------------------
 class MetricPrefix(object):
     
@@ -18,7 +20,7 @@ class MetricPrefix(object):
         return str(self.term) 
         
     def __call__(self,metric_reference_unit):
-        return metric_reference_unit._apply_prefix(self)
+        return metric_unit(self,metric_reference_unit)
         
 #============================================================================
 # Common metric prefixes

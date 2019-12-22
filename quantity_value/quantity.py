@@ -33,16 +33,8 @@ class Quantity(object):
     @property 
     def kind_of_quantity(self):
         return self._kind_of_quantity
-        
+  
 #----------------------------------------------------------------------------
-# TODO: There is similarity Unit and ValueUnit.
-# If a unit has a multiplier, it might as well be a ValueUnit?
-# Perhaps there is an opportunity to re-factor. However, a Unit  
-# differs from a ValueUnit by:
-#    * its association with a system of units 
-#    * the properties `name` and `kind_of_quantity`
-#    * the representation and string formating
-#
 class Unit(Quantity):
 
     """
@@ -51,17 +43,13 @@ class Unit(Quantity):
     Mathematical operations are defined between Unit objects.
     """
 
-    def __init__(self,kind_of_quantity,name,term):
+    def __init__(self,kind_of_quantity,name,term,system,multiplier):
         super(Unit,self).__init__(kind_of_quantity,name,term)
         
-        # We associate a unit system with a quantity because  
-        # the realisation of a unit may differ between systems. 
-        # Although this is rare, it suits our implementation to 
-        # carry a reference to the unit system.
+        self._system = system
+        self._multiplier = multiplier   
         
-        self._system = None
-        
-    # Units of the same kind of quantity have different multipliers. 
+    # Units of the same kind of quantity can have different multipliers. 
     @property 
     def multiplier(self):
         try:

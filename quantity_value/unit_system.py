@@ -9,7 +9,7 @@ from kind_of_quantity import Numeric
 from quantity import Unit 
 
 __all__ = (
-    'UnitSystem',
+    'UnitSystem', 'rational_unit'
 )
 
 #----------------------------------------------------------------------------
@@ -17,24 +17,22 @@ class UnitSystem(object):
 
     """
     A unit system holds a 1-to-1 bi-directional map between KindOfQuantity 
-    instances and Unit instances. Such as Length <-> metre.
+    instances and reference Unit instances. Such as Length <-> metre.
     UnitSystem objects also behave like a map from unit names to unit objects. 
-    Such as, `SI.centimetre` or `SI['centimetre']` or `'centimetre' in SI`.
+    Such as, `SI.metre` or `SI['metre']` or `'metre' in SI`.
     """
     
-    def __init__(self,name,unit_class):
+    def __init__(self,name):
         self._name = name
         
         self._register = bidict()   # koq <-> unit
         self._name_to_unit = dict() # unit name -> unit
         
-        self._unit_cls = unit_class
-            
         # There must be a unit for numbers
-        unity = unit_class(Numeric,'','')
+        unity = Unit(Numeric,'','',self,1)
         
         # Do registration explicitly, because unit.name = ""
-        unity.system = self 
+        # unity.system = self 
         self._register[Numeric] = unity
         self._name_to_unit['unity'] = unity
         self.__dict__['unity'] = unity 
@@ -89,7 +87,7 @@ class UnitSystem(object):
     def get(self,name,default=None):
             return self._name_to_unit.get(name,default)
             
-    def _register_unit(self,unit):
+    def _register_reference_unit(self,unit):
         # key: koq; value: unit
         koq = unit._kind_of_quantity
         
@@ -99,11 +97,12 @@ class UnitSystem(object):
                     "{!r} is already registered".format(koq)
                 )
         else:
-            unit.system = self 
             self._register[koq] = unit 
             self._register_by_name(unit)
             
     def _register_by_name(self,unit):
+        # This can contain all units, not just reference ones,
+        # provided their names are distinct dictionary keys
         if unit.name in self._name_to_unit:
             raise RuntimeError(
                 "The name {!s} registered to {!r}".format(
@@ -120,14 +119,16 @@ class UnitSystem(object):
  
     def kind_of_quantity(self,unit):
         return self._register.inverse[unit]
-        
+            
     def unit(self,kind_of_quantity,name,term):
         """
         Create a reference unit in this system for `kind_of_quantity`
         The unit will be identified by `name`, and abbreviation `term`.
         """
-        u = self._unit_cls(kind_of_quantity,name,term)
-        self._register_unit(u) 
+        # Reference units all have multiplier = 1
+        u = Unit(kind_of_quantity,name,term,self,multiplier=1)
+        self._register_reference_unit(u) 
+        
         return u
   
     def from_to(self,source_unit,target_unit):
@@ -152,3 +153,74 @@ class UnitSystem(object):
         
         return multiplier 
        
+#----------------------------------------------------------------------------
+def rational_unit(unit,fraction,name,term):
+    """
+    Define and register a rational multiple of a system  
+    reference unit for the same quantity.
+    
+    """
+    kind_of_quantity = unit._kind_of_quantity
+    system = unit._system 
+
+    if not unit is system.reference_unit_for(unit.kind_of_quantity):
+        raise RuntimeError(
+            "Illegal operation: '{}' is not a reference unit in this system".format(unit.name)  
+        )     
+
+    if name in self.system:
+        return self.system[name]
+    else:
+        rational_unit = Unit(
+            kind_of_quantity,
+            name,
+            term,
+            system,
+            Fraction( fraction )
+        )
+        system._register_by_name(rational_unit)
+        
+        return rational_unit
+        
+#----------------------------------------------------------------------------
+def metric_unit(prefix,unit):
+    """
+    Define a metric multiple of a system  
+    reference unit for the same quantity.
+    
+    """
+    kind_of_quantity = unit._kind_of_quantity
+    system = unit._system 
+
+    # Things like `centi(centi(metre))` are not permitted
+    # So check that `self` is a reference unit in the system.
+    if not unit is system.reference_unit_for(unit.kind_of_quantity):
+        raise RuntimeError(
+            "Illegal operation: '{}' is not a reference unit in this system".format(unit.name)  
+        )     
+
+    name = "{!s}{!s}".format(
+        prefix.name,
+        unit.name
+    )
+    
+    if name in system:
+        return system[name]
+    else:
+        term = "{!s}{!s}".format(
+            prefix.term,
+            unit
+        )
+        
+        pq = Unit(
+            kind_of_quantity,
+            name,
+            term,
+            system,
+            prefix.value
+        )
+        
+        # Buffer related quantities        
+        system._register_by_name(pq)
+        
+        return pq 
