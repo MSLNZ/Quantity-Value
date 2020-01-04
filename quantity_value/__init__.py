@@ -10,10 +10,12 @@ from .context import *
 
 __all__ = (
     'ValueUnit',
+    'qvalue',
     'value',
     'unit',
     'result',
     'KindOfQuantity',
+    'Numeric',
     'Context',
     'UnitSystem',
 )

@@ -1,3 +1,5 @@
+from .quantity import Unit
+
 #----------------------------------------------------------------------------
 #
 class ValueUnit(object):
@@ -18,7 +20,7 @@ class ValueUnit(object):
         
     def __repr__(self):
         return "{!s}({!r},{!r})".format(
-            self.__class__.__name__,
+            'qvalue',
             self.value,
             self.unit 
         )
@@ -29,16 +31,25 @@ class ValueUnit(object):
             self.unit 
         )
         
-    def __add__(self,rhs):
-        unit_l = self.unit
-        unit_r = rhs.unit
+    def __add__(self,rhs):  
+        if isinstance(self.unit,Unit):
+            unit_l = self.unit
+        else:   
+            assert False,'automatic resolution not implemented'
+        if isinstance(rhs.unit,Unit):
+            unit_r = rhs.unit
+        else:   
+            assert False,'automatic resolution not implemented'
+
         if not unit_l.system is unit_r.system:
-            raise RuntimeError("operation requires the same unit system")
+            raise RuntimeError("Different unit systems: {}, {}".format(
+                unit_l.system,unit_r.system)
+            )
             
         if unit_l is unit_r:
             return ValueUnit( self.value + rhs.value, unit_l )
          
-        if unit_l._kind_of_quantity is unit_r._kind_of_quantity:
+        if unit_l.kind_of_quantity is unit_r.kind_of_quantity:
             ml = unit_l.multiplier
             mr = unit_r.multiplier 
             if ml < mr:
@@ -46,29 +57,43 @@ class ValueUnit(object):
             else:
                 return ValueUnit( (ml/mr)*self.value + rhs.value, unit_r )
         else:
-            raise RuntimeError("operation requires the same kind of quantity")    
+            raise RuntimeError(
+                "Different kinds of quantity: {}, {}".format(
+                    unit_l.kind_of_quantity,unit_r.kind_of_quantity)
+            )    
 
     def __radd__(self,lhs):
         # Can add numbers to numeric QVs
-        unit_r = self.unit
+        if isinstance(self.unit,Unit):
+            unit_r = self.unit
+        else:   
+            assert False,'automatic resolution not implemented'
 
         if unit_r.kind_of_quantity is Numeric:
             return ValueUnit( lhs + self.value, unit_r )
         else:
-            raise NotImplemented
+            return NotImplemented
   
     def __sub__(self,rhs):
-        unit_l = self.unit
-        unit_r = rhs.unit
+        if isinstance(self.unit,Unit):
+            unit_l = self.unit
+        else:   
+            assert False,'automatic resolution not implemented'
+        if isinstance(rhs.unit,Unit):
+            unit_r = rhs.unit
+        else:   
+            assert False,'automatic resolution not implemented'
+
         if not unit_l.system is unit_r.system:
-            raise RuntimeError("operation requires the same unit system")
+            raise RuntimeError("Different unit systems: {}, {}".format(
+                unit_l.system,unit_r.system)
+            )
         
         if unit_l is unit_r:
             return ValueUnit( self.value - rhs.value, unit_l )
             
-        if (    unit_l.system is unit_r.system 
-            and unit_l._kind_of_quantity is unit_r._kind_of_quantity
-        ):
+        if unit_l.kind_of_quantity is unit_r.kind_of_quantity:
+        
             ml = unit_l.multiplier
             mr = unit_r.multiplier 
             if ml < mr:
@@ -76,15 +101,22 @@ class ValueUnit(object):
             else:
                 return ValueUnit( (ml/mr)*self.value - rhs.value, unit_r )
         else:
-            raise RuntimeError("operation requires the same kind of quantity")    
+            raise RuntimeError(
+                "Different kinds of quantity: {}, {}".format(
+                    unit_l.kind_of_quantity,unit_r.kind_of_quantity)
+            )    
   
     def __rsub__(self,lhs):
         # Can subtract numeric QVs from numbers
-        unit_r = self.unit
+        if isinstance(self.unit,Unit):
+            unit_r = self.unit
+        else:   
+            assert False,'automatic resolution not implemented'
+
         if unit_r.kind_of_quantity is Numeric:
             return ValueUnit( lhs - self.value, unit_r )
         else:
-            raise NotImplemented
+            return NotImplemented
   
     # Multiplication and division create ValueUnit 
     # objects in which the unit is a temporary 
@@ -93,25 +125,34 @@ class ValueUnit(object):
     # `multiplier`, `system` and `kind_of_quantity` attributes. 
     # These allow a unit to be resolved later.
     def __mul__(self,rhs):
-        unit_l = self.unit
-        unit_r = rhs.unit
-        if not unit_l.system is unit_r.system:
-            raise RuntimeError("operation requires the same unit system")
+        if hasattr(rhs,'unit'):          
+            unit_l = self.unit
+            unit_r = rhs.unit
+            if not unit_l.system is unit_r.system:
+                raise RuntimeError("operation requires the same unit system")
 
-        tmp = self.unit * rhs.unit 
-        v = self.value * rhs.value 
-        
-        return ValueUnit(v,tmp)
+            tmp = self.unit * rhs.unit 
+            v = self.value * rhs.value 
+
+            return ValueUnit(v,tmp)
+        else:
+            # Assume that the `rhs` behaves as a number 
+            q = self.unit.system.unity * self.unit
+            return ValueUnit(rhs * self.value, q)
             
     def __div__(self,rhs):
-        unit_l = self.unit
-        unit_r = rhs.unit
-        if not unit_l.system is unit_r.system:
-            raise RuntimeError("operation requires the same unit system")
+        if hasattr(rhs,'unit'):          
+            unit_l = self.unit
+            unit_r = rhs.unit
+            if not unit_l.system is unit_r.system:
+                raise RuntimeError("operation requires the same unit system")
 
-        return self.__truediv__(rhs) 
-        
-        return ValueUnit(v,tmp)
+            return self.__truediv__(rhs) 
+            
+        else:
+            # Assume that the `rhs` behaves as a number 
+            q = self.unit.system.unity / self.unit
+            return ValueUnit(self.value /  rhs, q)
             
     def __truediv__(self,rhs):
         unit_l = self.unit
@@ -126,14 +167,22 @@ class ValueUnit(object):
         
     def __rmul__(self,lhs):
         # Assume that the `lhs` behaves as a number 
-        q = self.unit.system.unitnity * self.unit
+        q = self.unit.system.unity * self.unit
         return ValueUnit(lhs * self.value, q)
             
     def __rdiv__(self,lhs):
         # Assume that the `lhs` behaves as a number 
-        q = self.unit.system.unitnity / self.unit
+        q = self.unit.system.unity / self.unit
         return ValueUnit(lhs / self.value, q)
+
+    def __rtruediv__(self,lhs):
+        # Assume that the `lhs` behaves as a number 
+        return NotImplemented
                         
+#----------------------------------------------------------------------------
+def qvalue(value,unit):
+    return ValueUnit(value,unit)
+    
 #----------------------------------------------------------------------------
 def value(vu):
     try:
@@ -151,16 +200,33 @@ def unit(vu):
         return None 
        
 #----------------------------------------------------------------------------
-#
-def result(value_unit, result_x_fn=lambda x,*arg:x, *arg):
+# TODO: `value_unit` can only consist of product/quotient terms. 
+# Need to resolve these before addition and subtraction with 
+# other terms can be allowed.
+# Hence:: 
+#   x0 + result(v0*t) + result(0.5*a0*t*t)
+# rather than::
+#   result(x0 + v0*t + 0.5*a0*t*t)
+# This could be changed by using the __add__ and __sub__ 
+# methods to trigger resolution of their arguments. 
+# In that case, we could often do without `result`, 
+# e.g., this would auto-evaluate::
+#   x0 + v0*t + 0.5*a0*t*t
+# We would need a different way to declare `result_x_fn`. It 
+# could be a callback function assigned to ValueUnit.
+def result(value_unit, result_x_fn=lambda x,*arg,**kwarg:x, *arg,**kwarg):
     """
-    Return a `ValueUnit` in which the unit has been 
+    Return a `qvalue` in which the unit has been 
     converted to the reference unit of the unit system. 
     A value result function `result_x_fn` can be supplied 
     to apply a final processing to the value.
     """
     return ValueUnit( 
-        result_x_fn(value_unit.unit.multiplier*value_unit.value, *arg), 
+        result_x_fn(
+            value_unit.unit.multiplier*value_unit.value, 
+            *arg, 
+            **kwarg
+        ), 
         value_unit.unit.reference_unit_for() 
     )
         

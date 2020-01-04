@@ -104,7 +104,7 @@ class UnaryOp(object):
 #----------------------------------------------------------------------------
 class BinaryOp(object):   
     """
-    Based class to build a simple parse tree and then evaluate it
+    Based class to build a simple parse tree and evaluate it
     """
     def __init__(self,lhs,rhs):
         self.lhs = lhs
@@ -122,13 +122,16 @@ class BinaryOp(object):
     def __div__(self,rhs):
         return Div(self,rhs)
 
+    def __rtruediv__(self,rhs):
+        return Div(lhs,self)
+
     def __rdiv__(self,lhs):
         return Div(lhs,self)
 
     @property
     def context(self):
         return self.lhs.context
-
+            
     def ratio(self,rhs):
         return Ratio(self,rhs)
 
