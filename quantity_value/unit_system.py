@@ -29,12 +29,13 @@ class UnitSystem(object):
         self._name = name
         self._context = context
         
-        self._register = bidict()   # koq <-> unit
+        self._koq_to_unit = bidict()   # koq <-> unit
         self._name_to_unit = dict() # unit name -> unit
         
         # There must be a unit for numbers
-        unity = Unit(context['Numeric'],'','',self,1)        
-        self._register[context['Numeric']] = unity
+        Numeric = context['Numeric']
+        unity = Unit(Numeric,'','',self,1)        
+        self._koq_to_unit[Numeric] = unity
         self._name_to_unit['unity'] = unity
         self.__dict__['unity'] = unity 
             
@@ -48,7 +49,7 @@ class UnitSystem(object):
         )
 
     def has_unit_for(self,kind_of_quantity):
-        return kind_of_quantity in self._register 
+        return kind_of_quantity in self._koq_to_unit 
         
     def reference_unit_for(self,expr):
         """
@@ -73,11 +74,13 @@ class UnitSystem(object):
             # Assume a koq or a koq expression
             koq = expr 
             
-        context = koq.context
         if hasattr(koq,'execute'):
-            koq = context.evaluate( koq )
+            context = koq.context
+            koq = context.dim_to_koq( 
+                context._evaluate_dimension( koq ) 
+            )
             
-        return self._register.get(koq,None)        
+        return self._koq_to_unit[koq]        
   
     def __contains__(self,name):
         return name in self._name_to_unit 
@@ -92,13 +95,13 @@ class UnitSystem(object):
         # key: koq; value: unit
         koq = unit._kind_of_quantity
         
-        if koq in self._register: 
-            if not self._register[koq] is unit:
+        if koq in self._koq_to_unit: 
+            if not self._koq_to_unit[koq] is unit:
                 raise RuntimeError(
                     "{!r} is already registered".format(koq)
                 )
         else:
-            self._register[koq] = unit 
+            self._koq_to_unit[koq] = unit 
             self._register_by_name(unit)
             
     def _register_by_name(self,unit):
@@ -119,14 +122,14 @@ class UnitSystem(object):
         self.__dict__[unit.name] = unit 
  
     def kind_of_quantity(self,unit):
-        return self._register.inverse[unit]
+        return self._koq_to_unit.inverse[unit]
             
     def unit(self,koq_name,unit_name,unit_term):
         """
         Create a reference unit in this system for `kind_of_quantity`
         The unit will be identified by `name`, and abbreviation `term`.
         """
-        koq = self._context._koq_name[koq_name]
+        koq = self._context._koq[koq_name]
         
         # Reference units all have multiplier = 1
         u = Unit(koq,unit_name,unit_term,self,multiplier=1)
