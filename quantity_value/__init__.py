@@ -9,19 +9,17 @@ from .context import *
 #----------------------------------------------------------------------------
 
 __all__ = (
-    'ValueUnit',
     'qvalue',
     'value',
     'unit',
     'result',
-    'KindOfQuantity',
-    'Numeric',
     'Context',
     'UnitSystem',
+    'rational_unit',
 )
 
 #----------------------------------------------------------------------------
 
 version = "0.1.0.dev0"
-copyright = """Copyright (c) 2019, \
+copyright = """Copyright (c) 2020, \
 Measurement Standards Laboratory of New Zealand"""
