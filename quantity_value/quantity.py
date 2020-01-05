@@ -1,3 +1,5 @@
+from __future__ import division 
+
 __all__ = (
     'Quantity',
     'Unit',
@@ -85,8 +87,8 @@ class Unit(Quantity):
     def __truediv__(self,rhs):
         return Div(self,rhs)
 
-    def __div__(self,rhs):
-        return self.__truediv__(rhs)
+    # def __div__(self,rhs):
+        # return self.__truediv__(rhs)
         
     def ratio(self,rhs):
         return Ratio(self,rhs)
@@ -127,8 +129,8 @@ class UnaryOp(object):
     def __truediv__(self,rhs):
         return Div(self,rhs)
 
-    def __div__(self,rhs):
-        return self.__truediv__(rhs)
+    # def __div__(self,rhs):
+        # return self.__truediv__(rhs)
         
     def ratio(self,rhs):
         return Ratio(self,rhs)
@@ -159,8 +161,8 @@ class BinaryOp(object):
     def __truediv__(self,rhs):
         return Div(self,rhs)
 
-    def __div__(self,rhs):
-        return self.__truediv__(rhs)
+    # def __div__(self,rhs):
+        # return self.__truediv__(rhs)
         
     def ratio(self,rhs):
         return Ratio(self,rhs)
@@ -181,6 +183,7 @@ class Simplify(UnaryOp):
         return "simplify({!r})".format(self.arg)
 
     def __str__(self):
+        # TODO: need to treat a numeric as a special case
         return "simplify({!s})".format(self.arg)
            
     @property 
@@ -201,6 +204,7 @@ class Ratio(BinaryOp):
         return "({!r}-|-{!r})".format(self.lhs,self.rhs)
 
     def __str__(self):
+        # TODO: need to treat a numeric as a special case
         return "({!s}|{!s})".format(self.lhs,self.rhs)
            
     @property 
@@ -218,10 +222,11 @@ class Mul(BinaryOp):
         super(Mul,self).__init__(lhs,rhs) 
 
     def __repr__(self):
-        return "({!r}*{!r})".format(self.lhs,self.rhs)
+        return "({!r})*({!r})".format(self.lhs,self.rhs)
 
     def __str__(self):
-        return "({!s}*{!s})".format(self.lhs,self.rhs)
+        # TODO: need to treat a numeric as a special case
+        return "({!s})*({!s})".format(self.lhs,self.rhs)
            
     @property 
     def kind_of_quantity(self):  
@@ -238,10 +243,11 @@ class Div(BinaryOp):
         super(Div,self).__init__(lhs,rhs) 
 
     def __repr__(self):
-        return "({!r}/{!r})".format(self.lhs,self.rhs)
+        return "({!r})/({!r})".format(self.lhs,self.rhs)
 
     def __str__(self):
-        return "({!s}/{!s})".format(self.lhs,self.rhs)
+        # TODO: need to treat a numeric as a special case
+        return "({!s})/({!s})".format(self.lhs,self.rhs)
     
     @property 
     def kind_of_quantity(self):  
