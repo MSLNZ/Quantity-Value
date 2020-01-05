@@ -12,34 +12,36 @@ class TestDimension(unittest.TestCase):
 
     def test_construction(self):
  
-        Length = KindOfQuantity('Length','L') 
-        Mass = KindOfQuantity('Mass','L') 
-        Time = KindOfQuantity('Time','L') 
+        context = Context(
+            ('Length','L'),
+            ('Mass','M'),
+            ('Time','T')
+        )
         
-        context = Context(Length,Mass,Time)
+        Length = context['Length'] 
+        Mass = context['Mass'] 
+        Time = context['Time'] 
         
-        self.assertEqual( str(context.dimension(Length)), str( (1,0,0) ) )
-        self.assertEqual( str(context.dimension(Mass)), str( (0,1,0) ) )
-        self.assertEqual( str(context.dimension(Time)), str( (0,0,1) ) )
+        self.assertEqual( str(context.koq_to_dim(Length)), str( (1,0,0) ) )
+        self.assertEqual( str(context.koq_to_dim(Mass)), str( (0,1,0) ) )
+        self.assertEqual( str(context.koq_to_dim(Time)), str( (0,0,1) ) )
         
-        self.assertEqual( len(context.dimension(Mass) ), 3 )
+        self.assertEqual( len(context.koq_to_dim(Mass) ), 3 )
         self.assertTrue( Dimension( (0,0,0) ).is_dimensionless )
         
-        Speed = KindOfQuantity('Speed','V') 
-        context.declare(Speed,Length/Time)
+        Speed = context.declare('Speed','V',Length/Time)
         
-        self.assertEqual( str(context.dimension(Speed)), str( (1,0,-1) ) )
+        self.assertEqual( str(context.koq_to_dim(Speed)), str( (1,0,-1) ) )
         
-        LengthRatio = KindOfQuantity('LengthRatio','L/L') 
-        context.declare( LengthRatio,Length.ratio(Length) )
+        LengthRatio = context.declare( 'LengthRatio','L/L',Length.ratio(Length) )
         self.assertEqual( 
-            str(context.dimension(LengthRatio)), 
+            str(context.koq_to_dim(LengthRatio)), 
             "{}/{}".format( (1,0,0), (1,0,0) )  
         )
 
-        self.assertTrue( context.dimension(LengthRatio).is_dimensionless )
-        self.assertTrue( context.dimension(LengthRatio).is_dimensionless_ratio ) 
-        self.assertTrue( context.dimension(LengthRatio).is_ratio_of(context.dimension(Length)) ) 
+        self.assertTrue( context.koq_to_dim(LengthRatio).is_dimensionless )
+        self.assertTrue( context.koq_to_dim(LengthRatio).is_dimensionless_ratio ) 
+        self.assertTrue( context.koq_to_dim(LengthRatio).is_ratio_of(context.koq_to_dim(Length)) ) 
 
         self.assertTrue( LengthRatio.is_dimensionless )
         self.assertTrue( LengthRatio.is_dimensionless_ratio ) 
@@ -78,20 +80,22 @@ class TestDimension(unittest.TestCase):
         
     def test_in_context(self):
     
-        Length = KindOfQuantity('Length','L') 
-        Time = KindOfQuantity('Time','T')
-    
-        context = Context(Length,Time)
+        context = Context(
+            ('Length','L'),
+            ('Time','T')
+        )
         
-        Speed = KindOfQuantity('Speed','V')
-        context.declare(Speed,Length/Time)
+        Length = context['Length'] 
+        Time = context['Time'] 
+    
+        Speed = context.declare('Speed','V',Length/Time)
 
-        self.assertEqual( context.dimension(Length), Dimension( (1,0) ) )
-        self.assertEqual( context.dimension(Time), Dimension( (0,1) ) )
-        self.assertEqual( context.dimension(Speed), Dimension( (1,-1) ) )
+        self.assertEqual( context.koq_to_dim(Length), Dimension( (1,0) ) )
+        self.assertEqual( context.koq_to_dim(Time), Dimension( (0,1) ) )
+        self.assertEqual( context.koq_to_dim(Speed), Dimension( (1,-1) ) )
 
-        self.assertTrue( context.kind_of_quantity( Dimension( (1,-1) ) ) is Speed)
-        self.assertTrue( context.kind_of_quantity( Dimension( (1,0) ) ) is Length)
+        self.assertTrue( context.dim_to_koq( Dimension( (1,-1) ) ) is Speed)
+        self.assertTrue( context.dim_to_koq( Dimension( (1,0) ) ) is Length)
 
 #============================================================================
 if __name__ == '__main__':

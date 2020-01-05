@@ -19,80 +19,87 @@ class TestContext(unittest.TestCase):
 
     def test_construction(self):
 
-        Length = KindOfQuantity('Length','L') 
-        Time = KindOfQuantity('Time','T')
-    
-        context = Context(Length,Time)
+        context = Context(
+            ('Length','L'),
+            ('Time','T')
+        )
         
+        Length = context['Length'] 
+        Time = context['Time']
+    
         self.assertEqual( len(context._koq_dimension[Length]), 2 )
         
-        d1 = context.dimension(Length)
+        d1 = context.koq_to_dim(Length)
         self.assertEqual( d1, Dimension( (1,0) ) )
         
-        d2 = context.dimension(Time)
+        d2 = context.koq_to_dim(Time)
         self.assertEqual( d2, Dimension( (0,1) ) )
 
-        self.assertTrue( Length is context.kind_of_quantity( d1 ) ) 
-        self.assertTrue( Time is context.kind_of_quantity( d2 ) )
+        self.assertTrue( Length is context.dim_to_koq( d1 ) ) 
+        self.assertTrue( Time is context.dim_to_koq( d2 ) )
    
     def test_decalare(self):
     
-        Length = KindOfQuantity('Length','L') 
-        Time = KindOfQuantity('Time','T')
+        context = Context(
+            ('Length','L'),
+            ('Time','T')
+        )
+        
+        Length = context['Length'] 
+        Time = context['Time']
     
-        context = Context(Length,Time)
+        Speed = context.declare('Speed','V',Length/Time)
  
-        Speed = KindOfQuantity('Speed','V')
-        context.declare(Speed,Length/Time)
- 
-        self.assertTrue( Speed is context.kind_of_quantity( Dimension( (1,-1) ) ) ) 
-        self.assertEqual( context.dimension(Speed), Dimension( (1,-1) ) )
+        self.assertTrue( Speed is context.dim_to_koq( Dimension( (1,-1) ) ) ) 
+        self.assertEqual( context.koq_to_dim(Speed), Dimension( (1,-1) ) )
 
-        SpeedRatio = KindOfQuantity('SpeedRatio','V/V')
-        context.declare(SpeedRatio,(Speed).ratio(Speed))
+        SpeedRatio = context.declare('SpeedRatio','V/V',(Speed).ratio(Speed))
 
-        self.assertEqual( context.dimension(SpeedRatio), Dimension( (1,-1), (1,-1)) )
-        self.assertTrue( SpeedRatio is context.kind_of_quantity( Dimension( (1,-1), (1,-1)) ) ) 
+        self.assertEqual( context.koq_to_dim(SpeedRatio), Dimension( (1,-1), (1,-1)) )
+        self.assertTrue( SpeedRatio is context.dim_to_koq( Dimension( (1,-1), (1,-1)) ) ) 
         self.assertTrue( 
-            context.dimension(SpeedRatio).simplify().is_dimensionless
+            context.koq_to_dim(SpeedRatio).simplify().is_dimensionless
         )
 
     def test_evaluate(self):
 
-        Length = KindOfQuantity('Length','L') 
-        Time = KindOfQuantity('Time','T')
-        Mass = KindOfQuantity('Mass','M')
-    
-        context = Context(Length,Time,Mass)
+        context = Context(
+            ('Length','L'),
+            ('Time','T'),
+            ('Mass','M')
+        )
         
-        Speed = KindOfQuantity('Speed','V')
-        context.declare(Speed,Length/Time)
+        Length = context['Length'] 
+        Time = context['Time']
+        Mass = context['Mass']
+        
+        Speed = context.declare('Speed','V',Length/Time)
  
-        SpeedRatio = KindOfQuantity('SpeedRatio','V/V')
-        context.declare(SpeedRatio,(Speed).ratio(Speed))
+        SpeedRatio = context.declare('SpeedRatio','V/V',(Speed).ratio(Speed))
 
         self.assertTrue( Speed is context.evaluate(Length/Time) )
         self.assertTrue( SpeedRatio is context.evaluate( (Length/Time).ratio(Length/Time) ) )
         
     def test_failures(self):
 
-        Length = KindOfQuantity('Length','L') 
-        Time = KindOfQuantity('Time','T')
-        Mass = KindOfQuantity('Mass','M')
-    
-        context = Context(Length,Time)
+        context = Context(
+            ('Length','L'),
+            ('Time','T')
+        )
+        
+        Length = context['Length'] 
 
         # Cannot define something that already exists
-        self.assertRaises(RuntimeError,context.declare,Length,Length)
+        self.assertRaises(RuntimeError,context.declare,"Length","L",Length)
         
         # Cannot just declare a new dimension 
-        self.assertRaises(AttributeError,context.declare,Mass,Length)
+        self.assertRaises(RuntimeError,context.declare,"Mass","M",Length)
 
         # Cannot associate a new kind of quantity with an existing dimension
         self.assertRaises(
             ValueDuplicationError,
             context.declare,
-            Mass,                   # Mass has not yet been declared, so OK
+            'Mass','M',             # Mass has not yet been declared, so OK
             Length*Length/Length    # reduces to Length, which is already in use
         )
         
@@ -103,13 +110,7 @@ class TestContext(unittest.TestCase):
             Length*Length
         )
  
-        # Arguments must have been declared or be in the basis
-        self.assertRaises(
-            KeyError,
-            context.evaluate,
-            Length*Mass
-        )
- 
+
 #============================================================================
 if __name__ == '__main__':
     unittest.main()

@@ -14,8 +14,9 @@ from quantity_value.quantity_value import *
 class TestQuantityValue(unittest.TestCase):
 
     def test_construction(self):
-        SIUnits =  UnitSystem("SI")
-        Length = KindOfQuantity('Length','L') 
+        context = Context( ('Length','L') )
+        SIUnits =  UnitSystem("SI",context)
+        Length = 'Length'
         metre = SIUnits.unit(Length,'metre','m')
         
         x = 1.234
@@ -27,9 +28,11 @@ class TestQuantityValue(unittest.TestCase):
  
     def test_simple_addition_subtraction(self):
         
-        SIUnits = UnitSystem("SI")
-        Length = KindOfQuantity('Length','L') 
-        metre = SIUnits.unit(Length,'metre','m')
+        context = Context( ('Length','L') )
+        SI =  UnitSystem("SI",context)
+        Length = 'Length'
+        
+        metre = SI.unit(Length,'metre','m')
 
         x1 = 1.2 
         x2 = 3.4 
@@ -57,7 +60,7 @@ class TestQuantityValue(unittest.TestCase):
         self.assertTrue( vu.unit is centi(metre) )
 
         # Illegal case 
-        Imperial = UnitSystem("Imperial")
+        Imperial = UnitSystem("Imperial",context)
         foot = Imperial.unit(Length,'foot','ft')
         qv3 = ValueUnit(x1,foot)
         

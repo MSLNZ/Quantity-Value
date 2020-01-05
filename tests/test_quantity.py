@@ -43,13 +43,13 @@ class TestQuantity(unittest.TestCase):
 class TestMetricQuantity(unittest.TestCase):
 
     def test_construction(self):
-        Length = KindOfQuantity('Length','L') 
+        context = Context( ('Length','L') )
+        SI =  UnitSystem("SI",context)
 
-        SIUnits =  UnitSystem("SI")
-
+        Length = 'Length'
         name = 'metre'
         symbol = 'm' 
-        metre = SIUnits.unit(Length,name,symbol)  
+        metre = SI.unit(Length,name,symbol)  
 
         self.assertTrue( type(metre) is Unit )
         self.assertEqual( str(metre), symbol )
