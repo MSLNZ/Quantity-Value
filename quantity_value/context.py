@@ -1,3 +1,5 @@
+from __future__ import division     # eval() needs this
+
 import warnings
 warnings.filterwarnings(
     "ignore", 
@@ -29,8 +31,8 @@ class Context(object):
             
         self._basis = tuple( KindOfQuantity(n,t) for (n,t) in argv )
         
-        self._koq_term = { koq_i._term: koq_i for koq_i in self._basis }
-        self._koq_name = { koq_i._name: koq_i for koq_i in self._basis }
+        self._koq = { koq_i._term: koq_i for koq_i in self._basis }
+        self._koq.update( { koq_i._name: koq_i for koq_i in self._basis } )
         
         # For conversions between different unit systems
         self._conversion_factors = dict()
@@ -44,8 +46,7 @@ class Context(object):
         Numeric.context = self
         
         self._koq_dimension[Numeric] = Dimension(dimension)
-        self._koq_name['Numeric'] = Numeric 
-        self._koq_term['1'] = Numeric 
+        self._koq.update( {'Numeric':Numeric, '1':Numeric} ) 
         
         for i,koq in enumerate( self._basis ):
             if koq in self._koq_dimension:
@@ -65,10 +66,8 @@ class Context(object):
                 dimension[i] = 0
         
     def __getitem__(self,name):
-        if name in self._koq_name:
-            return self._koq_name[name]
-        else:
-            return self._koq_term[name]
+        if name in self._koq:
+            return self._koq[name]
         
     # The `expression` is a sequence of binary multiplication
     # and division operations, represented as a tree of 
@@ -104,20 +103,18 @@ class Context(object):
         Associate `kog` with the quantity expression `expression`
         
         """
-        if koq_name in self._koq_name:
+        if koq_name in self._koq:
             raise RuntimeError(
                 "{!r} is already declared".format(koq_name)
             )
 
-        if koq_term in self._koq_term:
+        if koq_term in self._koq:
             raise RuntimeError(
                 "{!r} is already declared".format(koq_term)
             )
             
-        # TODO: `expression` consists of KoQ objects here,
-        # but we might implement a parser so that `expression`
-        # can just be another string containing names of terms 
-        # for the kinds of quantities.
+        expression = eval(expression,{'__builtins__': None},self._koq)
+        
         if isinstance(expression,KindOfQuantity):
             if expression in self._koq_dimension:
                 raise RuntimeError(
@@ -133,8 +130,7 @@ class Context(object):
             koq = KindOfQuantity(koq_name,koq_term)
             koq.context = self
             self._koq_dimension[koq] = dim
-            self._koq_name[koq_name] = koq
-            self._koq_term[koq_term] = koq
+            self._koq.update( {koq_name:koq, koq_term:koq} )
                 
             return koq 
         
@@ -143,6 +139,9 @@ class Context(object):
         Evaluate `expression` and return the corresponding kind of quantity
         
         """
+        if isinstance(expression,str):
+            expression = eval(expression,{'__builtins__': None},self._koq)
+
         dim = self._evaluate_dimension(expression)
         
         try:
