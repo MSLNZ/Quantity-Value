@@ -1,4 +1,6 @@
-__all__ = ( 'KindOfQuantity', 'Numeric', )
+from __future__ import division 
+
+__all__ = ( 'KindOfQuantity', )
 
 #----------------------------------------------------------------------------
 class KindOfQuantity(object):
@@ -6,7 +8,6 @@ class KindOfQuantity(object):
     def __init__(self,name,term):
         self._name = name 
         self._term = term 
-        self._context = None
      
     def __repr__(self):
         return "{!s}({!r},{!r})".format(
@@ -19,23 +20,23 @@ class KindOfQuantity(object):
         return str(self._term)
 
     def __eq__(self,other):
-        dim_lhs = self._context.dimension(self)
-        dim_rhs = self._context.dimension(other)
+        dim_lhs = self.context.koq_to_dim(self)
+        dim_rhs = self.context.koq_to_dim(other)
         
         return dim_lhs == dim_rhs        
 
     @property
-    def context(self):
+    def context(self):        
         return self._context 
         
     @context.setter
     def context(self,c):
-        if self._context is None:
-            self._context = c 
-        else:
+        if hasattr(self,'_context'):
             raise RuntimeError(
-                "Cannot change context setting"
+                "Cannot change context setting in {!r}".format(self)
             )
+        else:
+            self._context = c 
         
     @property 
     def name(self):
@@ -44,12 +45,12 @@ class KindOfQuantity(object):
     def __mul__(self,rhs):
         return Mul(self,rhs)
             
-    def __div__(self,rhs):
-        return Div(self,rhs)
-        
     def __truediv__(self,rhs):
         return Div(self,rhs)
 
+    # def __div__(self,rhs):
+        # return KindOfQuantity.__truediv__(self,rhs)
+        
     def ratio(self,rhs):
         return Ratio(self,rhs)
 
@@ -58,11 +59,11 @@ class KindOfQuantity(object):
 
     @property
     def is_dimensionless(self):
-        return self._context.dimension(self).is_dimensionless
+        return self.context.koq_to_dim(self).is_dimensionless
 
     @property
     def is_dimensionless_ratio(self):
-        return self._context.dimension(self).is_dimensionless_ratio
+        return self.context.koq_to_dim(self).is_dimensionless_ratio
         
     def is_ratio_of(self,other):
         """
@@ -70,15 +71,15 @@ class KindOfQuantity(object):
         the numerator and denominator of this quantity-ratio object.
         
         """
-        dim_lhs = self._context.dimension(self)
-        dim_rhs = self._context.dimension(other)
+        dim_lhs = self.context.koq_to_dim(self)
+        dim_rhs = self.context.koq_to_dim(other)
         
         return dim_lhs.is_ratio_of(dim_rhs)
     
-#----------------------------------------------------------------------------
-# A representation for pure numbers
-#
-Numeric = KindOfQuantity('Numeric','1')
+# #----------------------------------------------------------------------------
+# # A representation for pure numbers
+# #
+# Numeric = KindOfQuantity('Numeric','1')
 
 #----------------------------------------------------------------------------
 # The following classes support simple manipulation of KindOfQuantity objects 
@@ -119,17 +120,21 @@ class BinaryOp(object):
     def __truediv__(self,rhs):
         return Div(self,rhs)
 
-    def __div__(self,rhs):
-        return Div(self,rhs)
-
-    def __rtruediv__(self,rhs):
+    def __rtruediv__(self,lhs):
         return Div(lhs,self)
 
-    def __rdiv__(self,lhs):
-        return Div(lhs,self)
+    # def __div__(self,rhs):
+        # return BinaryOp.__truediv__(self,rhs)
+
+    # def __rdiv__(self,lhs):
+        # return BinaryOp.__rtruediv__(self,lhs)
 
     @property
     def context(self):
+        assert self.lhs.context is self.rhs.context,\
+            "Different contexts: {!r}, {!r}".format(
+                self.lhs.context, self.rhs.context
+             )
         return self.lhs.context
             
     def ratio(self,rhs):
