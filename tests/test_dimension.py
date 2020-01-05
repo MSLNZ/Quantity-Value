@@ -29,11 +29,11 @@ class TestDimension(unittest.TestCase):
         self.assertEqual( len(context.koq_to_dim(Mass) ), 3 )
         self.assertTrue( Dimension( (0,0,0) ).is_dimensionless )
         
-        Speed = context.declare('Speed','V',Length/Time)
+        Speed = context.declare('Speed','V','Length/Time')
         
         self.assertEqual( str(context.koq_to_dim(Speed)), str( (1,0,-1) ) )
         
-        LengthRatio = context.declare( 'LengthRatio','L/L',Length.ratio(Length) )
+        LengthRatio = context.declare( 'LengthRatio','L/L','Length.ratio(Length)' )
         self.assertEqual( 
             str(context.koq_to_dim(LengthRatio)), 
             "{}/{}".format( (1,0,0), (1,0,0) )  
@@ -49,9 +49,9 @@ class TestDimension(unittest.TestCase):
   
         # Although the simplified dimension is that of Length, 
         # the ratio (L*L)/L is not registered. 
-        self.assertRaises(RuntimeError,context.evaluate, LengthRatio*Length )
+        self.assertRaises(RuntimeError,context.evaluate, 'LengthRatio*Length' )
   
-        koq = context.evaluate( (LengthRatio*Length).simplify() )
+        koq = context.evaluate( '(LengthRatio*Length).simplify()' )
         self.assertTrue( koq is Length )     
         self.assertEqual( koq, Length )     
 
@@ -88,7 +88,7 @@ class TestDimension(unittest.TestCase):
         Length = context['Length'] 
         Time = context['Time'] 
     
-        Speed = context.declare('Speed','V',Length/Time)
+        Speed = context.declare('Speed','V','Length/Time')
 
         self.assertEqual( context.koq_to_dim(Length), Dimension( (1,0) ) )
         self.assertEqual( context.koq_to_dim(Time), Dimension( (0,1) ) )

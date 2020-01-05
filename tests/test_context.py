@@ -45,15 +45,12 @@ class TestContext(unittest.TestCase):
             ('Time','T')
         )
         
-        Length = context['Length'] 
-        Time = context['Time']
-    
-        Speed = context.declare('Speed','V',Length/Time)
+        Speed = context.declare('Speed','V','Length/Time')
  
         self.assertTrue( Speed is context.dim_to_koq( Dimension( (1,-1) ) ) ) 
         self.assertEqual( context.koq_to_dim(Speed), Dimension( (1,-1) ) )
 
-        SpeedRatio = context.declare('SpeedRatio','V/V',(Speed).ratio(Speed))
+        SpeedRatio = context.declare('SpeedRatio','V/V','Speed.ratio(Speed)')
 
         self.assertEqual( context.koq_to_dim(SpeedRatio), Dimension( (1,-1), (1,-1)) )
         self.assertTrue( SpeedRatio is context.dim_to_koq( Dimension( (1,-1), (1,-1)) ) ) 
@@ -69,16 +66,12 @@ class TestContext(unittest.TestCase):
             ('Mass','M')
         )
         
-        Length = context['Length'] 
-        Time = context['Time']
-        Mass = context['Mass']
-        
-        Speed = context.declare('Speed','V',Length/Time)
+        Speed = context.declare('Speed','V','Length/Time')
  
-        SpeedRatio = context.declare('SpeedRatio','V/V',(Speed).ratio(Speed))
+        SpeedRatio = context.declare('SpeedRatio','V/V','Speed.ratio(Speed)')
 
-        self.assertTrue( Speed is context.evaluate(Length/Time) )
-        self.assertTrue( SpeedRatio is context.evaluate( (Length/Time).ratio(Length/Time) ) )
+        self.assertTrue( Speed is context.evaluate('Length/Time') )
+        self.assertTrue( SpeedRatio is context.evaluate( '(Length/Time).ratio(Length/Time)' ) )
         
     def test_failures(self):
 
@@ -87,27 +80,25 @@ class TestContext(unittest.TestCase):
             ('Time','T')
         )
         
-        Length = context['Length'] 
-
         # Cannot define something that already exists
-        self.assertRaises(RuntimeError,context.declare,"Length","L",Length)
+        self.assertRaises(RuntimeError,context.declare,"Length","L",'Length')
         
         # Cannot just declare a new dimension 
-        self.assertRaises(RuntimeError,context.declare,"Mass","M",Length)
+        self.assertRaises(RuntimeError,context.declare,"Mass","M",'Length')
 
         # Cannot associate a new kind of quantity with an existing dimension
         self.assertRaises(
             ValueDuplicationError,
             context.declare,
             'Mass','M',             # Mass has not yet been declared, so OK
-            Length*Length/Length    # reduces to Length, which is already in use
+            'Length*Length/Length'  # reduces to Length, which is already in use
         )
         
         # The dimension must be resolved to a base or declared quantity 
         self.assertRaises(
             RuntimeError,
             context.evaluate,
-            Length*Length
+            'Length*Length'
         )
  
 
