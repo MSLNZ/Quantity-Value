@@ -1,3 +1,5 @@
+from __future__ import division 
+
 import warnings
 warnings.filterwarnings(
     "ignore", 
@@ -5,7 +7,8 @@ warnings.filterwarnings(
 )
 from bidict import bidict 
 
-from kind_of_quantity import Numeric 
+from fractions import *
+
 from quantity import Unit 
 
 __all__ = (
@@ -22,18 +25,16 @@ class UnitSystem(object):
     Such as, `SI.metre` or `SI['metre']` or `'metre' in SI`.
     """
     
-    def __init__(self,name):
+    def __init__(self,name,context):
         self._name = name
+        self._context = context
         
         self._register = bidict()   # koq <-> unit
         self._name_to_unit = dict() # unit name -> unit
         
         # There must be a unit for numbers
-        unity = Unit(Numeric,'','',self,1)
-        
-        # Do registration explicitly, because unit.name = ""
-        # unity.system = self 
-        self._register[Numeric] = unity
+        unity = Unit(context['Numeric'],'','',self,1)        
+        self._register[context['Numeric']] = unity
         self._name_to_unit['unity'] = unity
         self.__dict__['unity'] = unity 
             
@@ -69,7 +70,7 @@ class UnitSystem(object):
         if hasattr(expr,'kind_of_quantity'):
             koq = expr.kind_of_quantity
         else:
-            # Assume a koq or koq expression
+            # Assume a koq or a koq expression
             koq = expr 
             
         context = koq.context
@@ -120,13 +121,15 @@ class UnitSystem(object):
     def kind_of_quantity(self,unit):
         return self._register.inverse[unit]
             
-    def unit(self,kind_of_quantity,name,term):
+    def unit(self,koq_name,unit_name,unit_term):
         """
         Create a reference unit in this system for `kind_of_quantity`
         The unit will be identified by `name`, and abbreviation `term`.
         """
+        koq = self._context._koq_name[koq_name]
+        
         # Reference units all have multiplier = 1
-        u = Unit(kind_of_quantity,name,term,self,multiplier=1)
+        u = Unit(koq,unit_name,unit_term,self,multiplier=1)
         self._register_reference_unit(u) 
         
         return u
@@ -168,8 +171,8 @@ def rational_unit(unit,fraction,name,term):
             "Illegal operation: '{}' is not a reference unit in this system".format(unit.name)  
         )     
 
-    if name in self.system:
-        return self.system[name]
+    if name in system:
+        return system[name]
     else:
         rational_unit = Unit(
             kind_of_quantity,
