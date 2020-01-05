@@ -5,35 +5,47 @@ warnings.filterwarnings(
 )
 from bidict import bidict 
 
-from kind_of_quantity import Numeric
+from kind_of_quantity import KindOfQuantity
 from dimension import Dimension
 
 #----------------------------------------------------------------------------
 class Context(object):
 
     """
-    A Context keeps track of KindOfQuantity instances,
-    and associates each instance with a unique dimension.  
-    A set of 'independent' KindOfQuantity instances will
-    form an n-dimensional basis. Other KindOfQuantity instances 
-    can be declared as products and quotients of the base quantities. 
+    A Context keeps a register of KindOfQuantity instances,
+    and associates each instance with a unique dimension.
+    A Context object may be used to look up a KindOfQuantity by
+    name or by short-name (term).
+    
+    A Context is initialised by defining a set of 'independent' 
+    kinds of quantity that will form an n-dimensional basis. 
+    Other kinds of quantity can be declared as products and 
+    quotients of other KindOfQuantity instances. 
     """
     
     def __init__(self,*argv):
         assert len(argv) > 0,\
-            "Provide a sequence of `KindOfQuantity` instances"
+            "Provide a sequence of name-term tuples"
             
-        self._basis = tuple(argv)
-        self._koq_dimension = bidict()
+        self._basis = tuple( KindOfQuantity(n,t) for (n,t) in argv )
+        
+        self._koq_term = { koq_i._term: koq_i for koq_i in self._basis }
+        self._koq_name = { koq_i._name: koq_i for koq_i in self._basis }
         
         # For conversions between different unit systems
         self._conversion_factors = dict()
         
+        self._koq_dimension = bidict()
         # Assign an independent dimension to each base quantity
         dimension = [0] * len(argv)
         
         # Dimensionless case is included by default
+        Numeric = KindOfQuantity('Numeric','1')
+        Numeric.context = self
+        
         self._koq_dimension[Numeric] = Dimension(dimension)
+        self._koq_name['Numeric'] = Numeric 
+        self._koq_term['1'] = Numeric 
         
         for i,koq in enumerate( self._basis ):
             if koq in self._koq_dimension:
@@ -52,50 +64,79 @@ class Context(object):
                 self._koq_dimension[koq] = Dimension(dimension)
                 dimension[i] = 0
         
+    def __getitem__(self,name):
+        if name in self._koq_name:
+            return self._koq_name[name]
+        else:
+            return self._koq_term[name]
+        
     # The `expression` is a sequence of binary multiplication
     # and division operations, represented as a tree of 
     # KindOfQuantity objects. 
-    # The `self.dimension` method resolves 
+    # The `self.koq_to_dim` method resolves 
     # the dimension of KindOfQuantity objects at the leaves of this tree. 
     # Executing the expression produces a single 
     # dimension, corresponding to the dimension for the 
     # resultant KindOfQuantity.
     def _evaluate_dimension(self,expression):
         stack = list()
-        expression.execute(stack,self.dimension)
+        expression.execute(stack,self.koq_to_dim)
         
         assert len(stack) == 1
         return stack.pop()
     
-    def dimension(self,koq):
+    def koq_to_dim(self,koq):
         """
         Return the dimension associated with `koq`
         
         """
         return self._koq_dimension[koq]
   
-    def kind_of_quantity(self,dim):
+    def dim_to_koq(self,dim):
         """
         Return the kind of quantity associated with `dim`
         
         """
         return self._koq_dimension.inverse[dim]
   
-    def declare(self,koq,expression):
+    def declare(self,koq_name,koq_term,expression):
         """
         Associate `kog` with the quantity expression `expression`
         
         """
-        if koq in self._koq_dimension:
+        if koq_name in self._koq_name:
             raise RuntimeError(
-                "{!r} is already declared".format(koq)
+                "{!r} is already declared".format(koq_name)
             )
+
+        if koq_term in self._koq_term:
+            raise RuntimeError(
+                "{!r} is already declared".format(koq_term)
+            )
+            
+        # TODO: `expression` consists of KoQ objects here,
+        # but we might implement a parser so that `expression`
+        # can just be another string containing names of terms 
+        # for the kinds of quantities.
+        if isinstance(expression,KindOfQuantity):
+            if expression in self._koq_dimension:
+                raise RuntimeError(
+                    "{!r} is already declared".format(expression)
+                )
+            else:
+                # KoQ objects are only created by Context 
+                # and hence should already be registered 
+                assert False, 'unexpected'
         else:
             dim = self._evaluate_dimension(expression)
             
-            # Each kind of quantity must refer to this context
+            koq = KindOfQuantity(koq_name,koq_term)
             koq.context = self
             self._koq_dimension[koq] = dim
+            self._koq_name[koq_name] = koq
+            self._koq_term[koq_term] = koq
+                
+            return koq 
         
     def evaluate(self,expression):
         """
