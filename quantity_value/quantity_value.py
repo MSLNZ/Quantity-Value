@@ -1,4 +1,6 @@
-from .quantity import Unit
+from __future__ import division 
+
+from quantity import Unit
 
 #----------------------------------------------------------------------------
 #
@@ -32,89 +34,81 @@ class ValueUnit(object):
         )
         
     def __add__(self,rhs):  
-        if isinstance(self.unit,Unit):
-            unit_l = self.unit
-        else:   
-            assert False,'automatic resolution not implemented'
-        if isinstance(rhs.unit,Unit):
-            unit_r = rhs.unit
-        else:   
-            assert False,'automatic resolution not implemented'
-
-        if not unit_l.system is unit_r.system:
+        lhs = self         
+        if not lhs.unit.system is rhs.unit.system:
             raise RuntimeError("Different unit systems: {}, {}".format(
-                unit_l.system,unit_r.system)
+                lhs.unit.system, rhs.unit.system)
             )
             
-        if unit_l is unit_r:
-            return ValueUnit( self.value + rhs.value, unit_l )
+        if not isinstance(lhs.unit,Unit):
+            # Must resolve the unit before proceeding
+            lhs = ValueUnit( lhs.unit.multiplier*self.value, lhs.unit.reference_unit_for() ) 
+        
+        if not isinstance(rhs.unit,Unit):
+            # Must resolve the unit before proceeding
+            rhs = ValueUnit( rhs.unit.multiplier*rhs.value, rhs.unit.reference_unit_for() ) 
+            
+        if lhs.unit is rhs.unit:
+            return ValueUnit( lhs.value + rhs.value, lhs.unit )
          
-        if unit_l.kind_of_quantity is unit_r.kind_of_quantity:
-            ml = unit_l.multiplier
-            mr = unit_r.multiplier 
+        if lhs.unit.kind_of_quantity is rhs.unit.kind_of_quantity:
+            ml = lhs.unit.multiplier
+            mr = rhs.unit.multiplier 
             if ml < mr:
-                return ValueUnit( self.value + (mr/ml)*rhs.value, unit_l )
+                return ValueUnit( lhs.value + (mr/ml)*rhs.value, lhs.unit )
             else:
-                return ValueUnit( (ml/mr)*self.value + rhs.value, unit_r )
+                return ValueUnit( (ml/mr)*lhs.value + rhs.value, rhs.unit )
         else:
             raise RuntimeError(
                 "Different kinds of quantity: {}, {}".format(
-                    unit_l.kind_of_quantity,unit_r.kind_of_quantity)
+                    lhs.unit.kind_of_quantity,rhs.unit.kind_of_quantity)
             )    
 
     def __radd__(self,lhs):
+        rhs = self
         # Can add numbers to numeric QVs
-        if isinstance(self.unit,Unit):
-            unit_r = self.unit
-        else:   
-            assert False,'automatic resolution not implemented'
-
-        if unit_r.kind_of_quantity is Numeric:
-            return ValueUnit( lhs + self.value, unit_r )
+        if rhs.unit.kind_of_quantity is Numeric:
+            return ValueUnit( lhs + rhs.value, rhs.unit )
         else:
             return NotImplemented
   
     def __sub__(self,rhs):
-        if isinstance(self.unit,Unit):
-            unit_l = self.unit
-        else:   
-            assert False,'automatic resolution not implemented'
-        if isinstance(rhs.unit,Unit):
-            unit_r = rhs.unit
-        else:   
-            assert False,'automatic resolution not implemented'
-
-        if not unit_l.system is unit_r.system:
+        lhs = self
+        if not lhs.unit.system is rhs.unit.system:
             raise RuntimeError("Different unit systems: {}, {}".format(
-                unit_l.system,unit_r.system)
+                lhs.unit.system, rhs.unit.system)
             )
-        
-        if unit_l is unit_r:
-            return ValueUnit( self.value - rhs.value, unit_l )
             
-        if unit_l.kind_of_quantity is unit_r.kind_of_quantity:
+        if not isinstance(lhs.unit,Unit):
+            # Must resolve the unit before proceeding
+            lhs = ValueUnit( lhs.unit.multiplier*self.value, lhs.unit.reference_unit_for() ) 
         
-            ml = unit_l.multiplier
-            mr = unit_r.multiplier 
+        if not isinstance(rhs.unit,Unit):
+            # Must resolve the unit before proceeding
+            rhs = ValueUnit( rhs.unit.multiplier*rhs.value, rhs.unit.reference_unit_for() ) 
+        
+        if lhs.unit is rhs.unit:
+            return ValueUnit( lhs.value - rhs.value, lhs.unit )
+            
+        if lhs.unit.kind_of_quantity is rhs.unit.kind_of_quantity:
+        
+            ml = lhs.unit.multiplier
+            mr = rhs.unit.multiplier 
             if ml < mr:
-                return ValueUnit( self.value - (mr/ml)*rhs.value, unit_l )
+                return ValueUnit( lhs.value - (mr/ml)*rhs.value, lhs.unit )
             else:
-                return ValueUnit( (ml/mr)*self.value - rhs.value, unit_r )
+                return ValueUnit( (ml/mr)*lhs.value - rhs.value, rhs.unit )
         else:
             raise RuntimeError(
                 "Different kinds of quantity: {}, {}".format(
-                    unit_l.kind_of_quantity,unit_r.kind_of_quantity)
+                    lhs.unit.kind_of_quantity,rhs.unit.kind_of_quantity)
             )    
   
     def __rsub__(self,lhs):
+        rhs = self
         # Can subtract numeric QVs from numbers
-        if isinstance(self.unit,Unit):
-            unit_r = self.unit
-        else:   
-            assert False,'automatic resolution not implemented'
-
-        if unit_r.kind_of_quantity is Numeric:
-            return ValueUnit( lhs - self.value, unit_r )
+        if rhs.unit.kind_of_quantity is Numeric:
+            return ValueUnit( lhs - rhs.value, rhs.unit )
         else:
             return NotImplemented
   
@@ -125,59 +119,59 @@ class ValueUnit(object):
     # `multiplier`, `system` and `kind_of_quantity` attributes. 
     # These allow a unit to be resolved later.
     def __mul__(self,rhs):
-        if hasattr(rhs,'unit'):          
-            unit_l = self.unit
-            unit_r = rhs.unit
-            if not unit_l.system is unit_r.system:
+        lhs = self
+        if hasattr(rhs,'unit'):                      
+            if not lhs.unit.system is rhs.unit.system:
                 raise RuntimeError("operation requires the same unit system")
 
-            tmp = self.unit * rhs.unit 
-            v = self.value * rhs.value 
-
-            return ValueUnit(v,tmp)
+            return ValueUnit(lhs.value * rhs.value, lhs.unit * rhs.unit)
         else:
             # Assume that the `rhs` behaves as a number 
-            q = self.unit.system.unity * self.unit
-            return ValueUnit(rhs * self.value, q)
+            return ValueUnit(
+                rhs * lhs.value, 
+                lhs.unit.system.unity * lhs.unit
+            )
             
-    def __div__(self,rhs):
-        if hasattr(rhs,'unit'):          
-            unit_l = self.unit
-            unit_r = rhs.unit
-            if not unit_l.system is unit_r.system:
-                raise RuntimeError("operation requires the same unit system")
-
-            return self.__truediv__(rhs) 
-            
-        else:
-            # Assume that the `rhs` behaves as a number 
-            q = self.unit.system.unity / self.unit
-            return ValueUnit(self.value /  rhs, q)
+    def __rmul__(self,lhs):
+        rhs = self
+        # Assume that the `lhs` behaves as a number 
+        return ValueUnit(
+            lhs * rhs.value, 
+            rhs.unit.system.unity * rhs.unit
+        )
             
     def __truediv__(self,rhs):
-        unit_l = self.unit
-        unit_r = rhs.unit
-        if not unit_l.system is unit_r.system:
-            raise RuntimeError("operation requires the same unit system")
+        lhs = self 
+        if hasattr(rhs,'unit'):          
+            if not lhs.unit.system is rhs.unit.system:
+                raise RuntimeError("operation requires the same unit system")
 
-        tmp = self.unit / rhs.unit 
-        v = self.value / rhs.value 
-        
-        return ValueUnit(v,tmp)
-        
-    def __rmul__(self,lhs):
-        # Assume that the `lhs` behaves as a number 
-        q = self.unit.system.unity * self.unit
-        return ValueUnit(lhs * self.value, q)
+            return ValueUnit(
+                lhs.value / rhs.value,
+                lhs.unit / rhs.unit
+            )
             
-    def __rdiv__(self,lhs):
-        # Assume that the `lhs` behaves as a number 
-        q = self.unit.system.unity / self.unit
-        return ValueUnit(lhs / self.value, q)
-
+        else:
+            # Assume that the `rhs` behaves as a number 
+            return ValueUnit(
+                lhs.value / rhs, 
+                lhs.unit / lhs.unit.system.unity 
+            )
+        
     def __rtruediv__(self,lhs):
+        rhs = self
         # Assume that the `lhs` behaves as a number 
-        return NotImplemented
+        return ValueUnit(
+            lhs / rhs.value, 
+            rhs.unit.system.unity / rhs.unit
+        )
+        
+    # # Python 2.x backward compatibility
+    # def __div__(self,rhs):
+        # return ValueUnit.__truediv__(self,rhs)
+            
+    # def __rdiv__(self,lhs):
+        # return ValueUnit.__rtruediv__(self,lhs)
                         
 #----------------------------------------------------------------------------
 def qvalue(value,unit):
@@ -200,20 +194,6 @@ def unit(vu):
         return None 
        
 #----------------------------------------------------------------------------
-# TODO: `value_unit` can only consist of product/quotient terms. 
-# Need to resolve these before addition and subtraction with 
-# other terms can be allowed.
-# Hence:: 
-#   x0 + result(v0*t) + result(0.5*a0*t*t)
-# rather than::
-#   result(x0 + v0*t + 0.5*a0*t*t)
-# This could be changed by using the __add__ and __sub__ 
-# methods to trigger resolution of their arguments. 
-# In that case, we could often do without `result`, 
-# e.g., this would auto-evaluate::
-#   x0 + v0*t + 0.5*a0*t*t
-# We would need a different way to declare `result_x_fn`. It 
-# could be a callback function assigned to ValueUnit.
 def result(value_unit, result_x_fn=lambda x,*arg,**kwarg:x, *arg,**kwarg):
     """
     Return a `qvalue` in which the unit has been 
