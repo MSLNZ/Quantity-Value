@@ -76,7 +76,7 @@ class UnitSystem(object):
             
         if hasattr(koq,'execute'):
             context = koq.context
-            koq = context.dim_to_koq( 
+            koq = context._dim_to_koq( 
                 context._evaluate_dimension( koq ) 
             )
             

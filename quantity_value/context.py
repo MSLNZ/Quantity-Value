@@ -72,26 +72,26 @@ class Context(object):
     # The `expression` is a sequence of binary multiplication
     # and division operations, represented as a tree of 
     # KindOfQuantity objects. 
-    # The `self.koq_to_dim` method resolves 
+    # The `self._koq_to_dim` method resolves 
     # the dimension of KindOfQuantity objects at the leaves of this tree. 
     # Executing the expression produces a single 
     # dimension, corresponding to the dimension for the 
     # resultant KindOfQuantity.
     def _evaluate_dimension(self,expression):
         stack = list()
-        expression.execute(stack,self.koq_to_dim)
+        expression.execute(stack,self._koq_to_dim)
         
         assert len(stack) == 1
         return stack.pop()
     
-    def koq_to_dim(self,koq):
+    def _koq_to_dim(self,koq):
         """
         Return the dimension associated with `koq`
         
         """
         return self._koq_dimension[koq]
   
-    def dim_to_koq(self,dim):
+    def _dim_to_koq(self,dim):
         """
         Return the kind of quantity associated with `dim`
         
@@ -151,33 +151,33 @@ class Context(object):
                 "No quantity is associated with {!r}".format(dim)
             )
         
-    def conversion_from_to(self,ref_unit_1,ref_unit_2,factor):
-        """
-        Register a factor to convert from `ref_unit_1`, in  
-        one unit system, to `ref_unit_2` in another
-        """
-        koq_1 = ref_unit_1._kind_of_quantity
-        koq_2 = ref_unit_2._kind_of_quantity
-        assert koq_1 is koq_2,\
-            "{} and {} are different quantities".format(koq_1,koq_2)
+    # def conversion_from_to(self,ref_unit_1,ref_unit_2,factor):
+        # """
+        # Register a factor to convert from `ref_unit_1`, in  
+        # one unit system, to `ref_unit_2` in another
+        # """
+        # koq_1 = ref_unit_1._kind_of_quantity
+        # koq_2 = ref_unit_2._kind_of_quantity
+        # assert koq_1 is koq_2,\
+            # "{} and {} are different quantities".format(koq_1,koq_2)
             
-        if (ref_unit_1,ref_unit_2) in self._conversion_factors:
-                raise RuntimeError(
-                    "There is already an entry for {} and {}".format(
-                        ref_unit_1,
-                        ref_unit_2
-                    )
-                )
-        else:
-            self._conversion_factors[(ref_unit_1,ref_unit_2)] = factor
+        # if (ref_unit_1,ref_unit_2) in self._conversion_factors:
+                # raise RuntimeError(
+                    # "There is already an entry for {} and {}".format(
+                        # ref_unit_1,
+                        # ref_unit_2
+                    # )
+                # )
+        # else:
+            # self._conversion_factors[(ref_unit_1,ref_unit_2)] = factor
 
-    def from_to(self,ref_unit_1,ref_unit_2):
-        """
-        """
-        koq_1 = ref_unit_1._kind_of_quantity
-        koq_2 = ref_unit_2._kind_of_quantity
-        assert koq_1 is koq_2,\
-            "{} and {} are different quantities".format(koq_1,koq_2)
+    # def from_to(self,ref_unit_1,ref_unit_2):
+        # """
+        # """
+        # koq_1 = ref_unit_1._kind_of_quantity
+        # koq_2 = ref_unit_2._kind_of_quantity
+        # assert koq_1 is koq_2,\
+            # "{} and {} are different quantities".format(koq_1,koq_2)
 
-        return self._conversion_factors[(ref_unit_1,ref_unit_2)]
+        # return self._conversion_factors[(ref_unit_1,ref_unit_2)]
         
