@@ -10,9 +10,8 @@ from bidict import ValueDuplicationError
 
 import unittest
  
-from quantity_value.kind_of_quantity import * 
-from quantity_value.dimension import * 
-from quantity_value.context import *
+from quantity_value import * 
+from quantity_value.dimension import Dimension 
 
 #----------------------------------------------------------------------------
 class TestContext(unittest.TestCase):
@@ -29,14 +28,14 @@ class TestContext(unittest.TestCase):
     
         self.assertEqual( len(context._koq_dimension[Length]), 2 )
         
-        d1 = context.koq_to_dim(Length)
+        d1 = context._koq_to_dim(Length)
         self.assertEqual( d1, Dimension( (1,0) ) )
         
-        d2 = context.koq_to_dim(Time)
+        d2 = context._koq_to_dim(Time)
         self.assertEqual( d2, Dimension( (0,1) ) )
 
-        self.assertTrue( Length is context.dim_to_koq( d1 ) ) 
-        self.assertTrue( Time is context.dim_to_koq( d2 ) )
+        self.assertTrue( Length is context._dim_to_koq( d1 ) ) 
+        self.assertTrue( Time is context._dim_to_koq( d2 ) )
    
     def test_decalare(self):
     
@@ -47,15 +46,15 @@ class TestContext(unittest.TestCase):
         
         Speed = context.declare('Speed','V','Length/Time')
  
-        self.assertTrue( Speed is context.dim_to_koq( Dimension( (1,-1) ) ) ) 
-        self.assertEqual( context.koq_to_dim(Speed), Dimension( (1,-1) ) )
+        self.assertTrue( Speed is context._dim_to_koq( Dimension( (1,-1) ) ) ) 
+        self.assertEqual( context._koq_to_dim(Speed), Dimension( (1,-1) ) )
 
-        SpeedRatio = context.declare('SpeedRatio','V/V','Speed.ratio(Speed)')
+        SpeedRatio = context.declare('SpeedRatio','V//V','Speed//Speed')
 
-        self.assertEqual( context.koq_to_dim(SpeedRatio), Dimension( (1,-1), (1,-1)) )
-        self.assertTrue( SpeedRatio is context.dim_to_koq( Dimension( (1,-1), (1,-1)) ) ) 
+        self.assertEqual( context._koq_to_dim(SpeedRatio), Dimension( (1,-1), (1,-1)) )
+        self.assertTrue( SpeedRatio is context._dim_to_koq( Dimension( (1,-1), (1,-1)) ) ) 
         self.assertTrue( 
-            context.koq_to_dim(SpeedRatio).simplify().is_dimensionless
+            context._koq_to_dim(SpeedRatio).simplify().is_dimensionless
         )
 
     def test_evaluate(self):
@@ -68,10 +67,10 @@ class TestContext(unittest.TestCase):
         
         Speed = context.declare('Speed','V','Length/Time')
  
-        SpeedRatio = context.declare('SpeedRatio','V/V','Speed.ratio(Speed)')
+        SpeedRatio = context.declare('SpeedRatio','V//V','Speed//Speed')
 
         self.assertTrue( Speed is context.evaluate('Length/Time') )
-        self.assertTrue( SpeedRatio is context.evaluate( '(Length/Time).ratio(Length/Time)' ) )
+        self.assertTrue( SpeedRatio is context.evaluate( '(Length/Time)//(Length/Time)' ) )
         
     def test_failures(self):
 
