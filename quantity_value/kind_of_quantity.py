@@ -20,8 +20,8 @@ class KindOfQuantity(object):
         return str(self._term)
 
     def __eq__(self,other):
-        dim_lhs = self.context.koq_to_dim(self)
-        dim_rhs = self.context.koq_to_dim(other)
+        dim_lhs = self.context._koq_to_dim(self)
+        dim_rhs = self.context._koq_to_dim(other)
         
         return dim_lhs == dim_rhs        
 
@@ -51,7 +51,7 @@ class KindOfQuantity(object):
     # def __div__(self,rhs):
         # return KindOfQuantity.__truediv__(self,rhs)
         
-    def ratio(self,rhs):
+    def __floordiv__(self,rhs):
         return Ratio(self,rhs)
 
     def simplify(self):
@@ -59,11 +59,11 @@ class KindOfQuantity(object):
 
     @property
     def is_dimensionless(self):
-        return self.context.koq_to_dim(self).is_dimensionless
+        return self.context._koq_to_dim(self).is_dimensionless
 
     @property
     def is_dimensionless_ratio(self):
-        return self.context.koq_to_dim(self).is_dimensionless_ratio
+        return self.context._koq_to_dim(self).is_dimensionless_ratio
         
     def is_ratio_of(self,other):
         """
@@ -71,16 +71,11 @@ class KindOfQuantity(object):
         the numerator and denominator of this quantity-ratio object.
         
         """
-        dim_lhs = self.context.koq_to_dim(self)
-        dim_rhs = self.context.koq_to_dim(other)
+        dim_lhs = self.context._koq_to_dim(self)
+        dim_rhs = self.context._koq_to_dim(other)
         
         return dim_lhs.is_ratio_of(dim_rhs)
     
-# #----------------------------------------------------------------------------
-# # A representation for pure numbers
-# #
-# Numeric = KindOfQuantity('Numeric','1')
-
 #----------------------------------------------------------------------------
 # The following classes support simple manipulation of KindOfQuantity objects 
 # by multiplication and division. The operation of declaring a ratio 
@@ -111,6 +106,12 @@ class BinaryOp(object):
         self.lhs = lhs
         self.rhs = rhs 
 
+    def __repr__(self):
+        return "{!s}({!s},{!s})".format(
+            self.__class__.__name__,
+            self.lhs,
+            self.rhs
+        )            
     def __mul__(self,rhs):
         return Mul(self,rhs)
             
@@ -137,7 +138,7 @@ class BinaryOp(object):
              )
         return self.lhs.context
             
-    def ratio(self,rhs):
+    def __floordiv__(self,rhs):
         return Ratio(self,rhs)
 
     def simplify(self):
@@ -177,9 +178,6 @@ class Mul(BinaryOp):
     def __init__(self,lhs,rhs):
         BinaryOp.__init__(self,lhs,rhs) 
 
-    def __repr__(self):
-        return "Mul({!s},{!s})".format(self.lhs,self.rhs)
-   
     def execute(self,stack,converter):
         super(Mul,self).execute(stack,converter)    
         # The stack holds Dimension objects
@@ -192,9 +190,6 @@ class Div(BinaryOp):
 
     def __init__(self,lhs,rhs):
         BinaryOp.__init__(self,lhs,rhs) 
-
-    def __repr__(self):
-        return "Div({!s},{!s})".format(self.lhs,self.rhs)
     
     def execute(self,stack,converter):
         super(Div,self).execute(stack,converter)    
@@ -209,13 +204,10 @@ class Ratio(BinaryOp):
     def __init__(self,lhs,rhs):
         BinaryOp.__init__(self,lhs,rhs) 
 
-    def __repr__(self):
-        return "Ratio({!s},{!s})".format(self.lhs,self.rhs)
-    
     def execute(self,stack,converter):
         super(Ratio,self).execute(stack,converter)    
         # The stack holds Dimension objects
         r = stack.pop()
         l = stack.pop()
-        stack.append( l.ratio(r) )
+        stack.append( l // r )
 
