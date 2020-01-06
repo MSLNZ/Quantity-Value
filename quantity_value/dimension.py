@@ -1,26 +1,18 @@
-from __future__ import print_function
-from __future__ import division 
-
 try:
     from itertools import zip_longest                   # Python 3
 except ImportError:
     from itertools import izip_longest as zip_longest   # Python 2
 
-__all__ = (
-    'Dimension',
-)
-
 #----------------------------------------------------------------------------
 class Dimension(object):
 
     """
-    Dimension holds the dimensional exponents of a KindOfQuantity instance. 
+    Dimension holds the dimensional exponents of a KindOfQuantity. 
     
     Multiplication and division of Dimension adds and subtracts dimensional 
-    exponents, but there is also provision made to retain the dimension 
+    exponents. There is also provision made to retain the dimension 
     of 'dimensionless' quantities as a ratio.
     
-    Dimension objects may be used as keys in Python dictionaries.
     """
     
     def __init__(self,numerator,denominator=()):
@@ -34,7 +26,7 @@ class Dimension(object):
                 self.numerator
             )
         else:
-            return "{!s}{!r}/{!r}".format(
+            return "{!s}({!r}//{!r})".format(
                 self.__class__.__name__,
                 self.numerator,
                 self.denominator
@@ -44,12 +36,13 @@ class Dimension(object):
         if not self.denominator:
             return str( self.numerator )
         else:
-            return "{!s}/{!s}".format( 
+            return "{!s}//{!s}".format( 
                 self.numerator, 
                 self.denominator 
             )
         
     # __hash__ and __eq__ are required for mapping keys
+    # Dimensions are used as keys in Python dictionaries.
     def __hash__(self):
         return hash(
             ( self.numerator, self.denominator )
@@ -68,23 +61,29 @@ class Dimension(object):
     @property
     def is_simplified(self):
         """
-        Is in simplified form
+        True when the denominator is empty
         """
         return not self.denominator
         
     @property
     def is_dimensionless(self):
+        """
+        True when there are no non-zero dimensional exponents 
+        """
         return sum( self.simplify().numerator ) == 0
 
     @property
     def is_dimensionless_ratio(self):
+        """
+        True when the numerator and denominator are the same 
+        """
         return self.numerator == self.denominator
         
     def is_ratio_of(self,other):
         """
-        Return True when `other` is in simplified form and has 
-        the same dimensions as the numerator and denominator
-        of this dimensionless-ratio object.
+        True when `other` is in simplified form and
+        `self` is a dimensionless ratio of the
+        dimensions of `other`.
         
         """
         if self.is_dimensionless_ratio and other.is_simplified:
@@ -110,8 +109,8 @@ class Dimension(object):
             )
         )
             
-    def __div__(self,rhs):
-        return self.__truediv__(rhs)
+    # def __div__(self,rhs):
+        # return self.__truediv__(rhs)
     
     def __truediv__(self,rhs):
         return Dimension(
@@ -128,14 +127,20 @@ class Dimension(object):
             )
         )
 
-    def ratio(self,rhs):
+    def __floordiv__(self,rhs):
         """
-        Avoid simplifying the dimensions of `self` and `rhs`.
-        Retain them as a ratio, with the dimension of `self` in 
-        the numerator and the dimension of `rhs` in the denominator.
+        Divide the dimensions of `self` by `rhs`,
+        but retain the result as a ratio of dimensions.
+
+        The numerator will contain the dimensions of `self` 
+        and the denominator the dimensions of `rhs` 
+        if both arguments are in simplified form.
+                
+        If the arguments are not simplified, the 
+        more general calculation will be performed.
         
         """
-        if not rhs.denominator:
+        if rhs.is_simplified:
             num = self.numerator
         else:
             num = tuple(
@@ -144,7 +149,7 @@ class Dimension(object):
                     rhs.denominator)
             )
             
-        if not self.denominator:
+        if self.is_simplified:
             den = rhs.numerator
         else:
             den = tuple(
@@ -157,7 +162,8 @@ class Dimension(object):
 
     def simplify(self):
         """
-        Return the dimension of the object. 
+        Return the dimension of the object.
+        
         If there are dimensions for both the numerator and
         denominator they will be combined and simplified. 
         
@@ -171,17 +177,3 @@ class Dimension(object):
             )
         )
   
-        
-#============================================================================
-if __name__ == '__main__':
-    
-    import quantity_value as QV
-    from context import *
-
-    Length = QV.KindOfQuantity('Length','L') 
-    context = Context(Length)
-    
-    LengthRatio = QV.KindOfQuantity('LengthRatio','L/L') 
-    context.declare( LengthRatio,Length.ratio(Length) )
-    
-    print( context.evaluate( (LengthRatio*Length).simplify() ) )
