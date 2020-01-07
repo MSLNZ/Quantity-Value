@@ -6,7 +6,7 @@ from quantity import Unit
 #
 class ValueUnit(object):
     """
-    A ValueUnit object pairs a number and a unit.
+    A ValueUnit pairs a number and a unit.
     The unit must be associated with a system of units.
     Arithmetic expressions involving ValueUnit objects 
     apply the rules of quantity calculus to the associated units.
@@ -112,12 +112,11 @@ class ValueUnit(object):
         else:
             return NotImplemented
   
-    # Multiplication and division create ValueUnit 
-    # objects in which the unit is a temporary 
-    # object that has not not been resolved to a unit. 
-    # This temporary object has an interface that exposes
-    # `multiplier`, `system` and `kind_of_quantity` attributes. 
-    # These allow a unit to be resolved later.
+    # Multiplication and division create temporary ValueUnit 
+    # objects that have not been resolved to a unit. 
+    # These temporary objects have an interface that exposes
+    # `multiplier`, `system` and `kind_of_quantity` attributes, 
+    # which allow a kind_of_quantity and hence a unit to be resolved later.
     def __mul__(self,rhs):
         lhs = self
         if hasattr(rhs,'unit'):                      

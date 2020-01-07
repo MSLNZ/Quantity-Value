@@ -7,7 +7,7 @@ except ImportError:
 class Dimension(object):
 
     """
-    Dimension holds the dimensional exponents of a KindOfQuantity. 
+    Dimension holds a set of dimensional exponents. 
     
     Multiplication and division of Dimension adds and subtracts dimensional 
     exponents. There is also provision made to retain the dimension 

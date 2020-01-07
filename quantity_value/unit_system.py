@@ -1,12 +1,10 @@
 from __future__ import division 
 
-import warnings
-warnings.filterwarnings(
-    "ignore", 
-    message="Python 2 support will be dropped in a future release."
-)
-from bidict import bidict 
-
+# Note, we are taking the view that mappings from KoQ to unit can be 
+# many-to-one. An alternative view is to define a distinct unit 
+# for every KoQ. However, I think that is likely to be 
+# more confusing.
+ 
 from fractions import *
 
 from quantity import Unit 
@@ -19,9 +17,11 @@ __all__ = (
 class UnitSystem(object):
 
     """
-    A unit system holds a 1-to-1 bi-directional map between KindOfQuantity 
-    instances and reference Unit instances. Such as Length <-> metre.
-    UnitSystem objects also behave like a map from unit names to unit objects. 
+    A unit system holds a map between KindOfQuantity objects
+    and Unit objects (which will be considered as 'reference' units 
+    in the system). Such as Length -> metre.
+    
+    UnitSystem objects also map from unit names to unit objects. 
     Such as, `SI.metre` or `SI['metre']` or `'metre' in SI`.
     """
     
@@ -29,10 +29,10 @@ class UnitSystem(object):
         self._name = name
         self._context = context
         
-        self._koq_to_unit = bidict()   # koq <-> unit
+        self._koq_to_unit = dict()  # koq -> unit
         self._name_to_unit = dict() # unit name -> unit
         
-        # There must be a unit for numbers
+        # There must always be a unit for numbers
         Numeric = context['Numeric']
         unity = Unit(Numeric,'','',self,1)        
         self._koq_to_unit[Numeric] = unity
@@ -64,8 +64,8 @@ class UnitSystem(object):
         # a unit or a unit expression. In the first case, 
         # we obtain a kind-of-quantity directly and should
         # immediately look up the unit.
-        # In the second case, we obtain a kind-of-quantity
-        # expression that must be evaluated first.
+        # In the second case, a kind-of-quantity
+        # expression must be evaluated.
         # If `expr` has `execute` it is a kind-of-quantity
         # expression that must be evaluated.
         if hasattr(expr,'kind_of_quantity'):
@@ -89,7 +89,8 @@ class UnitSystem(object):
         return self._name_to_unit[name]
         
     def get(self,name,default=None):
-            return self._name_to_unit.get(name,default)
+        # unit name -> unit
+        return self._name_to_unit.get(name,default)
             
     def _register_reference_unit(self,unit):
         # key: koq; value: unit
@@ -121,9 +122,6 @@ class UnitSystem(object):
         self._name_to_unit[unit.name] = unit
         self.__dict__[unit.name] = unit 
  
-    def kind_of_quantity(self,unit):
-        return self._koq_to_unit.inverse[unit]
-            
     def unit(self,koq_name,unit_name,unit_term):
         """
         Create a reference unit in this system for `kind_of_quantity`
@@ -151,11 +149,15 @@ class UnitSystem(object):
         dst_koq = target_unit._kind_of_quantity
         if not src_koq is dst_koq:
             raise RuntimeError(
-                "{} and {} are different kinds of quantity".format(src_koq,dst_koq)
+                "{} and {} are different kinds of quantity".format(
+                src_koq,dst_koq)
             )
             
-        multiplier = target_unit.multiplier         # ref * k_dst -> unit_dst
-        multiplier /= source_unit.multiplier        # unit_dst / unit_src -> k_dst / k_src
+        # ref * k_dst -> unit_dst
+        multiplier = target_unit.multiplier
+
+        # unit_dst / unit_src -> k_dst / k_src
+        multiplier /= source_unit.multiplier    
         
         return multiplier 
        
@@ -171,7 +173,7 @@ def rational_unit(unit,fraction,name,term):
 
     if not unit is system.reference_unit_for(unit.kind_of_quantity):
         raise RuntimeError(
-            "Illegal operation: '{}' is not a reference unit in this system".format(unit.name)  
+            "{!r} is not a reference unit".format(unit.name)  
         )     
 
     if name in system:
@@ -198,11 +200,11 @@ def metric_unit(prefix,unit):
     kind_of_quantity = unit._kind_of_quantity
     system = unit._system 
 
-    # Things like `centi(centi(metre))` are not permitted
-    # So check that `self` is a reference unit in the system.
+    # Check that `self` is a reference unit in the system,
+    # because things like `centi(centi(metre))` are not permitted.
     if not unit is system.reference_unit_for(unit.kind_of_quantity):
         raise RuntimeError(
-            "Illegal operation: '{}' is not a reference unit in this system".format(unit.name)  
+            "{!r} is not a reference unit".format(unit.name)  
         )     
 
     name = "{!s}{!s}".format(

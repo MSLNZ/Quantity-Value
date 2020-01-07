@@ -20,9 +20,9 @@ class Context(object):
     name or by short-name (term).
     
     A Context is initialised by defining a set of 'independent' 
-    kinds of quantity that will form an n-dimensional basis. 
+    kinds of quantity that form an n-dimensional basis. 
     Other kinds of quantity can be declared as products and 
-    quotients of other KindOfQuantity instances. 
+    quotients of this basis. 
     """
     
     def __init__(self,*argv):
@@ -34,8 +34,8 @@ class Context(object):
         self._koq = { koq_i._term: koq_i for koq_i in self._basis }
         self._koq.update( { koq_i._name: koq_i for koq_i in self._basis } )
         
-        # For conversions between different unit systems
-        self._conversion_factors = dict()
+        # # For conversions between different unit systems
+        # self._conversion_factors = dict()
         
         self._koq_dimension = bidict()
         # Assign an independent dimension to each base quantity
@@ -69,14 +69,13 @@ class Context(object):
         if name in self._koq:
             return self._koq[name]
         
-    # The `expression` is a sequence of binary multiplication
+    # `expression` is a sequence of binary multiplication
     # and division operations, represented as a tree of 
     # KindOfQuantity objects. 
-    # The `self._koq_to_dim` method resolves 
-    # the dimension of KindOfQuantity objects at the leaves of this tree. 
-    # Executing the expression produces a single 
-    # dimension, corresponding to the dimension for the 
-    # resultant KindOfQuantity.
+    # `self._koq_to_dim()` resolves the dimension of  
+    # KindOfQuantity objects at the leaves of this tree. 
+    # Executing the expression results in the 
+    # dimension for the resultant KindOfQuantity.
     def _evaluate_dimension(self,expression):
         stack = list()
         expression.execute(stack,self._koq_to_dim)
@@ -113,6 +112,8 @@ class Context(object):
                 "{!r} is already declared".format(koq_term)
             )
             
+        # Evaluates the KoQ expression using only those KoQ 
+        # objects that have been declared in this context. 
         expression = eval(expression,{'__builtins__': None},self._koq)
         
         if isinstance(expression,KindOfQuantity):
@@ -136,10 +137,12 @@ class Context(object):
         
     def evaluate(self,expression):
         """
-        Evaluate `expression` and return the corresponding kind of quantity
+        Return the kind of quantity for `expression`
         
         """
         if isinstance(expression,str):
+            # Evaluates the KoQ expression using only those KoQ 
+            # objects that have been declared in this context. 
             expression = eval(expression,{'__builtins__': None},self._koq)
 
         dim = self._evaluate_dimension(expression)

@@ -77,10 +77,8 @@ class KindOfQuantity(object):
         return dim_lhs.is_ratio_of(dim_rhs)
     
 #----------------------------------------------------------------------------
-# The following classes support simple manipulation of KindOfQuantity objects 
-# by multiplication and division. The operation of declaring a ratio 
-# and of simplifying a ratio is also supported. The base classes 
-# `UnaryOp` and `BinaryOp` establish the method requirements.  
+# KindOfQuantity objects can be multiplied and divided. Declaring a ratio 
+# and simplifying a ratio is also supported.   
 #----------------------------------------------------------------------------
 class UnaryOp(object):   
 
@@ -145,10 +143,10 @@ class BinaryOp(object):
         return Simplify(self)
         
     # Execution is a recursive process that reduces a tree 
-    # of Mul and Div objects to a single dimension result.
-    # The `stack` will hold dimensions. 
+    # of Mul and Div objects to a single result.
     # The `converter` argument is a `Context` method
-    # that converts a KindOfQuantity object into a dimension.
+    # that converts a KindOfQuantity object into a Dimension.
+    # The `stack` holds dimensions. 
     def execute(self,stack,converter):
         if isinstance( self.lhs,(BinaryOp,UnaryOp) ):
             self.lhs.execute(stack,converter)

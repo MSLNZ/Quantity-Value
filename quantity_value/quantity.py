@@ -42,7 +42,10 @@ class Unit(Quantity):
     """
     A Unit is a Quantity associated with a system of units.  
     For instance, the metre is the unit of length in the SI system.  
-    Mathematical operations are defined between Unit objects.
+    
+    Mathematical operations are defined among Unit objects.
+    The semantics of these operations depends on the
+    same operations applied to the corresponding kinds of quantity.
     """
 
     def __init__(self,kind_of_quantity,name,term,system,multiplier):
@@ -51,7 +54,8 @@ class Unit(Quantity):
         self._system = system
         self._multiplier = multiplier   
         
-    # Units of the same kind of quantity can have different multipliers. 
+    # Units for the same kind of quantity can have different multipliers. 
+    # A unit with multiplier unity is the reference unit in a system.
     @property 
     def multiplier(self):
         try:
@@ -103,15 +107,10 @@ class Unit(Quantity):
 # The following classes support simple manipulation of units by
 # multiplication and division, declaring a ratio of units 
 # and of simplifying a ratio of units is also supported. 
-# The base classes  `UnaryOp` and `BinaryOp` establish the method 
-# interface requirements.  
-# These classes provide a temporary representation for 
-# an equation involving units.
+# The base classes  `UnaryOp` and `BinaryOp` establish the interface. 
+# These classes provide a representation for 
+# an equation involving units, but do not resolve into a unit.
 #
-# Operations implement manipulations of multipliers and kinds
-# of quantity simultaneously. The latter depends on 
-# operations defined in kind_of_quantity.py, construct a tree
-# of KoQ objects and then reduce it to a single resultant KoQ object.
 #----------------------------------------------------------------------------
 class UnaryOp(object):   
 
@@ -172,7 +171,12 @@ class BinaryOp(object):
 
     def reference_unit_for(self):
         return self.system.reference_unit_for( self.kind_of_quantity ) 
-       
+
+#----------------------------------------------------------------------------
+#
+# Operations implement manipulations of multipliers and kinds
+# of quantity simultaneously. 
+#       
 #----------------------------------------------------------------------------
 class Simplify(UnaryOp):
 
@@ -201,15 +205,15 @@ class Ratio(BinaryOp):
         BinaryOp.__init__(self,lhs,rhs) 
 
     def __repr__(self):
-        return "({!r}-|-{!r})".format(self.lhs,self.rhs)
+        return "({!r}//{!r})".format(self.lhs,self.rhs)
 
     def __str__(self):
         # TODO: need to treat a numeric as a special case
-        return "({!s}|{!s})".format(self.lhs,self.rhs)
+        return "({!s}//{!s})".format(self.lhs,self.rhs)
            
     @property 
     def kind_of_quantity(self):  
-        return self.lhs.kind_of_quantity.ratio(self.rhs.kind_of_quantity)
+        return self.lhs.kind_of_quantity // self.rhs.kind_of_quantity
         
     @property 
     def multiplier(self):
