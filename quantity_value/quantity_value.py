@@ -112,7 +112,7 @@ class ValueUnit(object):
         else:
             return NotImplemented
   
-    # Multiplication and division create temporary ValueUnit 
+    # Multiplication, division and exponentiation create temporary ValueUnit 
     # objects that have not been resolved to a unit. 
     # These temporary objects have an interface that exposes
     # `multiplier`, `system` and `kind_of_quantity` attributes, 
@@ -172,6 +172,10 @@ class ValueUnit(object):
     # def __rdiv__(self,lhs):
         # return ValueUnit.__rtruediv__(self,lhs)
                         
+    def __pow__(self,rhs):
+        # work in progress!
+        return NotImplemented
+        
 #----------------------------------------------------------------------------
 def qvalue(value,unit):
     return ValueUnit(value,unit)

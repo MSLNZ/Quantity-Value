@@ -1,5 +1,6 @@
 from __future__ import division 
-
+import numbers 
+ 
 __all__ = (
     'Quantity',
     'Unit',
@@ -94,6 +95,13 @@ class Unit(Quantity):
     # def __div__(self,rhs):
         # return self.__truediv__(rhs)
         
+    def __pow__(self,rhs):
+        assert isinstance(rhs,numbers.Real),\
+            "A real exponent is required"
+        
+        # work in progress!
+        return NotImplemented
+  
     def ratio(self,rhs):
         return Ratio(self,rhs)
 

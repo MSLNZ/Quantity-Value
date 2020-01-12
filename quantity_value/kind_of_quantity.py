@@ -45,11 +45,24 @@ class KindOfQuantity(object):
     def __mul__(self,rhs):
         return Mul(self,rhs)
             
+    def __rmul__(self,lhs):
+        # Assume that the lhs will behave as a number
+        lhs = self._context._koq['Numeric']
+        return Mul(lhs,self)
+            
     def __truediv__(self,rhs):
         return Div(self,rhs)
 
+    def __rtruediv__(self,lhs):
+        # Assume that the lhs will behave as a number
+        lhs = self._context._koq['Numeric']
+        return Div(lhs,self)
+        
     # def __div__(self,rhs):
         # return KindOfQuantity.__truediv__(self,rhs)
+        
+    # def __rdiv__(self,rhs):
+        # return KindOfQuantity.__rtruediv__(self,rhs)
         
     def __floordiv__(self,rhs):
         return Ratio(self,rhs)
