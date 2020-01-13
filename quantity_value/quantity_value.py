@@ -197,21 +197,37 @@ def unit(vu):
         return None 
        
 #----------------------------------------------------------------------------
-def result(value_unit, result_x_fn=lambda x,*arg,**kwarg:x, *arg,**kwarg):
+def result(value_unit, unit=None, result_x_fn=lambda x,*arg,**kwarg:x, *arg,**kwarg):
     """
-    Return a `qvalue` in which the unit has been 
-    converted to the reference unit of the unit system. 
+    Return a `qvalue`.
+    
+    If no `unit` is given the measure will be converted to the reference 
+    unit of the unit system. Otherwise the measure will be converted to
+    the `unit`.
+    
     A value result function `result_x_fn` can be supplied 
     to apply a final processing to the value.
     """
-    return ValueUnit( 
-        result_x_fn(
-            value_unit.unit.multiplier*value_unit.value, 
-            *arg, 
-            **kwarg
-        ), 
-        value_unit.unit.reference_unit_for() 
-    )
+    if unit:
+        # Use the preferred unit 
+        multiplier = value_unit.unit.multiplier/unit.multiplier
+        return ValueUnit( 
+            result_x_fn(
+                value_unit.value*multiplier , 
+                *arg, 
+                **kwarg
+            ), 
+            unit 
+        )
+    else:
+        return ValueUnit( 
+            result_x_fn(
+                value_unit.unit.multiplier*value_unit.value, 
+                *arg, 
+                **kwarg
+            ), 
+            value_unit.unit.reference_unit_for() 
+        )
         
              
 

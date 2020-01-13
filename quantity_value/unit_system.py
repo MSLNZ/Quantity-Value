@@ -10,7 +10,7 @@ from fractions import *
 from quantity import Unit 
 
 __all__ = (
-    'UnitSystem', 'rational_unit'
+    'UnitSystem', 'related_unit', 'metric_unit'
 )
 
 #----------------------------------------------------------------------------
@@ -162,9 +162,9 @@ class UnitSystem(object):
         return multiplier 
        
 #----------------------------------------------------------------------------
-def rational_unit(unit,fraction,name,term):
+def related_unit(unit,fraction,name,term):
     """
-    Define and register a rational multiple of a system  
+    Define and register a multiple of a system  
     reference unit for the same quantity.
     
     """
@@ -184,7 +184,7 @@ def rational_unit(unit,fraction,name,term):
             name,
             term,
             system,
-            Fraction( fraction )
+            fraction
         )
         system._register_by_name(rational_unit)
         

@@ -15,7 +15,8 @@ __all__ = (
     'result',
     'Context',
     'UnitSystem',
-    'rational_unit',
+    'related_unit',
+    'metric_unit'
 )
 
 #----------------------------------------------------------------------------
