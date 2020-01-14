@@ -2,8 +2,14 @@ from __future__ import division
 
 # Note, we are taking the view that mappings from KoQ to unit can be 
 # many-to-one. An alternative view is to define a distinct unit 
-# for every KoQ. However, I think that is likely to be 
-# more confusing.
+# for every KoQ. However, I think that is likely to be confusing.
+#
+# `UnitSystem` is perhaps not a very useful concept. It suggests that
+# different types of units belong in different systems, like the SI 
+# would have m, cm, km, etc, and Imperial would have the foot, yard,
+# etc. However, all those length scales are "similar" in the 
+# sense that a simple multiplier converts from one to the other.
+# Different `UnitSystem`s only provide different reference units.
  
 from fractions import *
 
@@ -106,21 +112,36 @@ class UnitSystem(object):
             self._register_by_name(unit)
             
     def _register_by_name(self,unit):
-        # This can contain all units, not just reference ones,
-        # provided their names are distinct dictionary keys
+        # `_name_to_unit` can refer to any units, not just reference ones,
+        # provided their names and terms are distinct dictionary keys
         if unit.name in self._name_to_unit:
             raise RuntimeError(
                 "The name {!s} registered to {!r}".format(
                     unit.name,
                     self._name_to_unit[unit.name]
                 )
-            )
+            ) 
+        term = str(unit)
+        if term in self._name_to_unit:
+            raise RuntimeError(
+                "The name {!s} registered to {!r}".format(
+                    term,
+                    self._name_to_unit[term]
+                )
+            ) 
             
         assert not unit.name in self.__dict__,\
             "{!s} is a reserved name".format(unit.name)
- 
+
         self._name_to_unit[unit.name] = unit
+        self._name_to_unit[term] = unit
         self.__dict__[unit.name] = unit 
+        
+        # # Don't express terms as object attributes 
+        # # because they usually aren't valid identifiers 
+        # assert not term in self.__dict__,\
+            # "{!s} is a reserved name".format(term)
+        # self.__dict__[term] = unit 
  
     def unit(self,koq_name,unit_name,unit_term):
         """
