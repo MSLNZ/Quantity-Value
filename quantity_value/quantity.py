@@ -95,6 +95,9 @@ class Unit(Quantity):
     # def __div__(self,rhs):
         # return self.__truediv__(rhs)
         
+    def __floordiv__(self,rhs):
+        return Ratio(self,rhs)
+
     def __pow__(self,rhs):
         assert isinstance(rhs,numbers.Real),\
             "A real exponent is required"
@@ -102,13 +105,21 @@ class Unit(Quantity):
         # work in progress!
         return NotImplemented
   
-    def ratio(self,rhs):
-        return Ratio(self,rhs)
+    # def ratio(self,rhs):
+        # return Ratio(self,rhs)
 
     def simplify(self):
         return Simplify(self)
 
-    def reference_unit_for(self):
+    def reference_unit(self):
+        """
+        Return the reference unit
+
+        There can be only one reference unit in a system for each 
+        kind of quantity, but there can be many other related units,
+        which are multiples of the reference.
+        
+        """
         return self.system.reference_unit_for( self.kind_of_quantity ) 
 
 #----------------------------------------------------------------------------
@@ -139,13 +150,16 @@ class UnaryOp(object):
     # def __div__(self,rhs):
         # return self.__truediv__(rhs)
         
-    def ratio(self,rhs):
+    def __floordiv__(self,rhs):
         return Ratio(self,rhs)
+
+    # def ratio(self,rhs):
+        # return Ratio(self,rhs)
 
     def simplify(self):
         return Simplify(self)
 
-    def reference_unit_for(self):
+    def reference_unit(self):
         return self.system.reference_unit_for( self.kind_of_quantity ) 
     
 #----------------------------------------------------------------------------
@@ -171,13 +185,16 @@ class BinaryOp(object):
     # def __div__(self,rhs):
         # return self.__truediv__(rhs)
         
-    def ratio(self,rhs):
+    def __floordiv__(self,rhs):
         return Ratio(self,rhs)
+
+    # def ratio(self,rhs):
+        # return Ratio(self,rhs)
 
     def simplify(self):
         return Simplify(self)
 
-    def reference_unit_for(self):
+    def reference_unit(self):
         return self.system.reference_unit_for( self.kind_of_quantity ) 
 
 #----------------------------------------------------------------------------
@@ -268,3 +285,4 @@ class Div(BinaryOp):
     @property 
     def multiplier(self):
         return self.lhs.multiplier / self.rhs.multiplier
+
