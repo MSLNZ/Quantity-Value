@@ -83,7 +83,6 @@ class KindOfQuantity(object):
     @property
     def is_dimensionless_ratio(self):
         dim = self.context._koq_to_dim(self)
-        print dim
         return dim.is_dimensionless_ratio
         
     def is_ratio_of(self,other):
