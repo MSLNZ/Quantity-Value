@@ -54,7 +54,7 @@ class KindOfQuantity(object):
         return Div(self,rhs)
 
     def __rtruediv__(self,lhs):
-        # Assume that the lhs will behave as a number
+        # Assume that lhs behaves like a number
         lhs = self._context._koq['Numeric']
         return Div(lhs,self)
         
@@ -67,16 +67,24 @@ class KindOfQuantity(object):
     def __floordiv__(self,rhs):
         return Ratio(self,rhs)
 
+    def __rfloordiv__(self,lhs):
+        # Assume that lhs behaves like a number
+        lhs = self._context._koq['Numeric']
+        return Ratio(lhs,self)
+        
     def simplify(self):
         return Simplify(self)
 
     @property
     def is_dimensionless(self):
-        return self.context._koq_to_dim(self).is_dimensionless
+        dim = self.context._koq_to_dim(self)
+        return dim.is_dimensionless
 
     @property
     def is_dimensionless_ratio(self):
-        return self.context._koq_to_dim(self).is_dimensionless_ratio
+        dim = self.context._koq_to_dim(self)
+        print dim
+        return dim.is_dimensionless_ratio
         
     def is_ratio_of(self,other):
         """
@@ -151,6 +159,10 @@ class BinaryOp(object):
             
     def __floordiv__(self,rhs):
         return Ratio(self,rhs)
+
+    def __rfloordiv__(self,lhs):
+        # rhs is not a KoQ
+        return Ratio(lhs,self)
 
     def simplify(self):
         return Simplify(self)
