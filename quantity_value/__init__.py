@@ -10,9 +10,10 @@ from .context import *
 
 __all__ = (
     'qvalue',
+    'qratio',
     'value',
     'unit',
-    'result',
+    'qresult',
     'Context',
     'UnitSystem',
     'related_unit',
