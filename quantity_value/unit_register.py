@@ -4,30 +4,30 @@ from __future__ import division
 # many-to-one. An alternative view is to define a distinct unit 
 # for every KoQ. However, I think that is likely to be confusing.
 #
-# `UnitSystem` is perhaps not a very useful concept. It suggests that
-# different types of units belong in different systems, like the SI 
+# `UnitRegister` is perhaps not a very useful concept. 
+# Different types of units belong in different systems, like the SI 
 # would have m, cm, km, etc, and Imperial would have the foot, yard,
 # etc. However, all those length scales are "similar" in the 
 # sense that a simple multiplier converts from one to the other.
-# Different `UnitSystem`s only provide different reference units.
+# Different `UnitRegister`s only provide different reference units.
  
 from fractions import *
 
 from quantity import Unit 
 
 __all__ = (
-    'UnitSystem', 'related_unit', 'metric_unit'
+    'UnitRegister', 'related_unit', 'metric_unit'
 )
 
 #----------------------------------------------------------------------------
-class UnitSystem(object):
+class UnitRegister(object):
 
     """
-    A unit system holds a map between KindOfQuantity objects
-    and Unit objects (which will be considered as 'reference' units 
-    in the system). Such as Length -> metre.
+    A unit register holds a map between KindOfQuantity objects
+    and Unit objects (which will be considered as 'reference' units). 
+    Such as Length -> metre.
     
-    UnitSystem objects also map from unit names to unit objects. 
+    UnitRegister objects also map from unit names to unit objects. 
     Such as, `SI.metre` or `SI['metre']` or `'metre' in SI`.
     """
     
@@ -145,7 +145,7 @@ class UnitSystem(object):
  
     def unit(self,koq_name,unit_name,unit_term):
         """
-        Create a reference unit in this system for `kind_of_quantity`
+        Create a reference unit in this register for `kind_of_quantity`
         The unit will be identified by `name`, and abbreviation `term`.
         """
         koq = self._context._koq[koq_name]
@@ -185,45 +185,45 @@ class UnitSystem(object):
 #----------------------------------------------------------------------------
 def related_unit(unit,fraction,name,term):
     """
-    Define and register a multiple of a system  
+    Define and register a multiple of a
     reference unit for the same quantity.
     
     """
     kind_of_quantity = unit._kind_of_quantity
-    system = unit._system 
+    register = unit._register 
 
-    if not unit is system.reference_unit_for(unit.kind_of_quantity):
+    if not unit is register.reference_unit_for(unit.kind_of_quantity):
         raise RuntimeError(
             "{!r} is not a reference unit".format(unit.name)  
         )     
 
-    if name in system:
-        return system[name]
+    if name in register:
+        return register[name]
     else:
         rational_unit = Unit(
             kind_of_quantity,
             name,
             term,
-            system,
+            register,
             fraction
         )
-        system._register_by_name(rational_unit)
+        register._register_by_name(rational_unit)
         
         return rational_unit
         
 #----------------------------------------------------------------------------
 def metric_unit(prefix,unit):
     """
-    Define a metric multiple of a system  
+    Define a metric multiple of a
     reference unit for the same quantity.
     
     """
     kind_of_quantity = unit._kind_of_quantity
-    system = unit._system 
+    register = unit._register 
 
-    # Check that `self` is a reference unit in the system,
+    # Check that `self` is a reference unit in the register,
     # because things like `centi(centi(metre))` are not permitted.
-    if not unit is system.reference_unit_for(unit.kind_of_quantity):
+    if not unit is register.reference_unit_for(unit.kind_of_quantity):
         raise RuntimeError(
             "{!r} is not a reference unit".format(unit.name)  
         )     
@@ -233,8 +233,8 @@ def metric_unit(prefix,unit):
         unit.name
     )
     
-    if name in system:
-        return system[name]
+    if name in register:
+        return register[name]
     else:
         term = "{!s}{!s}".format(
             prefix.term,
@@ -245,11 +245,11 @@ def metric_unit(prefix,unit):
             kind_of_quantity,
             name,
             term,
-            system,
+            register,
             prefix.value
         )
         
         # Buffer related quantities        
-        system._register_by_name(pq)
+        register._register_by_name(pq)
         
         return pq 

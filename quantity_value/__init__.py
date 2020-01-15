@@ -3,7 +3,7 @@ from .kind_of_quantity import *
 from .quantity import *
 from .metric_prefix import *
 from .quantity_value import *
-from .unit_system import *
+from .unit_register import *
 from .context import *
 
 #----------------------------------------------------------------------------
@@ -15,7 +15,7 @@ __all__ = (
     'unit',
     'qresult',
     'Context',
-    'UnitSystem',
+    'UnitRegister',
     'related_unit',
     'metric_unit'
 )

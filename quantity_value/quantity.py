@@ -41,22 +41,22 @@ class Quantity(object):
 class Unit(Quantity):
 
     """
-    A Unit is a Quantity associated with a system of units.  
-    For instance, the metre is the unit of length in the SI system.  
+    A Unit is a Quantity associated with a register of units.  
+    For instance, the metre is the unit of length in the SI.  
     
     Mathematical operations are defined among Unit objects.
     The semantics of these operations depends on the
     same operations applied to the corresponding kinds of quantity.
     """
 
-    def __init__(self,kind_of_quantity,name,term,system,multiplier):
+    def __init__(self,kind_of_quantity,name,term,register,multiplier):
         super(Unit,self).__init__(kind_of_quantity,name,term)
         
-        self._system = system
+        self._register = register
         self._multiplier = multiplier   
         
     # Units for the same kind of quantity can have different multipliers. 
-    # A unit with multiplier unity is the reference unit in a system.
+    # A unit with multiplier unity is the reference unit in a register.
     @property 
     def multiplier(self):
         try:
@@ -65,16 +65,16 @@ class Unit(Quantity):
             return 1 
 
     @property 
-    def system(self):
-        return self._system
+    def register(self):
+        return self._register
         
-    @system.setter
-    def system(self,system):
-        if self._system is None:
-            self._system = system
+    @register.setter
+    def register(self,register):
+        if self._register is None:
+            self._register = register
         else:
             raise RuntimeError(
-                "System of units is assigned: {}".format(self.system)
+                "Unit register is assigned: {}".format(self.register)
             )
         
     def __repr__(self):
@@ -83,7 +83,7 @@ class Unit(Quantity):
             self._kind_of_quantity,
             self._name,
             self._term,
-            self._system
+            self._register
         )     
 
     def __mul__(self,rhs):
@@ -115,12 +115,12 @@ class Unit(Quantity):
         """
         Return the reference unit
 
-        There can be only one reference unit in a system for each 
+        There can be only one reference unit in a register for each 
         kind of quantity, but there can be many other related units,
         which are multiples of the reference.
         
         """
-        return self.system.reference_unit_for( self.kind_of_quantity ) 
+        return self.register.reference_unit_for( self.kind_of_quantity ) 
 
 #----------------------------------------------------------------------------
 # The following classes support simple manipulation of units by
@@ -135,11 +135,11 @@ class UnaryOp(object):
 
     def __init__(self,arg):
         self.arg = arg
-        self._system = arg.system
+        self._register = arg.register
 
     @property 
-    def system(self):
-        return self._system
+    def register(self):
+        return self._register
 
     def __mul__(self,rhs):
         return Mul(self,rhs)
@@ -160,7 +160,7 @@ class UnaryOp(object):
         return Simplify(self)
 
     def reference_unit(self):
-        return self.system.reference_unit_for( self.kind_of_quantity ) 
+        return self.register.reference_unit_for( self.kind_of_quantity ) 
     
 #----------------------------------------------------------------------------
 class BinaryOp(object):   
@@ -169,12 +169,12 @@ class BinaryOp(object):
         self.lhs = lhs
         self.rhs = rhs
         
-        assert lhs.system is rhs.system
-        self._system = lhs.system
+        assert lhs.register is rhs.register
+        self._register = lhs.register
         
     @property 
-    def system(self):
-        return self._system
+    def register(self):
+        return self._register
 
     def __mul__(self,rhs):
         return Mul(self,rhs)
@@ -195,7 +195,7 @@ class BinaryOp(object):
         return Simplify(self)
 
     def reference_unit(self):
-        return self.system.reference_unit_for( self.kind_of_quantity ) 
+        return self.register.reference_unit_for( self.kind_of_quantity ) 
 
 #----------------------------------------------------------------------------
 #

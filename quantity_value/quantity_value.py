@@ -7,12 +7,12 @@ from quantity import Unit
 class ValueUnit(object):
     """
     A ValueUnit pairs a number and a unit.
-    The unit must be associated with a system of units.
+    The unit must be associated with a register of units.
     Arithmetic expressions involving ValueUnit objects 
     apply the rules of quantity calculus to the associated units.
     In general, this will create a temporary object representing 
     the unit expression, which must be explicitly resolved to the 
-    corresponding unit in the unit system.
+    corresponding unit in the unit register.
     """
     __slots__ = ("value", "unit")
     
@@ -35,9 +35,9 @@ class ValueUnit(object):
         
     def __add__(self,rhs):  
         lhs = self         
-        if not lhs.unit.system is rhs.unit.system:
+        if not lhs.unit.register is rhs.unit.register:
             raise RuntimeError("Different unit systems: {}, {}".format(
-                lhs.unit.system, rhs.unit.system)
+                lhs.unit.register, rhs.unit.register)
             )
             
         if not isinstance(lhs.unit,Unit):
@@ -74,9 +74,9 @@ class ValueUnit(object):
   
     def __sub__(self,rhs):
         lhs = self
-        if not lhs.unit.system is rhs.unit.system:
+        if not lhs.unit.register is rhs.unit.register:
             raise RuntimeError("Different unit systems: {}, {}".format(
-                lhs.unit.system, rhs.unit.system)
+                lhs.unit.register, rhs.unit.register)
             )
             
         if not isinstance(lhs.unit,Unit):
@@ -115,20 +115,20 @@ class ValueUnit(object):
     # Multiplication, division and exponentiation create temporary ValueUnit 
     # objects that have not been resolved to a unit. 
     # These temporary objects have an interface that exposes
-    # `multiplier`, `system` and `kind_of_quantity` attributes, 
+    # `multiplier`, `register` and `kind_of_quantity` attributes, 
     # which allow a kind_of_quantity and hence a unit to be resolved later.
     def __mul__(self,rhs):
         lhs = self
         if hasattr(rhs,'unit'):                      
-            if not lhs.unit.system is rhs.unit.system:
-                raise RuntimeError("operation requires the same unit system")
+            if not lhs.unit.register is rhs.unit.register:
+                raise RuntimeError("operation requires the same unit register")
 
             return ValueUnit(lhs.value * rhs.value, lhs.unit * rhs.unit)
         else:
             # Assume that the `rhs` behaves as a number 
             return ValueUnit(
                 rhs * lhs.value, 
-                lhs.unit.system.unity * lhs.unit
+                lhs.unit.register.unity * lhs.unit
             )
             
     def __rmul__(self,lhs):
@@ -136,14 +136,14 @@ class ValueUnit(object):
         # Assume that the `lhs` behaves as a number 
         return ValueUnit(
             lhs * rhs.value, 
-            rhs.unit.system.unity * rhs.unit
+            rhs.unit.register.unity * rhs.unit
         )
             
     def __truediv__(self,rhs):
         lhs = self 
         if hasattr(rhs,'unit'):          
-            if not lhs.unit.system is rhs.unit.system:
-                raise RuntimeError("operation requires the same unit system")
+            if not lhs.unit.register is rhs.unit.register:
+                raise RuntimeError("operation requires the same unit register")
 
             return ValueUnit(
                 lhs.value / rhs.value,
@@ -154,7 +154,7 @@ class ValueUnit(object):
             # Assume that the `rhs` behaves as a number 
             return ValueUnit(
                 lhs.value / rhs, 
-                lhs.unit / lhs.unit.system.unity 
+                lhs.unit / lhs.unit.register.unity 
             )
         
     def __rtruediv__(self,lhs):
@@ -162,14 +162,14 @@ class ValueUnit(object):
         # Assume that the `lhs` behaves as a number 
         return ValueUnit(
             lhs / rhs.value, 
-            rhs.unit.system.unity / rhs.unit
+            rhs.unit.register.unity / rhs.unit
         )
         
     # def __floordiv__(self,rhs):
         # lhs = self 
         # if hasattr(rhs,'unit'):          
-            # if not lhs.unit.system is rhs.unit.system:
-                # raise RuntimeError("operation requires the same unit system")
+            # if not lhs.unit.register is rhs.unit.register:
+                # raise RuntimeError("operation requires the same unit register")
 
             # return ValueUnit(
                 # lhs.value / rhs.value,
@@ -179,7 +179,7 @@ class ValueUnit(object):
             # # Assume that the `rhs` behaves as a number 
             # return ValueUnit(
                 # lhs.value / rhs, 
-                # lhs.unit // lhs.unit.system.unity 
+                # lhs.unit // lhs.unit.register.unity 
             # )
 
     # def __rfloordiv__(self,lhs):
@@ -187,7 +187,7 @@ class ValueUnit(object):
         # # Assume that the `lhs` behaves as a number 
         # return ValueUnit(
             # lhs.value / rhs.value, 
-            # rhs.unit.system.unity // rhs.unit   
+            # rhs.unit.register.unity // rhs.unit   
         # )
         
     # # Python 2.x backward compatibility
@@ -239,7 +239,7 @@ def qresult(
     `simplify` controls when the unit dimensions will be simplified.
     
     If no `unit` is given the measure will be converted to the reference 
-    unit of the system. 
+    unit of the register. 
     
     A function `value_result` can be supplied 
     to apply a final processing to the value.
@@ -249,7 +249,7 @@ def qresult(
 
         if isinstance(unit,str):
             # `unit` is the name of a unit, so look up the object
-            unit = value_unit.unit.system[unit]
+            unit = value_unit.unit.register[unit]
             
         if simplify:
             ref_unit = value_unit.unit.simplify().reference_unit() 
@@ -295,7 +295,7 @@ def qratio(value_unit_1, value_unit_2, unit=None ):
     of the numerator and denominator separate.
 
     If no `unit` is given the ratio will be converted to the reference 
-    unit of the system. 
+    unit of the register. 
 
     """
     # Return a qvalue with units that are appropriate for the ratio

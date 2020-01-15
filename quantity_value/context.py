@@ -157,7 +157,7 @@ class Context(object):
     # def conversion_from_to(self,ref_unit_1,ref_unit_2,factor):
         # """
         # Register a factor to convert from `ref_unit_1`, in  
-        # one unit system, to `ref_unit_2` in another
+        # one unit register, to `ref_unit_2` in another
         # """
         # koq_1 = ref_unit_1._kind_of_quantity
         # koq_2 = ref_unit_2._kind_of_quantity
