@@ -9,13 +9,16 @@ class Dimension(object):
     """
     Dimension holds a set of dimensional exponents. 
     
-    Multiplication and division of Dimension adds and subtracts dimensional 
+    To allow interpretation of dimensions a Context is required (the 
+    Context holds 1-to-1 mappings between dimensions and kinds of quantity)
+    
+    Multiplication and division of Dimensions adds and subtracts dimensional 
     exponents. There is also provision made to retain the dimension 
     of 'dimensionless' quantities as a ratio.
-    
     """
     
-    def __init__(self,numerator,denominator=()):
+    def __init__(self,context,numerator,denominator=()):
+        self._context = context
         self.numerator = tuple(numerator) 
         self.denominator = tuple(denominator)
        
@@ -59,6 +62,10 @@ class Dimension(object):
         return len( self.numerator )
 
     @property
+    def context(self):        
+        return self._context 
+        
+    @property
     def is_simplified(self):
         """
         True when the denominator is empty
@@ -94,6 +101,7 @@ class Dimension(object):
     # Dimensions can be multiplied and divided
     def __mul__(self,rhs):
         return Dimension(
+            self.context,
             tuple( 
                 i+j for i,j in zip(
                     self.numerator,
@@ -111,6 +119,7 @@ class Dimension(object):
 
     def __pow__(self,rhs):
         return Dimension(
+            self.context,
             tuple(i*rhs for i in self.numerator),
             tuple(i*rhs for i in self.denominator)
         )
@@ -120,6 +129,7 @@ class Dimension(object):
     
     def __truediv__(self,rhs):
         return Dimension(
+            self.context,
             tuple( 
                 i-j for i,j in zip(
                     self.numerator,
@@ -164,7 +174,7 @@ class Dimension(object):
                     rhs.numerator)
             )
             
-        return Dimension(num,den)
+        return Dimension(self.context,num,den)
 
     def simplify(self):
         """
@@ -175,6 +185,7 @@ class Dimension(object):
         
         """
         return Dimension(
+            self.context,
             tuple( 
                 i-j for i,j in zip_longest(
                     self.numerator,
