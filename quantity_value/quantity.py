@@ -2,15 +2,16 @@ from __future__ import division
 import numbers 
  
 __all__ = (
-    'Quantity',
+    'Scale',
     'Unit',
 )
 #----------------------------------------------------------------------------
-class Quantity(object):
+class Scale(object):
 
     """
-    A Quantity is an specific KindOfQuantity. 
-    Such as the metre is a specific Length.   
+    A Scale is used in the measurement of a specific quantity,  
+    for example, the metre is the SI scale for measurement 
+    of specific lengths.   
     """
     
     def __init__(self,kind_of_quantity,name,term):
@@ -21,10 +22,17 @@ class Quantity(object):
     def __repr__(self):
         return "{!s}({!r},{!r},{!r})".format(
             self.__class__.__name__,
-            self._kind_of_quantity,
-            self._name,
-            self._term
+            self.kind_of_quantity,
+            self.name,
+            self.term
         )
+        
+    def __eq__(self,other):
+        return (
+            self.name == other.name 
+        and 
+            self.term == other.term 
+        ) 
         
     def __str__(self):
         return str(self._term)
@@ -34,15 +42,22 @@ class Quantity(object):
         return str(self._name)
         
     @property 
+    def term(self):
+        return str(self._term)
+        
+    @property 
     def kind_of_quantity(self):
         return self._kind_of_quantity
   
 #----------------------------------------------------------------------------
-class Unit(Quantity):
+# A Scale (correctly) does not refer to a register but the implementation 
+# of Unit would be awkward without such a reference. Unit is therefore 
+# really part of the implementation of the unit register. 
+class Unit(Scale):
 
     """
     A Unit is a Quantity associated with a register of units.  
-    For instance, the metre is the unit of length in the SI.  
+    For instance, the metre is the scale for length in the SI.  
     
     Mathematical operations are defined among Unit objects.
     The semantics of these operations depends on the
@@ -56,7 +71,9 @@ class Unit(Quantity):
         self._multiplier = multiplier   
         
     # Units for the same kind of quantity can have different multipliers. 
-    # A unit with multiplier unity is the reference unit in a register.
+    # A unit with multiplier of unity is the reference unit.
+    # It is perhaps better to hold the multipliers in the unit register?
+    
     @property 
     def multiplier(self):
         try:
@@ -80,9 +97,9 @@ class Unit(Quantity):
     def __repr__(self):
         return "{!s}({!r},{!r},{!r},{!r})".format(
             self.__class__.__name__,
-            self._kind_of_quantity,
-            self._name,
-            self._term,
+            self.kind_of_quantity,
+            self.name,
+            self.term,
             self._register
         )     
 
