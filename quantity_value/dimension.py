@@ -108,6 +108,12 @@ class Dimension(object):
                     fillvalue=0) 
             )
         )
+
+    def __pow__(self,rhs):
+        return Dimension(
+            tuple(i*rhs for i in self.numerator),
+            tuple(i*rhs for i in self.denominator)
+        )
             
     # def __div__(self,rhs):
         # return self.__truediv__(rhs)

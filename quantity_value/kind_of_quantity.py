@@ -2,6 +2,15 @@ from __future__ import division
 
 __all__ = ( 'KindOfQuantity', )
 
+# KindOfQuantity and Context are closely linked. Every KindOfQuantity instance
+# is created by a Context and retains a reference to it.  
+# KindOfQuantity objects are only used by Context objects.
+# The Context associates each KoQ object with a Dimension. 
+# I originally thought that KoQ objects could be manipulated by the user, 
+# but this is not now part of the API. However, the Context needs to be 
+# able to map in either direction between dimensions and KoQs, so I am keeping 
+# the classes distinct for the moment. Later one might contain the other.
+
 #----------------------------------------------------------------------------
 class KindOfQuantity(object):
 
@@ -43,6 +52,7 @@ class KindOfQuantity(object):
         return str(self._name) 
         
     def __mul__(self,rhs):
+        # NB deliberately don't allow `rhs` to be numeric
         return Mul(self,rhs)
             
     def __rmul__(self,lhs):
@@ -51,6 +61,7 @@ class KindOfQuantity(object):
         return Mul(lhs,self)
             
     def __truediv__(self,rhs):
+        # NB deliberately don't allow `rhs` to be numeric
         return Div(self,rhs)
 
     def __rtruediv__(self,lhs):
@@ -65,6 +76,7 @@ class KindOfQuantity(object):
         # return KindOfQuantity.__rtruediv__(self,rhs)
         
     def __floordiv__(self,rhs):
+        # NB deliberately don't allow `rhs` to be numeric
         return Ratio(self,rhs)
 
     def __rfloordiv__(self,lhs):
@@ -75,27 +87,6 @@ class KindOfQuantity(object):
     def simplify(self):
         return Simplify(self)
 
-    @property
-    def is_dimensionless(self):
-        dim = self.context._koq_to_dim(self)
-        return dim.is_dimensionless
-
-    @property
-    def is_dimensionless_ratio(self):
-        dim = self.context._koq_to_dim(self)
-        return dim.is_dimensionless_ratio
-        
-    def is_ratio_of(self,other):
-        """
-        Return True when `other` has the same dimensions as 
-        the numerator and denominator of this quantity-ratio object.
-        
-        """
-        dim_lhs = self.context._koq_to_dim(self)
-        dim_rhs = self.context._koq_to_dim(other)
-        
-        return dim_lhs.is_ratio_of(dim_rhs)
-    
 #----------------------------------------------------------------------------
 # KindOfQuantity objects can be multiplied and divided. Declaring a ratio 
 # and simplifying a ratio is also supported.   
@@ -130,6 +121,10 @@ class BinaryOp(object):
             self.lhs,
             self.rhs
         )            
+        
+    def __pow__(self,rhs):
+        return Pow(self,rhs)
+        
     def __mul__(self,rhs):
         return Mul(self,rhs)
             
@@ -194,6 +189,19 @@ class Simplify(UnaryOp):
         x = stack.pop()
         stack.append( x.simplify() )
 
+#----------------------------------------------------------------------------
+class Pow(BinaryOp):   
+
+    def __init__(self,lhs,rhs):
+        BinaryOp.__init__(self,lhs,rhs) 
+
+    def execute(self,stack,converter):
+        super(Pow,self).execute(stack,converter)    
+        # The stack holds Dimension objects
+        r = stack.pop()
+        l = stack.pop()
+        stack.append( l ** r )
+        
 #----------------------------------------------------------------------------
 class Mul(BinaryOp):   
 

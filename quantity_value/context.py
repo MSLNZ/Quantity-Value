@@ -16,13 +16,15 @@ class Context(object):
     """
     A Context keeps a register of KindOfQuantity instances,
     and associates each instance with a unique dimension.
-    A Context object may be used to look up a KindOfQuantity by
+    
+    A Context may be used to look up a KindOfQuantity by
     name or by short-name (term).
     
     A Context is initialised by defining a set of 'independent' 
-    kinds of quantity that form an n-dimensional basis. 
-    Other kinds of quantity can be declared as products and 
-    quotients of this basis. 
+    kinds of quantity to form an n-dimensional basis. 
+    Other kinds of quantity can then be declared as products  
+    and quotients of this basis. Only derived quantities 
+    with unique dimensions are permitted.
     """
     
     def __init__(self,*argv):
@@ -34,7 +36,7 @@ class Context(object):
         self._koq = { koq_i._term: koq_i for koq_i in self._basis }
         self._koq.update( { koq_i._name: koq_i for koq_i in self._basis } )
         
-        # # For conversions between different unit systems
+        # # For conversions between different unit registers
         # self._conversion_factors = dict()
         
         self._koq_dimension = bidict()
@@ -137,7 +139,7 @@ class Context(object):
         
     def evaluate(self,expression):
         """
-        Return the kind of quantity for `expression`
+        Evaluate the kind of quantity for `expression`
         
         """
         if isinstance(expression,str):
@@ -153,6 +155,25 @@ class Context(object):
             raise RuntimeError(
                 "No quantity is associated with {!r}".format(dim)
             )
+
+    def is_dimensionless(self,koq_name):
+        return self._koq_to_dim(self[koq_name]).is_dimensionless
+
+    def is_dimensionless_ratio(self,koq_name):
+        return self._koq_to_dim(self[koq_name]).is_dimensionless_ratio
+        
+    def is_ratio_of(self,koq_ratio_name,koq_name):
+        """
+        Return True when `koq` has the same dimensions as 
+        the numerator and denominator of `koq_ratio`.
+        
+        """
+        dim_lhs = self._koq_to_dim( self[koq_ratio_name] )
+        dim_rhs = self._koq_to_dim( self[koq_name] )
+        
+        return dim_lhs.is_ratio_of(dim_rhs)
+    
+
         
     # def conversion_from_to(self,ref_unit_1,ref_unit_2,factor):
         # """
