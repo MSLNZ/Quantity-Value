@@ -1,15 +1,12 @@
 from __future__ import division 
 
-# Note, we are taking the view that mappings from KoQ to unit can be 
-# many-to-one. An alternative view is to define a distinct unit 
-# for every KoQ. However, I think that is likely to be confusing.
+# Note, mappings from KoQ to unit can be many-to-one. 
 #
-# `UnitRegister` is perhaps not a very useful concept. 
+# `UnitRegister` does not represent the concept of a 'system of units'. 
 # Different types of units belong in different systems, like the SI 
 # would have m, cm, km, etc, and Imperial would have the foot, yard,
 # etc. However, all those length scales are "similar" in the 
 # sense that a simple multiplier converts from one to the other.
-# Different `UnitRegister`s only provide different reference units.
  
 from fractions import *
 
@@ -23,12 +20,15 @@ __all__ = (
 class UnitRegister(object):
 
     """
-    A unit register holds a map between KindOfQuantity objects
-    and Unit objects (which will be considered as 'reference' units). 
-    Such as Length -> metre.
+    A unit register maps can declare a reference unit for a 
+    kind of quantity. Other related units can be declared as 
+    a multiple of the reference unit.
     
-    UnitRegister objects also map from unit names to unit objects. 
-    Such as, `SI.metre` or `SI['metre']` or `'metre' in SI`.
+    Units can be looked up by name or by term (short name),
+    such as `SI['metre']` or `'metre' in SI`. Unit names 
+    can also be used as an attribute to access the unit,
+    for example, `SI.metre`.
+    
     """
     
     def __init__(self,name,context):
@@ -54,8 +54,9 @@ class UnitRegister(object):
             self._name
         )
 
-    def has_unit_for(self,kind_of_quantity):
-        return kind_of_quantity in self._koq_to_unit 
+    @property
+    def context(self):        
+        return self._context 
         
     def reference_unit_for(self,expr):
         """
@@ -81,22 +82,21 @@ class UnitRegister(object):
             koq = expr 
             
         if hasattr(koq,'execute'):
-            context = koq.context
-            koq = context._dim_to_koq( 
-                context._evaluate_dimension( koq ) 
+            koq = self.context._dim_to_koq( 
+                self.context._evaluate_dimension( koq ) 
             )
             
         return self._koq_to_unit[koq]        
   
-    def __contains__(self,name):
-        return name in self._name_to_unit 
+    def __contains__(self,name_or_term):
+        return name_or_term in self._name_to_unit 
         
-    def __getitem__(self,name):
-        return self._name_to_unit[name]
+    def __getitem__(self,name_or_term):
+        return self._name_to_unit[name_or_term]
         
-    def get(self,name,default=None):
+    def get(self,name_or_term,default=None):
         # unit name -> unit
-        return self._name_to_unit.get(name,default)
+        return self._name_to_unit.get(name_or_term,default)
             
     def _register_reference_unit(self,unit):
         # key: koq; value: unit
@@ -121,12 +121,11 @@ class UnitRegister(object):
                     self._name_to_unit[unit.name]
                 )
             ) 
-        term = str(unit)
-        if term in self._name_to_unit:
+        if unit.term in self._name_to_unit:
             raise RuntimeError(
                 "The name {!s} registered to {!r}".format(
-                    term,
-                    self._name_to_unit[term]
+                    unit.term,
+                    self._name_to_unit[unit.term]
                 )
             ) 
             
@@ -134,7 +133,7 @@ class UnitRegister(object):
             "{!s} is a reserved name".format(unit.name)
 
         self._name_to_unit[unit.name] = unit
-        self._name_to_unit[term] = unit
+        self._name_to_unit[unit.term] = unit
         self.__dict__[unit.name] = unit 
         
         # # Don't express terms as object attributes 
@@ -145,10 +144,12 @@ class UnitRegister(object):
  
     def unit(self,koq_name,unit_name,unit_term):
         """
-        Create a reference unit in this register for `kind_of_quantity`
-        The unit will be identified by `name`, and abbreviation `term`.
+        Create a reference unit in the register for `koq_name`
+        The unit will be identified by `unit_name`, 
+        and the abbreviation `unit_term`.
+        
         """
-        koq = self._context._koq[koq_name]
+        koq = self.context._koq[koq_name]
         
         # Reference units all have multiplier = 1
         u = Unit(koq,unit_name,unit_term,self,multiplier=1)
