@@ -1,18 +1,22 @@
 from __future__ import division 
 
-__all__ = ( 'KindOfQuantity', )
+__all__ = ( 'KindOfQuantity', 'Numeric' )
 
-# KindOfQuantity and Context are closely linked. Every KindOfQuantity instance
-# is created by a Context and retains a reference to it.  
-# KindOfQuantity objects are only used by Context objects.
-# The Context associates each KoQ object with a Dimension. 
-# I originally thought that KoQ objects could be manipulated by the user, 
-# but this is not now part of the API. However, the Context needs to be 
-# able to map in either direction between dimensions and KoQs, so I am keeping 
-# the classes distinct for the moment. Later one might contain the other.
+# KindOfQuantity is fundamental. 
+# Using a Context, KoQs are associated with dimensions. 
+# There could be different contexts that retain references 
+# to the same KoQ objects. 
 
 #----------------------------------------------------------------------------
 class KindOfQuantity(object):
+
+    """
+    A quantity in the most general sense, 
+    like Mass, Length, etc.
+    
+    When two objects have the same name and short name (term) 
+    they are considered to be the same kind of quantity. 
+    """
 
     def __init__(self,name,term):
         self._name = name 
@@ -21,44 +25,35 @@ class KindOfQuantity(object):
     def __repr__(self):
         return "{!s}({!r},{!r})".format(
             self.__class__.__name__,
-            self._name,
-            self._term
+            self.name,
+            self.term
         )
 
     def __str__(self):
-        return str(self._term)
+        return str(self.term)
 
     def __eq__(self,other):
-        dim_lhs = self.context._koq_to_dim(self)
-        dim_rhs = self.context._koq_to_dim(other)
-        
-        return dim_lhs == dim_rhs        
-
-    @property
-    def context(self):        
-        return self._context 
-        
-    @context.setter
-    def context(self,c):
-        if hasattr(self,'_context'):
-            raise RuntimeError(
-                "Cannot change context setting in {!r}".format(self)
-            )
-        else:
-            self._context = c 
+        return (
+            self.name == other.name 
+        and 
+            self.term == other.term 
+        ) 
         
     @property 
     def name(self):
         return str(self._name) 
         
+    @property 
+    def term(self):
+        return str(self._term) 
+
     def __mul__(self,rhs):
         # NB deliberately don't allow `rhs` to be numeric
         return Mul(self,rhs)
             
     def __rmul__(self,lhs):
         # Assume that the lhs will behave as a number
-        lhs = self._context._koq['Numeric']
-        return Mul(lhs,self)
+        return Mul(Numeric,self)
             
     def __truediv__(self,rhs):
         # NB deliberately don't allow `rhs` to be numeric
@@ -66,8 +61,7 @@ class KindOfQuantity(object):
 
     def __rtruediv__(self,lhs):
         # Assume that lhs behaves like a number
-        lhs = self._context._koq['Numeric']
-        return Div(lhs,self)
+        return Div(Numeric,self)
         
     # def __div__(self,rhs):
         # return KindOfQuantity.__truediv__(self,rhs)
@@ -81,8 +75,7 @@ class KindOfQuantity(object):
 
     def __rfloordiv__(self,lhs):
         # Assume that lhs behaves like a number
-        lhs = self._context._koq['Numeric']
-        return Ratio(lhs,self)
+        return Ratio(Numeric,self)
         
     def simplify(self):
         return Simplify(self)
@@ -96,10 +89,6 @@ class UnaryOp(object):
     def __init__(self,arg):
         self.arg = arg
 
-    @property
-    def context(self):
-        return self.arg.context
-        
     def execute(self,stack,converter):
         if isinstance( self.arg,(BinaryOp,UnaryOp) ):
             self.arg.execute(stack,converter)
@@ -142,14 +131,6 @@ class BinaryOp(object):
 
     # def __rdiv__(self,lhs):
         # return BinaryOp.__rtruediv__(self,lhs)
-
-    @property
-    def context(self):
-        assert self.lhs.context is self.rhs.context,\
-            "Different contexts: {!r}, {!r}".format(
-                self.lhs.context, self.rhs.context
-             )
-        return self.lhs.context
             
     def __floordiv__(self,rhs):
         return Ratio(self,rhs)
@@ -241,3 +222,5 @@ class Ratio(BinaryOp):
         l = stack.pop()
         stack.append( l // r )
 
+#----------------------------------------------------------------------------
+Numeric = KindOfQuantity('Numeric','1')
