@@ -4,7 +4,7 @@ from __future__ import division
 import unittest
 
 from quantity_value.kind_of_quantity import * 
-from quantity_value.unit_system import *
+from quantity_value.unit_register import *
 from quantity_value.quantity import * 
 from quantity_value.metric_prefix import *
 from quantity_value.context import *
@@ -25,7 +25,7 @@ class TestPrefix(unittest.TestCase):
         self.assertAlmostEqual( value, centi.value, 15 )
 
 #----------------------------------------------------------------------------
-class TestQuantity(unittest.TestCase):
+class TestScale(unittest.TestCase):
 
     def test_construction(self):
         Length = KindOfQuantity('Length','L') 
@@ -33,18 +33,18 @@ class TestQuantity(unittest.TestCase):
         name = 'metre'
         symbol = 'm' 
         
-        metre = Quantity(Length,name,symbol)
-        self.assertTrue( type(metre) is Quantity )
+        metre = Scale(Length,name,symbol)
+        self.assertTrue( type(metre) is Scale )
         self.assertEqual( str(metre), symbol )
         self.assertEqual( metre.name, name  )
         
 
 #----------------------------------------------------------------------------
-class TestMetricQuantity(unittest.TestCase):
+class TestMetricScale(unittest.TestCase):
 
     def test_construction(self):
         context = Context( ('Length','L') )
-        SI =  UnitSystem("SI",context)
+        SI =  UnitRegister("SI",context)
 
         Length = 'Length'
         name = 'metre'

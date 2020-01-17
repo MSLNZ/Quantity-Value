@@ -7,7 +7,8 @@ warnings.filterwarnings(
 )
 from bidict import bidict 
 
-from kind_of_quantity import KindOfQuantity
+from kind_of_quantity import KindOfQuantity, Numeric
+
 from dimension import Dimension
 
 #----------------------------------------------------------------------------
@@ -44,10 +45,7 @@ class Context(object):
         dimension = [0] * len(argv)
         
         # Dimensionless case is included by default
-        Numeric = KindOfQuantity('Numeric','1')
-        Numeric.context = self
-        
-        self._koq_dimension[Numeric] = Dimension(dimension)
+        self._koq_dimension[Numeric] = Dimension(self,dimension)
         self._koq.update( {'Numeric':Numeric, '1':Numeric} ) 
         
         for i,koq in enumerate( self._basis ):
@@ -59,12 +57,8 @@ class Context(object):
                     )
                 )
             else:
-                # Every kind of quantity known to the context 
-                # must carry a reference to it.
-                koq.context = self
-                
                 dimension[i] = 1
-                self._koq_dimension[koq] = Dimension(dimension)
+                self._koq_dimension[koq] = Dimension(self,dimension)
                 dimension[i] = 0
         
     def __getitem__(self,name):
@@ -115,7 +109,7 @@ class Context(object):
             )
             
         # Evaluates the KoQ expression using only those KoQ 
-        # objects that have been declared in this context. 
+        # objects that have been declared. 
         expression = eval(expression,{'__builtins__': None},self._koq)
         
         if isinstance(expression,KindOfQuantity):
@@ -131,7 +125,6 @@ class Context(object):
             dim = self._evaluate_dimension(expression)
             
             koq = KindOfQuantity(koq_name,koq_term)
-            koq.context = self
             self._koq_dimension[koq] = dim
             self._koq.update( {koq_name:koq, koq_term:koq} )
                 
@@ -173,7 +166,6 @@ class Context(object):
         
         return dim_lhs.is_ratio_of(dim_rhs)
     
-
         
     # def conversion_from_to(self,ref_unit_1,ref_unit_2,factor):
         # """
