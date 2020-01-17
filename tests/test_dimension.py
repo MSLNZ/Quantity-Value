@@ -30,7 +30,7 @@ class TestDimension(unittest.TestCase):
         
         self.assertEqual( len(context._koq_to_dim(Mass) ), 3 )
         
-        self.assertTrue( Dimension( (0,0,0) ).is_dimensionless )
+        self.assertTrue( Dimension( context, (0,0,0) ).is_dimensionless )
         # Default - always present
         Numeric = context['Numeric']
         self.assertTrue( context._koq_to_dim(Numeric).is_dimensionless )
@@ -63,11 +63,14 @@ class TestDimension(unittest.TestCase):
         self.assertEqual( koq, Length )     
 
     def test_operations(self):
+    
+        context = None 
+        
         t1 = (1,0)
         t2 = (0,1)
         
-        d1 = Dimension( t1 )
-        d2 = Dimension( t2 )
+        d1 = Dimension( context, t1 )
+        d2 = Dimension( context, t2 )
         
         d_add = d1 * d2
         self.assertEqual( (1,1), d_add.numerator ) 
@@ -97,17 +100,19 @@ class TestDimension(unittest.TestCase):
     
         Speed = context.declare('Speed','V','Length/Time')
 
-        self.assertEqual( context._koq_to_dim(Length), Dimension( (1,0) ) )
-        self.assertEqual( context._koq_to_dim(Time), Dimension( (0,1) ) )
-        self.assertEqual( context._koq_to_dim(Speed), Dimension( (1,-1) ) )
+        self.assertEqual( context._koq_to_dim(Length), Dimension( context, (1,0) ) )
+        self.assertEqual( context._koq_to_dim(Time), Dimension( context, (0,1) ) )
+        self.assertEqual( context._koq_to_dim(Speed), Dimension( context, (1,-1) ) )
 
-        self.assertTrue( context._dim_to_koq( Dimension( (1,-1) ) ) is Speed)
-        self.assertTrue( context._dim_to_koq( Dimension( (1,0) ) ) is Length)
+        self.assertTrue( context._dim_to_koq( Dimension( context, (1,-1) ) ) is Speed)
+        self.assertTrue( context._dim_to_koq( Dimension( context, (1,0) ) ) is Length)
 
     def test_as_dict_key(self):
     
+        context = None 
+
         t1 = (1,0)
-        d1 = Dimension( t1 )
+        d1 = Dimension( context, t1 )
         d = {d1:t1}
         self.assertEqual( d[d1], t1 )
 

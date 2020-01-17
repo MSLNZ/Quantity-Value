@@ -29,10 +29,10 @@ class TestContext(unittest.TestCase):
         self.assertEqual( len(context._koq_dimension[Length]), 2 )
         
         d1 = context._koq_to_dim(Length)
-        self.assertEqual( d1, Dimension( (1,0) ) )
+        self.assertEqual( d1, Dimension( context, (1,0) ) )
         
         d2 = context._koq_to_dim(Time)
-        self.assertEqual( d2, Dimension( (0,1) ) )
+        self.assertEqual( d2, Dimension( context, (0,1) ) )
 
         self.assertTrue( Length is context._dim_to_koq( d1 ) ) 
         self.assertTrue( Time is context._dim_to_koq( d2 ) )
@@ -48,7 +48,7 @@ class TestContext(unittest.TestCase):
         
         self.assertTrue( Speed is context['Speed'] )
         self.assertTrue( Speed is context['V'] )
-        self.assertTrue( context._koq_to_dim(Speed) == Dimension( (1,-1), () ) )
+        self.assertTrue( context._koq_to_dim(Speed) == Dimension( context, (1,-1), () ) )
         
         # Multiplication by a number of the left is OK
         self.assertTrue( Speed is context.evaluate('1*Length/Time') )
@@ -59,13 +59,13 @@ class TestContext(unittest.TestCase):
         # Division by by a number on the right is not tolerated
         self.assertRaises( KeyError, context.evaluate,'Length/Time/1' )
  
-        self.assertTrue( Speed is context._dim_to_koq( Dimension( (1,-1) ) ) ) 
-        self.assertEqual( context._koq_to_dim(Speed), Dimension( (1,-1) ) )
+        self.assertTrue( Speed is context._dim_to_koq( Dimension( context, (1,-1) ) ) ) 
+        self.assertEqual( context._koq_to_dim(Speed), Dimension( context, (1,-1) ) )
 
         SpeedRatio = context.declare('SpeedRatio','V/V','Speed//Speed')
 
-        self.assertEqual( context._koq_to_dim(SpeedRatio), Dimension( (1,-1), (1,-1)) )
-        self.assertTrue( SpeedRatio is context._dim_to_koq( Dimension( (1,-1), (1,-1)) ) )
+        self.assertEqual( context._koq_to_dim(SpeedRatio), Dimension( context, (1,-1), (1,-1)) )
+        self.assertTrue( SpeedRatio is context._dim_to_koq( Dimension( context, (1,-1), (1,-1)) ) )
         
         self.assertTrue( context.is_dimensionless('SpeedRatio') )
         self.assertTrue( context.is_ratio_of('SpeedRatio','Speed') )
