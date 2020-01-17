@@ -45,17 +45,31 @@ class TestContext(unittest.TestCase):
         )
         
         Speed = context.declare('Speed','V','Length/Time')
+        
+        self.assertTrue( Speed is context['Speed'] )
+        self.assertTrue( Speed is context['V'] )
+        self.assertTrue( context._koq_to_dim(Speed) == Dimension( (1,-1), () ) )
+        
+        # Multiplication by a number of the left is OK
+        self.assertTrue( Speed is context.evaluate('1*Length/Time') )
+        # Multiplication by a number on the right is not tolerated
+        self.assertRaises( KeyError, context.evaluate,'Length*1/Time' )
+        # Division by a number on the left is OK
+        self.assertTrue( Speed is context.evaluate('Length*(1/Time)') )
+        # Division by by a number on the right is not tolerated
+        self.assertRaises( KeyError, context.evaluate,'Length/Time/1' )
  
         self.assertTrue( Speed is context._dim_to_koq( Dimension( (1,-1) ) ) ) 
         self.assertEqual( context._koq_to_dim(Speed), Dimension( (1,-1) ) )
 
-        SpeedRatio = context.declare('SpeedRatio','V//V','Speed//Speed')
+        SpeedRatio = context.declare('SpeedRatio','V/V','Speed//Speed')
 
         self.assertEqual( context._koq_to_dim(SpeedRatio), Dimension( (1,-1), (1,-1)) )
-        self.assertTrue( SpeedRatio is context._dim_to_koq( Dimension( (1,-1), (1,-1)) ) ) 
-        self.assertTrue( 
-            context._koq_to_dim(SpeedRatio).simplify().is_dimensionless
-        )
+        self.assertTrue( SpeedRatio is context._dim_to_koq( Dimension( (1,-1), (1,-1)) ) )
+        
+        self.assertTrue( context.is_dimensionless('SpeedRatio') )
+        self.assertTrue( context.is_ratio_of('SpeedRatio','Speed') )
+        self.assertTrue( context.is_dimensionless_ratio('SpeedRatio') )
 
     def test_evaluate(self):
 

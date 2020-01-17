@@ -50,9 +50,9 @@ class TestDimension(unittest.TestCase):
         self.assertTrue( context._koq_to_dim(LengthRatio).is_dimensionless_ratio ) 
         self.assertTrue( context._koq_to_dim(LengthRatio).is_ratio_of(context._koq_to_dim(Length)) ) 
 
-        self.assertTrue( LengthRatio.is_dimensionless )
-        self.assertTrue( LengthRatio.is_dimensionless_ratio ) 
-        self.assertTrue( LengthRatio.is_ratio_of(Length) ) 
+        self.assertTrue( context.is_dimensionless('LengthRatio') )
+        self.assertTrue( context.is_dimensionless_ratio('LengthRatio') ) 
+        self.assertTrue( context.is_ratio_of('LengthRatio','Length') ) 
   
         # Although the simplified dimension is that of Length, 
         # the temporary ratio (L*L)/L is not recognised. 
