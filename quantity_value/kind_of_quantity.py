@@ -32,6 +32,10 @@ class KindOfQuantity(object):
     def __str__(self):
         return str(self.term)
 
+    # __hash__ and __eq__ are required for mapping keys
+    def __hash__(self):
+        return hash( ( self.name, self.term ) )
+        
     def __eq__(self,other):
         return (
             self.name == other.name 

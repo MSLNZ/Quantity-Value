@@ -1,6 +1,6 @@
 
 from .kind_of_quantity import *
-from .quantity import *
+from .scale import *
 from .metric_prefix import *
 from .quantity_value import *
 from .unit_register import *

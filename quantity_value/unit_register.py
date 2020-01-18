@@ -10,7 +10,7 @@ from __future__ import division
  
 from fractions import *
 
-from quantity import Unit 
+from scale import Unit 
 
 __all__ = (
     'UnitRegister', 'related_unit', 'metric_unit'
@@ -20,7 +20,7 @@ __all__ = (
 class UnitRegister(object):
 
     """
-    A unit register maps can declare a reference unit for a 
+    A unit register can declare a reference unit for a 
     kind of quantity. Other related units can be declared as 
     a multiple of the reference unit.
     
@@ -100,7 +100,7 @@ class UnitRegister(object):
             
     def _register_reference_unit(self,unit):
         # key: koq; value: unit
-        koq = unit._kind_of_quantity
+        koq = unit.scale.kind_of_quantity
         
         if koq in self._koq_to_unit: 
             if not self._koq_to_unit[koq] is unit:
@@ -114,27 +114,27 @@ class UnitRegister(object):
     def _register_by_name(self,unit):
         # `_name_to_unit` can refer to any units, not just reference ones,
         # provided their names and terms are distinct dictionary keys
-        if unit.name in self._name_to_unit:
+        if unit.scale.name in self._name_to_unit:
             raise RuntimeError(
                 "The name {!s} registered to {!r}".format(
-                    unit.name,
-                    self._name_to_unit[unit.name]
+                    unit.scale.name,
+                    self._name_to_unit[unit.scale.name]
                 )
             ) 
-        if unit.term in self._name_to_unit:
+        if unit.scale.term in self._name_to_unit:
             raise RuntimeError(
                 "The name {!s} registered to {!r}".format(
-                    unit.term,
-                    self._name_to_unit[unit.term]
+                    unit.scale.term,
+                    self._name_to_unit[unit.scale.term]
                 )
             ) 
             
-        assert not unit.name in self.__dict__,\
-            "{!s} is a reserved name".format(unit.name)
+        assert not unit.scale.name in self.__dict__,\
+            "{!s} is a reserved name".format(unit.scale.name)
 
-        self._name_to_unit[unit.name] = unit
-        self._name_to_unit[unit.term] = unit
-        self.__dict__[unit.name] = unit 
+        self._name_to_unit[unit.scale.name] = unit
+        self._name_to_unit[unit.scale.term] = unit
+        self.__dict__[unit.scale.name] = unit 
         
         # # Don't express terms as object attributes 
         # # because they usually aren't valid identifiers 
@@ -161,14 +161,14 @@ class UnitRegister(object):
         """
         Return a multiplier to convert from `source_unit` to `target_unit`
         """
-        assert source_unit.name in self,\
+        assert source_unit.scale.name in self,\
             "{!r} is not registered".format(source_unit)
             
-        assert target_unit.name in self,\
+        assert target_unit.scale.name in self,\
             "{!r} is not registered".format(target_unit)
             
-        src_koq = source_unit._kind_of_quantity
-        dst_koq = target_unit._kind_of_quantity
+        src_koq = source_unit.scale.kind_of_quantity
+        dst_koq = target_unit.scale.kind_of_quantity
         if not src_koq is dst_koq:
             raise RuntimeError(
                 "{} and {} are different kinds of quantity".format(
@@ -190,12 +190,12 @@ def related_unit(unit,fraction,name,term):
     reference unit for the same quantity.
     
     """
-    kind_of_quantity = unit._kind_of_quantity
+    kind_of_quantity = unit.scale.kind_of_quantity
     register = unit._register 
 
-    if not unit is register.reference_unit_for(unit.kind_of_quantity):
+    if not unit is register.reference_unit_for(unit.scale.kind_of_quantity):
         raise RuntimeError(
-            "{!r} is not a reference unit".format(unit.name)  
+            "{!r} is not a reference unit".format(unit.scale.name)  
         )     
 
     if name in register:
@@ -219,19 +219,19 @@ def metric_unit(prefix,unit):
     reference unit for the same quantity.
     
     """
-    kind_of_quantity = unit._kind_of_quantity
+    kind_of_quantity = unit.scale.kind_of_quantity
     register = unit._register 
 
     # Check that `self` is a reference unit in the register,
     # because things like `centi(centi(metre))` are not permitted.
-    if not unit is register.reference_unit_for(unit.kind_of_quantity):
+    if not unit is register.reference_unit_for(unit.scale.kind_of_quantity):
         raise RuntimeError(
-            "{!r} is not a reference unit".format(unit.name)  
+            "{!r} is not a reference unit".format(unit.scale.name)  
         )     
 
     name = "{!s}{!s}".format(
         prefix.name,
-        unit.name
+        unit.scale.name
     )
     
     if name in register:
@@ -239,7 +239,7 @@ def metric_unit(prefix,unit):
     else:
         term = "{!s}{!s}".format(
             prefix.term,
-            unit
+            unit.scale
         )
         
         pq = Unit(

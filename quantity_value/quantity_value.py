@@ -1,6 +1,6 @@
 from __future__ import division 
 
-from quantity import Unit
+from scale import Unit
 
 #----------------------------------------------------------------------------
 #
@@ -51,7 +51,7 @@ class ValueUnit(object):
         if lhs.unit is rhs.unit:
             return ValueUnit( lhs.value + rhs.value, lhs.unit )
          
-        if lhs.unit.kind_of_quantity is rhs.unit.kind_of_quantity:
+        if lhs.unit.scale.kind_of_quantity is rhs.unit.scale.kind_of_quantity:
             ml = lhs.unit.multiplier
             mr = rhs.unit.multiplier 
             if ml < mr:
@@ -61,13 +61,13 @@ class ValueUnit(object):
         else:
             raise RuntimeError(
                 "Different kinds of quantity: {}, {}".format(
-                    lhs.unit.kind_of_quantity,rhs.unit.kind_of_quantity)
+                    lhs.unit.scale.kind_of_quantity,rhs.unit.scale.kind_of_quantity)
             )    
 
     def __radd__(self,lhs):
         rhs = self
         # Can add numbers to numeric QVs
-        if rhs.unit.kind_of_quantity is Numeric:
+        if rhs.unit.scale.kind_of_quantity is Numeric:
             return ValueUnit( lhs + rhs.value, rhs.unit )
         else:
             return NotImplemented
@@ -90,7 +90,7 @@ class ValueUnit(object):
         if lhs.unit is rhs.unit:
             return ValueUnit( lhs.value - rhs.value, lhs.unit )
             
-        if lhs.unit.kind_of_quantity is rhs.unit.kind_of_quantity:
+        if lhs.unit.scale.kind_of_quantity is rhs.unit.scale.kind_of_quantity:
         
             ml = lhs.unit.multiplier
             mr = rhs.unit.multiplier 
@@ -101,13 +101,13 @@ class ValueUnit(object):
         else:
             raise RuntimeError(
                 "Different kinds of quantity: {}, {}".format(
-                    lhs.unit.kind_of_quantity,rhs.unit.kind_of_quantity)
+                    lhs.unit.scale.kind_of_quantity,rhs.unit.scale.kind_of_quantity)
             )    
   
     def __rsub__(self,lhs):
         rhs = self
         # Can subtract numeric QVs from numbers
-        if rhs.unit.kind_of_quantity is Numeric:
+        if rhs.unit.scale.kind_of_quantity is Numeric:
             return ValueUnit( lhs - rhs.value, rhs.unit )
         else:
             return NotImplemented
@@ -256,7 +256,7 @@ def qresult(
         else:
             ref_unit = value_unit.unit.reference_unit()
                 
-        if unit.kind_of_quantity != ref_unit.kind_of_quantity:
+        if unit.scale.kind_of_quantity != ref_unit.scale.kind_of_quantity:
             raise RuntimeError(
                 "{} are incompatible with {}".format(
                     unit,
@@ -300,8 +300,8 @@ def qratio(value_unit_1, value_unit_2, unit=None ):
     """
     # Return a qvalue with units that are appropriate for the ratio
     
-    koq_1 = value_unit_1.unit.reference_unit().kind_of_quantity 
-    koq_2 = value_unit_2.unit.reference_unit().kind_of_quantity 
+    koq_1 = value_unit_1.unit.reference_unit().scale.kind_of_quantity 
+    koq_2 = value_unit_2.unit.reference_unit().scale.kind_of_quantity 
     
     if koq_1 != koq_2:
         raise RuntimeError(
@@ -310,10 +310,10 @@ def qratio(value_unit_1, value_unit_2, unit=None ):
             )
         )
     
-    if unit and koq_1 != unit.kind_of_quantity:
+    if unit and koq_1 != unit.scale.kind_of_quantity:
         raise RuntimeError(
             "Different kinds of quantity: {} and {}".format(
-                koq_1, unit.kind_of_quantity
+                koq_1, unit.scale.kind_of_quantity
             )
         )
    
