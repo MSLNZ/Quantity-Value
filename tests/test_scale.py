@@ -5,7 +5,7 @@ import unittest
 
 from quantity_value.kind_of_quantity import * 
 from quantity_value.unit_register import *
-from quantity_value.quantity import * 
+from quantity_value.scale import * 
 from quantity_value.metric_prefix import *
 from quantity_value.context import *
 
@@ -52,14 +52,14 @@ class TestMetricScale(unittest.TestCase):
         metre = SI.unit(Length,name,symbol)  
 
         self.assertTrue( type(metre) is Unit )
-        self.assertEqual( str(metre), symbol )
-        self.assertEqual( metre.name, name  )
+        self.assertEqual( str(metre.scale), symbol )
+        self.assertEqual( metre.scale.name, name  )
 
         centimetre = centi( metre )
 
         self.assertTrue( isinstance(centimetre,Unit) )
-        self.assertEqual( str(centimetre), 'cm' )
-        self.assertEqual( centimetre.name, 'centimetre' )
+        self.assertEqual( str(centimetre.scale), 'cm' )
+        self.assertEqual( centimetre.scale.name, 'centimetre' )
         
         # Don't create a new object each time you change prefix
         centimetre_2 = centi( metre )

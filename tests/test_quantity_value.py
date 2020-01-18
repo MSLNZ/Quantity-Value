@@ -4,8 +4,8 @@ from __future__ import division
 import unittest
 
 from quantity_value.kind_of_quantity import * 
-from quantity_value.unit_system import *
-from quantity_value.quantity import * 
+from quantity_value.unit_register import *
+from quantity_value.scale import * 
 from quantity_value.metric_prefix import *
 from quantity_value.context import *
 from quantity_value.quantity_value import *
@@ -15,7 +15,7 @@ class TestQuantityValue(unittest.TestCase):
 
     def test_construction(self):
         context = Context( ('Length','L') )
-        SIUnits =  UnitSystem("SI",context)
+        SIUnits =  UnitRegister("SI",context)
         Length = 'Length'
         metre = SIUnits.unit(Length,'metre','m')
         
@@ -29,7 +29,7 @@ class TestQuantityValue(unittest.TestCase):
     def test_simple_addition_subtraction(self):
         
         context = Context( ('Length','L') )
-        SI =  UnitSystem("SI",context)
+        SI =  UnitRegister("SI",context)
         Length = 'Length'
         
         metre = SI.unit(Length,'metre','m')
@@ -60,7 +60,7 @@ class TestQuantityValue(unittest.TestCase):
         self.assertTrue( vu.unit is centi(metre) )
 
         # Illegal case 
-        Imperial = UnitSystem("Imperial",context)
+        Imperial = UnitRegister("Imperial",context)
         foot = Imperial.unit(Length,'foot','ft')
         qv3 = ValueUnit(x1,foot)
         
