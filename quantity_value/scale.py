@@ -2,8 +2,7 @@ from __future__ import division
 import numbers 
  
 __all__ = (
-    'Scale',
-    'Unit',
+    'Scale', 'Unit',
 )
 #----------------------------------------------------------------------------
 class Scale(object):
@@ -26,6 +25,10 @@ class Scale(object):
             self.name,
             self.term
         )
+        
+    # __hash__ and __eq__ are required for mapping keys
+    def __hash__(self):
+        return hash( ( self.name, self.term ) )
         
     def __eq__(self,other):
         return (
@@ -53,7 +56,7 @@ class Scale(object):
 # A Scale (correctly) does not refer to a register but the implementation 
 # of Unit would be awkward without such a reference. Unit is therefore 
 # really part of the implementation of the unit register. 
-class Unit(Scale):
+class Unit(object):
 
     """
     A Unit is a Quantity associated with a register of units.  
@@ -65,8 +68,8 @@ class Unit(Scale):
     """
 
     def __init__(self,kind_of_quantity,name,term,register,multiplier):
-        super(Unit,self).__init__(kind_of_quantity,name,term)
-        
+        self._scale = Scale(kind_of_quantity,name,term)
+        self._kind_of_quantity = self._scale.kind_of_quantity
         self._register = register
         self._multiplier = multiplier   
         
@@ -74,6 +77,14 @@ class Unit(Scale):
     # A unit with multiplier of unity is the reference unit.
     # It is perhaps better to hold the multipliers in the unit register?
     
+    @property 
+    def scale(self):
+        return self._scale 
+
+    @property 
+    def kind_of_quantity(self):  
+        return self._kind_of_quantity
+
     @property 
     def multiplier(self):
         try:
@@ -94,12 +105,15 @@ class Unit(Scale):
                 "Unit register is assigned: {}".format(self.register)
             )
         
+    def __str__(self):
+        return "{!s}".format(self.scale)
+        
     def __repr__(self):
         return "{!s}({!r},{!r},{!r},{!r})".format(
             self.__class__.__name__,
             self.kind_of_quantity,
-            self.name,
-            self.term,
+            self.scale.name,
+            self.scale.term,
             self._register
         )     
 
