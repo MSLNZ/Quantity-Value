@@ -8,9 +8,8 @@ __all__ = (
 class Scale(object):
 
     """
-    A Scale is used in the measurement of a specific quantity,  
-    for example, the metre is the SI scale for measurement 
-    of specific lengths.   
+    A Scale is used to represent the measurement of a specific quantity,  
+    for example, the metre is the SI scale for measurement of lengths.   
     """
     
     def __init__(self,kind_of_quantity,name,term):
@@ -53,18 +52,15 @@ class Scale(object):
         return self._kind_of_quantity
   
 #----------------------------------------------------------------------------
-# A Scale (correctly) does not refer to a register but the implementation 
+# A Scale (correctly) does not refer to a register, but the implementation 
 # of Unit would be awkward without such a reference. Unit is therefore 
-# really part of the implementation of the unit register. 
+# really part of the implementation of the UnitRegister. 
 class Unit(object):
 
     """
-    A Unit is a Quantity associated with a register of units.  
-    For instance, the metre is the scale for length in the SI.  
-    
-    Mathematical operations are defined among Unit objects.
-    The semantics of these operations depends on the
-    same operations applied to the corresponding kinds of quantity.
+    A Unit is associated with a :class:`Scale` and a :class:`.UnitRegister`. 
+    Units represent measurement units in the common sense. Such as 
+    the metre is the unit of length in the SI.  
     """
 
     def __init__(self,kind_of_quantity,name,term,register,multiplier):

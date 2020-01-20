@@ -7,14 +7,14 @@ except ImportError:
 class Dimension(object):
 
     """
-    Dimension holds a set of dimensional exponents. 
+    A Dimension keeps track of dimensional exponents. 
     
-    To allow interpretation of dimensions a Context is required (the 
-    Context holds 1-to-1 mappings between dimensions and kinds of quantity)
+    Multiplication and division of dimensions adds and subtracts their 
+    exponents, respectively. There is also provision to retain the  
+    dimension of 'dimensionless' quantities as a ratio.
     
-    Multiplication and division of Dimensions adds and subtracts dimensional 
-    exponents. There is also provision made to retain the dimension 
-    of 'dimensionless' quantities as a ratio.
+    A Dimension always refers to a :class:`.Context`, which has 
+    a 1-to-1 mapping between dimensions and kinds of quantity.
     """
     
     def __init__(self,context,numerator,denominator=()):

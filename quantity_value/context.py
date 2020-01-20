@@ -15,10 +15,10 @@ from dimension import Dimension
 class Context(object):
 
     """
-    A Context keeps a register of KindOfQuantity instances,
+    A Context keeps a register of :class:`.KindOfQuantity` instances,
     and associates each instance with a unique dimension.
     
-    A Context may be used to look up a KindOfQuantity by
+    A Context may be used to look up a kind of quantity by
     name or by short-name (term).
     
     A Context is initialised by defining a set of 'independent' 
@@ -150,14 +150,22 @@ class Context(object):
             )
 
     def is_dimensionless(self,koq_name):
+        """
+        True when ``koq_name`` is dimensionless
+        
+        """
         return self._koq_to_dim(self[koq_name]).is_dimensionless
 
     def is_dimensionless_ratio(self,koq_name):
+        """
+        True when ``koq_name`` is a a dimensionless ratio
+        
+        """
         return self._koq_to_dim(self[koq_name]).is_dimensionless_ratio
         
     def is_ratio_of(self,koq_ratio_name,koq_name):
         """
-        Return True when `koq` has the same dimensions as 
+        Return True when ``koq_name`` has the same dimensions as 
         the numerator and denominator of `koq_ratio`.
         
         """

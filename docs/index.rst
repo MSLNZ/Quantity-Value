@@ -3,21 +3,11 @@ Quantity-Value
 ==============
 
 
-Release Notes
--------------
 .. toctree::
-   :maxdepth: 2
 
     License <license>
-    Authors <authors>
-    Change Log <changelog>
-
-Guide
------
-.. toctree::
-   :maxdepth: 2
-
     Introduction <introduction>
+    Modules <modules>
 
 Indices and tables
 ==================
