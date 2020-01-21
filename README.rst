@@ -2,12 +2,12 @@
 Quantity-Value
 ==============
 
-The Quantity-Value package provides support for physical quantities in Python code. It can be used to enforce quantity-correctness in mathematical equations containing terms that represent physical quantities. 
+This package provides Python support for physical quantities used in mathematical equations. It ensures that the rules of quantity calculus are followed rigorously. 
 
 Status
 ======
 
-The Quantity-Value package is a proof-of-concept output of research into Data Metrology at MSL. The implementation is incomplete and exploratory at this stage and may undergo substantial change.
+The Quantity-Value package is part of a research project looking at Digital Metrology. The implementation is not yet stable and may undergo substantial change.
 
 
 
