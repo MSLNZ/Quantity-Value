@@ -1,9 +1,8 @@
 from __future__ import division 
 import numbers 
  
-__all__ = (
-    'Scale', 'Unit',
-)
+__all__ = ( 'Scale', 'Unit', )
+
 #----------------------------------------------------------------------------
 class Scale(object):
 
@@ -320,3 +319,8 @@ class Div(BinaryOp):
     def multiplier(self):
         return self.lhs.multiplier / self.rhs.multiplier
 
+# ===========================================================================    
+if __name__ == "__main__":
+    import doctest
+    from QV import *
+    doctest.testmod(  optionflags= doctest.NORMALIZE_WHITESPACE | doctest.ELLIPSIS  )

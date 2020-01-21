@@ -11,10 +11,10 @@ When using the package, the first task is to select a set of base dimensions. Th
 
 For instance, the basis :math:`LT` (distance and duration) may be used for a straight-line kinematics problems. Other kinds of quantity are then declared in terms of this basis, for example the dimensions of speed are :math:`LT^{-1}`. ::
 
-    from quantity_value import *
+    from QV import *
     
     context = Context( ("Length","L"),("Time","T") )
-    Speed = context.declare('Speed','V','Length/Time')
+    context.declare('Speed','V','Length/Time')
 
 Here, the object ``context`` maintains one-to-one relationships between the names, and short symbols, of kinds of quantities and the dimensions associated with measurements of them. So, after the declaration of speed, ``context`` will not allow any other quantity with the same dimensions to be declared. 
 

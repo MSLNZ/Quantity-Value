@@ -10,7 +10,7 @@ from __future__ import division
  
 from fractions import *
 
-from .scale import Unit 
+from QV.scale import Unit 
 
 __all__ = (
     'UnitRegister', 'related_unit', 'metric_unit'
@@ -257,3 +257,9 @@ def metric_unit(prefix,reference_unit):
         register._register_by_name(pq)
         
         return pq 
+        
+# ===========================================================================    
+if __name__ == "__main__":
+    import doctest
+    from QV import *
+    doctest.testmod(  optionflags= doctest.NORMALIZE_WHITESPACE | doctest.ELLIPSIS  )

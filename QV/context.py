@@ -7,9 +7,8 @@ warnings.filterwarnings(
 )
 from bidict import bidict 
 
-from .kind_of_quantity import KindOfQuantity, Numeric
-
-from .dimension import Dimension
+from QV.kind_of_quantity import KindOfQuantity, Numeric
+from QV.dimension import Dimension
 
 #----------------------------------------------------------------------------
 class Context(object):
@@ -23,6 +22,13 @@ class Context(object):
     Other kinds of quantity can be declared as products  
     and quotients of this basis. Only derived quantities 
     with unique dimensions are permitted.
+        
+    Example::
+
+        >>> context = Context( ("Length","L"),("Time","T") )
+        >>> context.declare('Speed','V','Length/Time') 
+        KindOfQuantity('Speed','V')
+        
     """
     
     def __init__(self,*argv):
@@ -201,4 +207,9 @@ class Context(object):
             # "{} and {} are different quantities".format(koq_1,koq_2)
 
         # return self._conversion_factors[(ref_unit_1,ref_unit_2)]
-        
+   
+# ===========================================================================    
+if __name__ == "__main__":
+    import doctest
+    from QV import *
+    doctest.testmod(  optionflags= doctest.NORMALIZE_WHITESPACE | doctest.ELLIPSIS  )

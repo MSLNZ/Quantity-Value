@@ -224,3 +224,9 @@ class Ratio(BinaryOp):
 
 #----------------------------------------------------------------------------
 Numeric = KindOfQuantity('Numeric','1')
+
+# ===========================================================================    
+if __name__ == "__main__":
+    import doctest
+    from QV import *
+    doctest.testmod(  optionflags= doctest.NORMALIZE_WHITESPACE | doctest.ELLIPSIS  )

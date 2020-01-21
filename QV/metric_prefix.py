@@ -1,4 +1,4 @@
-from .unit_register import metric_unit
+from QV.unit_register import metric_unit
 
 #----------------------------------------------------------------------------
 class MetricPrefix(object):

@@ -1,6 +1,6 @@
 from __future__ import division 
 
-from .scale import Unit
+from QV.scale import Unit
 
 __all__ = ('qvalue','value','unit','qresult','qratio')
 
@@ -351,4 +351,8 @@ def qratio(value_unit_1, value_unit_2, unit=None ):
             (value_unit_1.unit//value_unit_2.unit).reference_unit()
         )
     
-    
+# ===========================================================================    
+if __name__ == "__main__":
+    import doctest
+    from QV import *
+    doctest.testmod(  optionflags= doctest.NORMALIZE_WHITESPACE | doctest.ELLIPSIS  )    
