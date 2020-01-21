@@ -9,7 +9,7 @@ if sys.version_info[:2] == (2, 7):
     install_requires = ['bidict<=0.18']
     tests_require.extend(['zipp<2.0.0','pytest>=3.0,<5.0'])
 else:
-    install_requires = ['bidict>=1.18']
+    install_requires = ['bidict>=0.18']
     tests_require.append('pytest>=3.0')
 
 
