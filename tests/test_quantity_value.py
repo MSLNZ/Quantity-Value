@@ -3,12 +3,9 @@ from __future__ import division
 
 import unittest
 
-from quantity_value.kind_of_quantity import * 
-from quantity_value.unit_register import *
-from quantity_value.scale import * 
+from quantity_value import * 
 from quantity_value.metric_prefix import *
-from quantity_value.context import *
-from quantity_value.quantity_value import *
+from quantity_value.quantity_value import ValueUnit
 
 #----------------------------------------------------------------------------
 class TestQuantityValue(unittest.TestCase):
@@ -20,7 +17,7 @@ class TestQuantityValue(unittest.TestCase):
         metre = SIUnits.unit(Length,'metre','m')
         
         x = 1.234
-        vu = ValueUnit(x,metre)
+        vu = qvalue(x,metre)
         
         self.assertTrue( isinstance(vu,ValueUnit) )
         self.assertTrue( unit(vu) is metre )
@@ -37,8 +34,8 @@ class TestQuantityValue(unittest.TestCase):
         x1 = 1.2 
         x2 = 3.4 
         
-        qv1 = ValueUnit(x1,metre)
-        qv2 = ValueUnit(x2,metre)
+        qv1 = qvalue(x1,metre)
+        qv2 = qvalue(x2,metre)
         
         vu = qv1 + qv2 
         self.assertAlmostEqual( vu.value, x1 + x2, 15 )       
@@ -49,7 +46,7 @@ class TestQuantityValue(unittest.TestCase):
         self.assertTrue( vu.unit is metre )
         
         # When the units have different prefixes
-        qv2 = ValueUnit(x2,centi(metre))
+        qv2 = qvalue(x2,centi(metre))
         vu = qv1 + qv2 
         # The result will be expressed in the lesser of the units 
         self.assertAlmostEqual( value(vu), x1*100 + x2, 15 )       
@@ -62,7 +59,7 @@ class TestQuantityValue(unittest.TestCase):
         # Illegal case 
         Imperial = UnitRegister("Imperial",context)
         foot = Imperial.unit(Length,'foot','ft')
-        qv3 = ValueUnit(x1,foot)
+        qv3 = qvalue(x1,foot)
         
         # When QVs use different systems of units,  
         # addition and subtraction is not permitted
