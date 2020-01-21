@@ -2,17 +2,16 @@ from __future__ import division
 
 from scale import Unit
 
+__all__ = ('qvalue','value','unit','qresult','qratio')
+
 #----------------------------------------------------------------------------
 #
 class ValueUnit(object):
     """
-    A ValueUnit pairs a number and a unit.
-    The unit must be associated with a register of units.
-    Arithmetic expressions involving ValueUnit objects 
-    apply the rules of quantity calculus to the associated units.
-    In general, this will create a temporary object representing 
-    the unit expression, which must be explicitly resolved to the 
-    corresponding unit in the unit register.
+    A number and an associated unit.
+    
+    A ``ValueUnit`` class is intended to represent the notion of a
+    quantity value, as that term is used formally in metrology.
     """
     __slots__ = ("value", "unit")
     
@@ -20,6 +19,8 @@ class ValueUnit(object):
         self.value = value     
         self.unit = unit
         
+    # We want the object to appear to be ``qvalue``,
+    # because that is how we would create such an object.
     def __repr__(self):
         return "{!s}({!r},{!r})".format(
             'qvalue',
@@ -34,19 +35,26 @@ class ValueUnit(object):
         )
         
     def __add__(self,rhs):  
-        lhs = self         
-        if not lhs.unit.register is rhs.unit.register:
+        lhs = self  
+        register = lhs.unit.register
+        if not register is rhs.unit.register:
             raise RuntimeError("Different unit systems: {}, {}".format(
-                lhs.unit.register, rhs.unit.register)
+                register, rhs.unit.register)
             )
             
         if not isinstance(lhs.unit,Unit):
             # Must resolve the unit before proceeding
-            lhs = ValueUnit( lhs.unit.multiplier*self.value, lhs.unit.reference_unit() ) 
+            lhs = ValueUnit( 
+                lhs.unit.multiplier*self.value, 
+                register.reference_unit_for( lhs.unit ) 
+            ) 
         
         if not isinstance(rhs.unit,Unit):
             # Must resolve the unit before proceeding
-            rhs = ValueUnit( rhs.unit.multiplier*rhs.value, rhs.unit.reference_unit() ) 
+            rhs = ValueUnit( 
+                rhs.unit.multiplier*rhs.value, 
+                register.reference_unit_for( rhs.unit ) 
+        ) 
             
         if lhs.unit is rhs.unit:
             return ValueUnit( lhs.value + rhs.value, lhs.unit )
@@ -74,18 +82,25 @@ class ValueUnit(object):
   
     def __sub__(self,rhs):
         lhs = self
-        if not lhs.unit.register is rhs.unit.register:
+        register = lhs.unit.register
+        if not register is rhs.unit.register:
             raise RuntimeError("Different unit systems: {}, {}".format(
-                lhs.unit.register, rhs.unit.register)
+                register, rhs.unit.register)
             )
             
         if not isinstance(lhs.unit,Unit):
             # Must resolve the unit before proceeding
-            lhs = ValueUnit( lhs.unit.multiplier*self.value, lhs.unit.reference_unit() ) 
+            lhs = ValueUnit( 
+                lhs.unit.multiplier*self.value, 
+                register.reference_unit_for( lhs.unit ) 
+            ) 
         
         if not isinstance(rhs.unit,Unit):
             # Must resolve the unit before proceeding
-            rhs = ValueUnit( rhs.unit.multiplier*rhs.value, rhs.unit.reference_unit() ) 
+            rhs = ValueUnit( 
+                rhs.unit.multiplier*rhs.value, 
+                register.reference_unit_for( rhs.unit ) 
+            ) 
         
         if lhs.unit is rhs.unit:
             return ValueUnit( lhs.value - rhs.value, lhs.unit )
@@ -164,32 +179,7 @@ class ValueUnit(object):
             lhs / rhs.value, 
             rhs.unit.register.unity / rhs.unit
         )
-        
-    # def __floordiv__(self,rhs):
-        # lhs = self 
-        # if hasattr(rhs,'unit'):          
-            # if not lhs.unit.register is rhs.unit.register:
-                # raise RuntimeError("operation requires the same unit register")
-
-            # return ValueUnit(
-                # lhs.value / rhs.value,
-                # lhs.unit // rhs.unit
-            # )
-        # else:
-            # # Assume that the `rhs` behaves as a number 
-            # return ValueUnit(
-                # lhs.value / rhs, 
-                # lhs.unit // lhs.unit.register.unity 
-            # )
-
-    # def __rfloordiv__(self,lhs):
-        # rhs = self 
-        # # Assume that the `lhs` behaves as a number 
-        # return ValueUnit(
-            # lhs.value / rhs.value, 
-            # rhs.unit.register.unity // rhs.unit   
-        # )
-        
+                
     # # Python 2.x backward compatibility
     # def __div__(self,rhs):
         # return ValueUnit.__truediv__(self,rhs)
@@ -203,19 +193,34 @@ class ValueUnit(object):
         
 #----------------------------------------------------------------------------
 def qvalue(value,unit):
+    """
+    Create a new quantity value object.
+    
+    ``value`` is the measure,
+    ``unit`` is the measurement scale
+    
+    """
     return ValueUnit(value,unit)
     
 #----------------------------------------------------------------------------
-def value(vu):
+def value(quantity_value):
+    """
+    Return the value of a quantity value object.
+    
+    """
     try:
-        return vu.value 
+        return quantity_value.value 
     except AttributeError:
-        return vu 
+        return quantity_value 
 
 #----------------------------------------------------------------------------
-def unit(vu):
+def unit(quantity_value):
+    """
+    Return the measurement unit (scale) of a quantity value object.
+    
+    """
     try:
-        return vu.unit 
+        return quantity_value.unit 
     except AttributeError:
         # TODO: This must be interpreted as being  
         # equivalent to `unity`, the Numeric unit.
@@ -231,30 +236,32 @@ def qresult(
     **kwarg
     ):
     """
-    Return a `qvalue`.
+    Return a ``qvalue``.
     
-    `unit` may be the name of a unit, or a unit object. The measure will be 
-    converted to this unit.
+    ``value_unit`` is a ``qvalue`` object or expression of ``qvalue`` objects. 
     
-    `simplify` controls when the unit dimensions will be simplified.
     
-    If no `unit` is given the measure will be converted to the reference 
-    unit of the register. 
+    If a ``unit`` is supplied it will be used to report the measure. If  
+    not the measure will be converted to the reference unit.
     
-    A function `value_result` can be supplied 
-    to apply a final processing to the value.
+    If ``simplify`` is ``True`` the unit dimensions will be simplified.
+    
+    A ``value_result`` function can be applied 
+    to the value as a final processing step.
     """
     if unit:
         # Use a preferred unit 
-
+        register = value_unit.unit.register
         if isinstance(unit,str):
             # `unit` is the name of a unit, so look up the object
-            unit = value_unit.unit.register[unit]
+            unit = register[unit]
             
         if simplify:
-            ref_unit = value_unit.unit.simplify().reference_unit() 
+            ref_unit = register.reference_unit_for( 
+                value_unit.unit.simplify() 
+            ) 
         else:
-            ref_unit = value_unit.unit.reference_unit()
+            ref_unit = register.reference_unit_for( value_unit.unit )
                 
         if unit.scale.kind_of_quantity != ref_unit.scale.kind_of_quantity:
             raise RuntimeError(
@@ -275,10 +282,13 @@ def qresult(
         )
     else:
         if simplify:
-            unit = value_unit.unit.simplify().reference_unit() 
+            unit = value_unit.unit.simplify()
         else:
-            unit = value_unit.unit.reference_unit()
+            unit = value_unit.unit
             
+        register = value_unit.unit.register 
+        unit = register.reference_unit_for( unit )
+        
         return ValueUnit( 
             value_result(
                 value_unit.unit.multiplier*value_unit.value, 
@@ -291,17 +301,20 @@ def qresult(
 #----------------------------------------------------------------------------
 def qratio(value_unit_1, value_unit_2, unit=None ):
     """
-    Return a quantity-value for the ratio keeping the dimensions 
-    of the numerator and denominator separate.
+    Return a quantity value for ``value_unit_1/value_unit_2``  keeping   
+    while the dimensions of the numerator and denominator separate.
 
-    If no `unit` is given the ratio will be converted to the reference 
-    unit of the register. 
+    If no ``unit`` is supplied the reference unit is used. 
 
     """
-    # Return a qvalue with units that are appropriate for the ratio
+    register = value_unit_1.unit.register 
+    if not register is value_unit_1.unit.register :
+        raise RuntimeError("Different unit systems: {}, {}".format(
+            register, value_unit_1.unit.register)
+        )
     
-    koq_1 = value_unit_1.unit.reference_unit().scale.kind_of_quantity 
-    koq_2 = value_unit_2.unit.reference_unit().scale.kind_of_quantity 
+    koq_1 = register.reference_unit_for( value_unit_1 ).scale.kind_of_quantity 
+    koq_2 = register.reference_unit_for( value_unit_2 ).scale.kind_of_quantity 
     
     if koq_1 != koq_2:
         raise RuntimeError(

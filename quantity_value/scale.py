@@ -8,8 +8,12 @@ __all__ = (
 class Scale(object):
 
     """
-    A Scale is used to represent the measurement of a specific quantity,  
+    The measurement of a specific quantity must be represented on a scale,  
     for example, the metre is the SI scale for measurement of lengths.   
+        
+    The Scale class defines a name (and a short name or term) for a scale 
+    and contains a reference to the kind of quantity associated with 
+    measurements.
     """
     
     def __init__(self,kind_of_quantity,name,term):
@@ -58,9 +62,12 @@ class Scale(object):
 class Unit(object):
 
     """
-    A Unit is associated with a :class:`Scale` and a :class:`.UnitRegister`. 
-    Units represent measurement units in the common sense. Such as 
-    the metre is the unit of length in the SI.  
+    A Unit represents a measurement scale, such as the metre 
+    is the unit of length in the SI (length measured on the 
+    metre scale). 
+    
+    A Unit class will be associated with a :class:`Scale` 
+    and a :class:`.UnitRegister`.       
     """
 
     def __init__(self,kind_of_quantity,name,term,register,multiplier):
@@ -138,16 +145,16 @@ class Unit(object):
     def simplify(self):
         return Simplify(self)
 
-    def reference_unit(self):
-        """
-        Return the reference unit
+    # def reference_unit(self):
+        # """
+        # Return the reference unit
 
-        There can be only one reference unit in a register for each 
-        kind of quantity, but there can be many other related units,
-        which are multiples of the reference.
+        # There can be only one reference unit in a register for each 
+        # kind of quantity, but there can be many other related units,
+        # which are multiples of the reference.
         
-        """
-        return self.register.reference_unit_for( self.kind_of_quantity ) 
+        # """
+        # return self.register.reference_unit_for( self.kind_of_quantity ) 
 
 #----------------------------------------------------------------------------
 # The following classes support simple manipulation of units by
@@ -186,8 +193,8 @@ class UnaryOp(object):
     def simplify(self):
         return Simplify(self)
 
-    def reference_unit(self):
-        return self.register.reference_unit_for( self.kind_of_quantity ) 
+    # def reference_unit(self):
+        # return self.register.reference_unit_for( self.kind_of_quantity ) 
     
 #----------------------------------------------------------------------------
 class BinaryOp(object):   
@@ -221,8 +228,8 @@ class BinaryOp(object):
     def simplify(self):
         return Simplify(self)
 
-    def reference_unit(self):
-        return self.register.reference_unit_for( self.kind_of_quantity ) 
+    # def reference_unit(self):
+        # return self.register.reference_unit_for( self.kind_of_quantity ) 
 
 #----------------------------------------------------------------------------
 #
@@ -244,7 +251,7 @@ class Simplify(UnaryOp):
            
     @property 
     def kind_of_quantity(self):  
-        return self.arg.kind_of_quantity.simplify()
+        return self.arg.kind_of_quantity._simplify()
         
     @property 
     def multiplier(self):

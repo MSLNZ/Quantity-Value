@@ -20,16 +20,17 @@ __all__ = (
 class UnitRegister(object):
 
     """
-    A unit register can declare a reference unit for a 
-    kind of quantity. Other related units can be declared as 
-    a multiple of the reference unit.
+    A UnitRegister maintains references between kinds of quantities and units.
+    
+    A distinction is made between a reference unit for a kind of quantity 
+    and other related units for the same kind of quantity. There can be 
+    only one reference units for each kind of quantity in the register.
     
     Units can be looked up by name or by term (short name),
-    such as `SI['metre']` or `'metre' in SI`. Unit names 
-    can also be used as an attribute to access the unit,
-    for example, `SI.metre`.
-    
-    """
+    such as ``SI['metre']`` or ``SI['m']`` or ``'metre' in SI``. 
+    Unit names  can also be used as an attribute to access the unit,
+    for example, ``SI.metre``.   
+    """ 
     
     def __init__(self,name,context):
         self._name = name
@@ -64,7 +65,7 @@ class UnitRegister(object):
         
         `expr` can be a product or quotient of units, 
         a product or quotient of kind-of-quantity objects,
-        or simply a kind-of-quantity object.
+        or a kind-of-quantity object.
         
         """
         # If `expr` has `kind_of_quantity` then `expr` is 
@@ -144,9 +145,7 @@ class UnitRegister(object):
  
     def unit(self,koq_name,unit_name,unit_term):
         """
-        Create a reference unit in the register for `koq_name`
-        The unit will be identified by `unit_name`, 
-        and the abbreviation `unit_term`.
+        Create a reference unit for ``koq_name``
         
         """
         koq = self.context._koq[koq_name]
@@ -159,7 +158,7 @@ class UnitRegister(object):
   
     def from_to(self,source_unit,target_unit):
         """
-        Return a multiplier to convert from `source_unit` to `target_unit`
+        Return a sacel factor to convert from `source_unit` to `target_unit`
         """
         assert source_unit.scale.name in self,\
             "{!r} is not registered".format(source_unit)
@@ -184,18 +183,20 @@ class UnitRegister(object):
         return multiplier 
        
 #----------------------------------------------------------------------------
-def related_unit(unit,fraction,name,term):
+def related_unit(reference_unit,fraction,name,term):
     """
-    Define and register a multiple of a
-    reference unit for the same quantity.
+    Define and register a unit that is multiple of the
+    reference unit for the same kind of quantity.
     
     """
-    kind_of_quantity = unit.scale.kind_of_quantity
-    register = unit._register 
+    kind_of_quantity = reference_unit.scale.kind_of_quantity
+    register = reference_unit._register 
 
-    if not unit is register.reference_unit_for(unit.scale.kind_of_quantity):
+    if not reference_unit is register.reference_unit_for(
+        reference_unit.scale.kind_of_quantity
+    ):
         raise RuntimeError(
-            "{!r} is not a reference unit".format(unit.scale.name)  
+            "{!r} is not a reference unit".format(reference_unit.scale.name)  
         )     
 
     if name in register:
@@ -213,25 +214,27 @@ def related_unit(unit,fraction,name,term):
         return rational_unit
         
 #----------------------------------------------------------------------------
-def metric_unit(prefix,unit):
+def metric_unit(prefix,reference_unit):
     """
-    Define a metric multiple of a
+    Define a unit that is a metric multiple of the
     reference unit for the same quantity.
     
     """
-    kind_of_quantity = unit.scale.kind_of_quantity
-    register = unit._register 
+    kind_of_quantity = reference_unit.scale.kind_of_quantity
+    register = reference_unit._register 
 
     # Check that `self` is a reference unit in the register,
     # because things like `centi(centi(metre))` are not permitted.
-    if not unit is register.reference_unit_for(unit.scale.kind_of_quantity):
+    if not reference_unit is register.reference_unit_for(
+        reference_unit.scale.kind_of_quantity
+    ):
         raise RuntimeError(
-            "{!r} is not a reference unit".format(unit.scale.name)  
+            "{!r} is not a reference unit".format(reference_unit.scale.name)  
         )     
 
     name = "{!s}{!s}".format(
         prefix.name,
-        unit.scale.name
+        reference_unit.scale.name
     )
     
     if name in register:
@@ -239,7 +242,7 @@ def metric_unit(prefix,unit):
     else:
         term = "{!s}{!s}".format(
             prefix.term,
-            unit.scale
+            reference_unit.scale
         )
         
         pq = Unit(

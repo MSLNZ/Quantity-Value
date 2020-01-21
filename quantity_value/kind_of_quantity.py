@@ -11,11 +11,7 @@ __all__ = ( 'KindOfQuantity', 'Numeric' )
 class KindOfQuantity(object):
 
     """
-    A quantity in the most general sense, 
-    like Mass, Length, etc.
-    
-    When two objects have the same name and short name (term) 
-    they are considered to be the same kind of quantity. 
+    A general quantity, like Mass, Length, etc.
     """
 
     def __init__(self,name,term):
@@ -81,7 +77,7 @@ class KindOfQuantity(object):
         # Assume that lhs behaves like a number
         return Ratio(Numeric,self)
         
-    def simplify(self):
+    def _simplify(self):
         return Simplify(self)
 
 #----------------------------------------------------------------------------
@@ -143,7 +139,7 @@ class BinaryOp(object):
         # rhs is not a KoQ
         return Ratio(lhs,self)
 
-    def simplify(self):
+    def _simplify(self):
         return Simplify(self)
         
     # Execution is a recursive process that reduces a tree 

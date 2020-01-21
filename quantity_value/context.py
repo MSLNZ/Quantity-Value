@@ -18,12 +18,9 @@ class Context(object):
     A Context keeps a register of :class:`.KindOfQuantity` instances,
     and associates each instance with a unique dimension.
     
-    A Context may be used to look up a kind of quantity by
-    name or by short-name (term).
-    
-    A Context is initialised by defining a set of 'independent' 
-    kinds of quantity to form an n-dimensional basis. 
-    Other kinds of quantity can then be declared as products  
+    A Context is initialised by a set of 'independent' 
+    kinds of quantity that form an n-dimensional basis. 
+    Other kinds of quantity can be declared as products  
     and quotients of this basis. Only derived quantities 
     with unique dimensions are permitted.
     """
@@ -95,7 +92,7 @@ class Context(object):
   
     def declare(self,koq_name,koq_term,expression):
         """
-        Associate `kog` with the quantity expression `expression`
+        Create a :class:`.KindOfQuantity` associated with ``expression``
         
         """
         if koq_name in self._koq:
@@ -132,7 +129,7 @@ class Context(object):
         
     def evaluate(self,expression):
         """
-        Evaluate the kind of quantity for `expression`
+        Evaluate the kind of quantity in ``expression``
         
         """
         if isinstance(expression,str):
@@ -158,7 +155,7 @@ class Context(object):
 
     def is_dimensionless_ratio(self,koq_name):
         """
-        True when ``koq_name`` is a a dimensionless ratio
+        True when ``koq_name`` is a dimensionless ratio
         
         """
         return self._koq_to_dim(self[koq_name]).is_dimensionless_ratio

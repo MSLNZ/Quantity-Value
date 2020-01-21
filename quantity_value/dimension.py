@@ -11,9 +11,9 @@ class Dimension(object):
     
     Multiplication and division of dimensions adds and subtracts their 
     exponents, respectively. There is also provision to retain the  
-    dimension of 'dimensionless' quantities as a ratio.
+    dimensions of a 'dimensionless' quantity.
     
-    A Dimension always refers to a :class:`.Context`, which has 
+    A Dimension contains a reference to a :class:`.Context`, which has 
     a 1-to-1 mapping between dimensions and kinds of quantity.
     """
     
@@ -75,7 +75,7 @@ class Dimension(object):
     @property
     def is_dimensionless(self):
         """
-        True when there are no non-zero dimensional exponents 
+        True when all dimensional exponents are zero 
         """
         return sum( self.simplify().numerator ) == 0
 
@@ -88,9 +88,8 @@ class Dimension(object):
         
     def is_ratio_of(self,other):
         """
-        True when `other` is in simplified form and
-        `self` is a dimensionless ratio of the
-        dimensions of `other`.
+        True when this object and `other` 
+        have the same dimensions.
         
         """
         if self.is_dimensionless_ratio and other.is_simplified:
@@ -178,10 +177,12 @@ class Dimension(object):
 
     def simplify(self):
         """
-        Return the dimension of the object.
+        Return the simplified dimensions of the object.
         
-        If there are dimensions for both the numerator and
-        denominator they will be combined and simplified. 
+        If there are dimensions in both the numerator and
+        the denominator they will be combined in the
+        numerator of the object returned leaving the 
+        denominator zero. 
         
         """
         return Dimension(

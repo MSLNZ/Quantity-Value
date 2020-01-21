@@ -58,7 +58,7 @@ class TestDimension(unittest.TestCase):
         # the temporary ratio (L*L)/L is not recognised. 
         self.assertRaises(RuntimeError,context.evaluate, 'LengthRatio*Length' )
   
-        koq = context.evaluate( '(LengthRatio*Length).simplify()' )
+        koq = context.evaluate( '(LengthRatio*Length)._simplify()' )
         self.assertTrue( koq is Length )     
         self.assertEqual( koq, Length )     
 
