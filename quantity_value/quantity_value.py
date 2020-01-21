@@ -1,6 +1,6 @@
 from __future__ import division 
 
-from scale import Unit
+from .scale import Unit
 
 __all__ = ('qvalue','value','unit','qresult','qratio')
 

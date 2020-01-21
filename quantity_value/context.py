@@ -7,9 +7,9 @@ warnings.filterwarnings(
 )
 from bidict import bidict 
 
-from kind_of_quantity import KindOfQuantity, Numeric
+from .kind_of_quantity import KindOfQuantity, Numeric
 
-from dimension import Dimension
+from .dimension import Dimension
 
 #----------------------------------------------------------------------------
 class Context(object):

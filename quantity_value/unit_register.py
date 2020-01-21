@@ -10,7 +10,7 @@ from __future__ import division
  
 from fractions import *
 
-from scale import Unit 
+from .scale import Unit 
 
 __all__ = (
     'UnitRegister', 'related_unit', 'metric_unit'
