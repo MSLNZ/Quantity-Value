@@ -11,15 +11,15 @@ Status
 
 The Quantity-Value package is part of a research project looking at Digital Metrology. The implementation is not yet stable and may undergo substantial change.
 
-.. image:: https://readthedocs.org/projects/quantity-value/badge/?version=latest
+.. |docs| image:: https://readthedocs.org/projects/quantity-value/badge/?version=latest
     :target: https://quantity-value.readthedocs.io/en/latest/?badge=latest
     :alt: Documentation Status
 
 .. |travis| image:: https://img.shields.io/travis/MSLNZ/Quantity-Value/master.svg?label=Travis-CI
     :target: https://travis-ci.org/MSLNZ/Quantity-Value
 
-.. |appveyor| image:: https://img.shields.io/appveyor/ci/jborbely/quantity_value/master.svg?label=AppVeyor
-    :target: https://ci.appveyor.com/project/jborbely/quantity_value/branch/master
+.. |appveyor| image:: https://img.shields.io/appveyor/ci/jborbely/Quantity-Value/master.svg?label=AppVeyor
+    :target: https://ci.appveyor.com/project/jborbely/Quantity-Value/branch/master
 
 .. |pypi| image:: https://badge.fury.io/py/Quantity-Value.svg
     :target: https://badge.fury.io/py/Quantity-Value
