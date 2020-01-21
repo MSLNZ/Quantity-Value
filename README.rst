@@ -18,8 +18,8 @@ The Quantity-Value package is part of a research project looking at Digital Metr
 .. |travis| image:: https://img.shields.io/travis/MSLNZ/Quantity-Value/master.svg?label=Travis-CI
     :target: https://travis-ci.org/MSLNZ/Quantity-Value
 
-.. |appveyor| image:: https://ci.appveyor.com/api/projects/status/v4chc1l189djm1cb?svg=true?label=AppVeyor
-    :target: https://ci.appveyor.com/project/jborbely/quantity-value
+.. |appveyor| image:: https://img.shields.io/appveyor/ci/jborbely/Quantity-Value/master.svg?label=AppVeyor
+    :target: https://ci.appveyor.com/project/jborbely/Quantity-Value/branch/master
 
 .. |pypi| image:: https://badge.fury.io/py/Quantity-Value.svg
     :target: https://badge.fury.io/py/Quantity-Value
