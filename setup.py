@@ -133,5 +133,5 @@ setup(
     tests_require=tests_require,
     install_requires=install_requires,
     cmdclass={'docs': BuildDocs, 'apidocs': ApiDocs},
-    packages=find_packages(include=('quantity_value*')),
+    packages=find_packages(include=('quantity_value*',)),
 )
