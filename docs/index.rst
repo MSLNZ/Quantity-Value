@@ -7,6 +7,7 @@ Quantity-Value
 
     License <license>
     Introduction <introduction>
+    Examples <examples>
     Modules <modules>
 
 Indices and tables

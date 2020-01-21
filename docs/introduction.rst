@@ -6,7 +6,8 @@ Introduction
 
 This package supports the representation of physical quantities as a measured value paired with a unit, for example 10.5 kg. It is possible, for example, to define ::
 
-    >>> m = quantity_value(10.5,kg) 
+    >>> from quantity_value import *
+    >>> m = qvalue(10.5,kg) 
     
 and then use ``m`` in mathematical expressions. The semantics of quantities and rules governing calculations are handled by the software.
 
