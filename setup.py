@@ -34,7 +34,7 @@ class ApiDocs(Command):
             '--module-first',  # put module documentation before submodule documentation
             '--separate',  # put documentation for each module on its own page
             '-o', './docs/_autosummary',  # where to save the output files
-            'quantity_value',  # the path to the Python package to document
+            'QV',  # the path to the Python package to document
         ]
 
         import sphinx
@@ -92,7 +92,7 @@ def read(filename):
 
 def fetch_init(key):
     # open the __init__.py file to determine the value instead of importing the package to get the value
-    init_text = read('quantity_value/__init__.py')
+    init_text = read('QV/__init__.py')
     return re.compile(r'{}\s*=\s*(.*)'.format(key)).search(init_text).group(1)[1:-1]
 
 
@@ -133,5 +133,5 @@ setup(
     tests_require=tests_require,
     install_requires=install_requires,
     cmdclass={'docs': BuildDocs, 'apidocs': ApiDocs},
-    packages=find_packages(include=('quantity_value*',)),
+    packages=find_packages(include=('QV*',)),
 )
