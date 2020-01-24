@@ -3,9 +3,9 @@ from __future__ import division
 
 import unittest
 
-from quantity_value import * 
-from quantity_value.metric_prefix import *
-from quantity_value.quantity_value import ValueUnit
+from QV import * 
+from QV.metric_prefix import *
+from QV.quantity_value import ValueUnit
 
 #----------------------------------------------------------------------------
 class TestQuantityValue(unittest.TestCase):

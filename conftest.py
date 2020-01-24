@@ -5,7 +5,7 @@ import sys
 
 import pytest
 
-from quantity_value import *
+from QV import *
 
 
 @pytest.fixture(autouse=True)

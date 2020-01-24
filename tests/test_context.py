@@ -10,8 +10,8 @@ from bidict import ValueDuplicationError
 
 import unittest
  
-from quantity_value import * 
-from quantity_value.dimension import Dimension 
+from QV import * 
+from QV.dimension import Dimension 
 
 #----------------------------------------------------------------------------
 class TestContext(unittest.TestCase):

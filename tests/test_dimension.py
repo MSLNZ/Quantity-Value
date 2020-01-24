@@ -2,8 +2,8 @@ from __future__ import division
 
 import unittest
  
-from quantity_value import *
-from quantity_value.dimension import Dimension 
+from QV import *
+from QV.dimension import Dimension 
 
 #----------------------------------------------------------------------------
 class TestDimension(unittest.TestCase):

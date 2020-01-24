@@ -3,11 +3,10 @@ from __future__ import division
 
 import unittest
 
-from quantity_value.kind_of_quantity import * 
-from quantity_value.unit_register import *
-from quantity_value.scale import * 
-from quantity_value.metric_prefix import *
-from quantity_value.context import *
+from QV import * 
+from QV.kind_of_quantity import * 
+from QV.scale import *
+from QV.metric_prefix import *
 
 #----------------------------------------------------------------------------
 class TestPrefix(unittest.TestCase):

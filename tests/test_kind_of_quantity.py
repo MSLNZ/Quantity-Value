@@ -10,7 +10,7 @@ from bidict import ValueDuplicationError
 
 import unittest
  
-from quantity_value.kind_of_quantity import * 
+from QV.kind_of_quantity import * 
 
 #----------------------------------------------------------------------------
 class TestKindOfQuantity(unittest.TestCase):
