@@ -1,13 +1,9 @@
-from __future__ import print_function
 from __future__ import division 
 
 import unittest
  
 from quantity_value import *
-
-# from quantity_value.kind_of_quantity import * 
 from quantity_value.dimension import Dimension 
-# from quantity_value.context import *
 
 #----------------------------------------------------------------------------
 class TestDimension(unittest.TestCase):

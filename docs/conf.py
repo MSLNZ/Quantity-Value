@@ -14,11 +14,11 @@
 #
 import os
 import sys
-# sys.path.insert(0, os.path.abspath('../quantity_value'))
+# sys.path.insert(0, os.path.abspath('../QV'))
 
 # import sphinx
 
-from quantity_value import version, copyright
+from QV import version, copyright
 
 # -- Project information -----------------------------------------------------
 

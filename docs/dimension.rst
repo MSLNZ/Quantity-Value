@@ -10,6 +10,6 @@ Context
 
 .. _dimension_module:
 
-.. automodule:: quantity_value.dimension
+.. automodule:: QV.dimension
     :members: 
     :inherited-members:

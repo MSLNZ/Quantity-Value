@@ -10,6 +10,6 @@ Kind of Quantity
 
 .. _kind_of_quantity_module:
 
-.. automodule:: quantity_value.kind_of_quantity
+.. automodule:: QV.kind_of_quantity
     :members: 
     :inherited-members:

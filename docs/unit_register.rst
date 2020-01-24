@@ -10,6 +10,6 @@ Unit register
 
 .. _unit_register_module:
 
-.. automodule:: quantity_value.unit_register
+.. automodule:: QV.unit_register
     :members: 
     :inherited-members:

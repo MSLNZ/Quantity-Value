@@ -10,4 +10,4 @@ Metric prefix
 
 .. _metric_prefix_module:
 
-.. literalinclude:: ../quantity_value/metric_prefix.py
+.. literalinclude:: ../QV/metric_prefix.py

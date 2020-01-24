@@ -10,6 +10,6 @@ Quantity value
 
 .. _quantity_value_module:
 
-.. automodule:: quantity_value.quantity_value
+.. automodule:: QV.quantity_value
     :members: 
     :inherited-members:

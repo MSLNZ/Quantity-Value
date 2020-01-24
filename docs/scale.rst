@@ -10,6 +10,6 @@ Scale
 
 .. _scale_module:
 
-.. automodule:: quantity_value.scale
+.. automodule:: QV.scale
     :members: 
     :inherited-members:

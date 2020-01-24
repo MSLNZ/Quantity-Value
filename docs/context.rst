@@ -10,6 +10,6 @@ Context
 
 .. _context_module:
 
-.. automodule:: quantity_value.context
+.. automodule:: QV.context
     :members: 
     :inherited-members:
