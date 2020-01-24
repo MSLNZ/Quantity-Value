@@ -151,32 +151,14 @@ class Context(object):
             raise RuntimeError(
                 "No quantity is associated with {!r}".format(dim)
             )
-
-    def is_dimensionless(self,koq_name):
+            
+    def dimensions(self,koq_name):
         """
-        True when ``koq_name`` is dimensionless
+        Return the dimensions of ``koq_name`` in this context 
         
         """
-        return self._koq_to_dim(self[koq_name]).is_dimensionless
-
-    def is_dimensionless_ratio(self,koq_name):
-        """
-        True when ``koq_name`` is a dimensionless ratio
-        
-        """
-        return self._koq_to_dim(self[koq_name]).is_dimensionless_ratio
-        
-    def is_ratio_of(self,koq_ratio_name,koq_name):
-        """
-        Return True when ``koq_name`` has the same dimensions as 
-        the numerator and denominator of `koq_ratio`.
-        
-        """
-        dim_lhs = self._koq_to_dim( self[koq_ratio_name] )
-        dim_rhs = self._koq_to_dim( self[koq_name] )
-        
-        return dim_lhs.is_ratio_of(dim_rhs)
-    
+        koq = self._koq[koq_name] 
+        return self._koq_dimension[koq]    
         
     # def conversion_from_to(self,ref_unit_1,ref_unit_2,factor):
         # """

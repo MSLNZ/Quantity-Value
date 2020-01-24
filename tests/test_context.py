@@ -67,9 +67,7 @@ class TestContext(unittest.TestCase):
         self.assertEqual( context._koq_to_dim(SpeedRatio), Dimension( context, (1,-1), (1,-1)) )
         self.assertTrue( SpeedRatio is context._dim_to_koq( Dimension( context, (1,-1), (1,-1)) ) )
         
-        self.assertTrue( context.is_dimensionless('SpeedRatio') )
-        self.assertTrue( context.is_ratio_of('SpeedRatio','Speed') )
-        self.assertTrue( context.is_dimensionless_ratio('SpeedRatio') )
+        self.assertTrue( context.dimensions('SpeedRatio').is_dimensionless )
 
     def test_evaluate(self):
 
