@@ -43,11 +43,11 @@ class TestDimension(unittest.TestCase):
 
         self.assertTrue( not context._koq_to_dim(LengthRatio).is_simplified )
         self.assertTrue( context._koq_to_dim(LengthRatio).is_dimensionless )
-        self.assertTrue( context._koq_to_dim(LengthRatio).is_dimensionless_ratio ) 
+        # self.assertTrue( context._koq_to_dim(LengthRatio).is_dimensionless_ratio ) 
         self.assertTrue( context._koq_to_dim(LengthRatio).is_ratio_of(context._koq_to_dim(Length)) ) 
 
         self.assertTrue( context.dimensions('LengthRatio').is_dimensionless )
-        self.assertTrue( context.dimensions('LengthRatio').is_dimensionless_ratio ) 
+        # self.assertTrue( context.dimensions('LengthRatio').is_dimensionless_ratio ) 
         self.assertTrue( context.dimensions('LengthRatio').is_ratio_of(context.dimensions('Length') ) )
   
         # Although the simplified dimension is that of Length, 
