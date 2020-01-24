@@ -313,8 +313,8 @@ def qratio(value_unit_1, value_unit_2, unit=None ):
             register, value_unit_1.unit.register)
         )
     
-    koq_1 = register.reference_unit_for( value_unit_1 ).scale.kind_of_quantity 
-    koq_2 = register.reference_unit_for( value_unit_2 ).scale.kind_of_quantity 
+    koq_1 = register.reference_unit_for( value_unit_1.unit ).scale.kind_of_quantity 
+    koq_2 = register.reference_unit_for( value_unit_2.unit ).scale.kind_of_quantity 
     
     if koq_1 != koq_2:
         raise RuntimeError(
@@ -346,9 +346,11 @@ def qratio(value_unit_1, value_unit_2, unit=None ):
             (value_unit_2.unit.multiplier*value_unit_2.value) 
         )
 
+        ureg = value_unit_1.unit.register
+        unit = register.reference_unit_for(value_unit_1.unit//value_unit_2.unit)
         return ValueUnit( 
             value, 
-            (value_unit_1.unit//value_unit_2.unit).reference_unit()
+            unit
         )
     
 # ===========================================================================    
