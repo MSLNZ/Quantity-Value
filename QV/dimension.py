@@ -7,13 +7,23 @@ except ImportError:
 class Dimension(object):
 
     """
-    A Dimension keeps track of dimensional exponents. 
+    A Dimension holds dimensional exponents. 
     
-    Multiplication and division of dimensions adds and subtracts their 
-    exponents, respectively. There is also provision to retain the  
-    dimensions of a 'dimensionless' quantity.
+    Multiplication and division of dimensions adds and subtracts the 
+    dimensional exponents, respectively. 
     
-    A Dimension contains a reference to a :class:`.Context`, which has 
+    The numerator and denominator of a Dimension object 
+    are tuples of dimensional exponents. This   
+    allows the dimensions of a 'dimensionless' 
+    quantity to be retained. 
+    
+    A Dimension object is in 'simplified' form when the 
+    denominator is empty. A Dimension object may be converted
+    to 'simplified' form by setting the numerator equal to the 
+    difference between the numerator and the denominator and setting the 
+    exponents in the denominator to zero.
+    
+    A Dimension holds a reference to a :class:`.Context`, which has 
     a 1-to-1 mapping between dimensions and kinds of quantity.
     """
     
@@ -63,36 +73,31 @@ class Dimension(object):
 
     @property
     def context(self):        
+        """The associated Context"""
         return self._context 
         
     @property
     def is_simplified(self):
-        """
-        True when the denominator is empty
-        """
+        """True when dimensional exponents in the denominator are all zero"""
         return not self.denominator
         
     @property
     def is_dimensionless(self):
-        """
-        True when all dimensional exponents are zero 
-        """
+        """True when the dimensional exponents in simplified form are all zero"""
         return sum( self.simplify().numerator ) == 0
 
-    @property
-    def is_dimensionless_ratio(self):
-        """
-        True when the numerator and denominator are the same 
-        """
-        return self.numerator == self.denominator
+    # @property
+    # def is_dimensionless_ratio(self):
+        # """True when the numerator equals the denominator"""
+        # return self.numerator == self.denominator
         
     def is_ratio_of(self,other):
         """
-        True when this object and `other` 
-        have the same dimensions.
+        True when the object is a dimensionless ratio and the
+        numerator has the same dimensions as the``other`` object.
         
         """
-        if self.is_dimensionless_ratio and other.is_simplified:
+        if self.numerator == self.denominator and other.is_simplified:
             return self.numerator == other.numerator
             
         return False
@@ -177,12 +182,12 @@ class Dimension(object):
 
     def simplify(self):
         """
-        Return the simplified dimensions of the object.
+        Return the dimensions in simplified form.
         
-        If there are dimensions in both the numerator and
-        the denominator they will be combined in the
-        numerator of the object returned leaving the 
-        denominator zero. 
+        The numerator in the Dimension object returned is the 
+        difference between the numerator and the denominator
+        of this object, the dimensional exponents in the 
+        denominator of the object returned are all zero.
         
         """
         return Dimension(
