@@ -17,11 +17,14 @@ class Context(object):
     A Context keeps a register of :class:`.KindOfQuantity` instances,
     and associates each instance with a unique dimension.
     
-    A Context is initialised by a set of 'independent' 
-    kinds of quantity that form an n-dimensional basis. 
-    Other kinds of quantity can be declared as products  
-    and quotients of this basis. Only derived quantities 
-    with unique dimensions are permitted.
+    A Context is initialised by a set of :math:`n` 
+    kinds of quantity that become the base quantities for  
+    that context. Other kinds of quantity can be declared as products  
+    and quotients of base quantities, or of other 
+    quantities already declared. 
+    
+    The dimensions of declared quantities must be unique
+    in the context.
         
     Example::
 
@@ -68,6 +71,12 @@ class Context(object):
         if name in self._koq:
             return self._koq[name]
         
+    def _koq_to_dim(self,koq):
+        return self._koq_dimension[koq]
+  
+    def _dim_to_koq(self,dim):
+        return self._koq_dimension.inverse[dim]
+  
     # `expression` is a sequence of binary multiplication
     # and division operations, represented as a tree of 
     # KindOfQuantity objects. 
@@ -82,23 +91,23 @@ class Context(object):
         assert len(stack) == 1
         return stack.pop()
     
-    def _koq_to_dim(self,koq):
-        """
-        Return the dimension associated with `koq`
+    @property 
+    def base_quantities(self):
+        """Return the base quantities in this context"""
+        return self._basis
         
-        """
-        return self._koq_dimension[koq]
-  
-    def _dim_to_koq(self,dim):
-        """
-        Return the kind of quantity associated with `dim`
-        
-        """
-        return self._koq_dimension.inverse[dim]
-  
     def declare(self,koq_name,koq_term,expression):
         """
-        Create a :class:`.KindOfQuantity` associated with ``expression``
+        Declare a :class:`.KindOfQuantity` in the context
+        with dimensions defined by the ``expression``
+        
+        The argument ``expression`` may be an arbitrary number of 
+        multiplications and divisions among :obj:`.KindOfQuantity` objects, 
+        or a string representing such a sequence of operations.
+        
+        A ``RuntimeError`` is raised if if the dimensions of the 
+        ``expression`` are already associated with a kind 
+        of quantity in the context.
         
         """
         if koq_name in self._koq:
@@ -113,7 +122,10 @@ class Context(object):
             
         # Evaluates the KoQ expression using only those KoQ 
         # objects that have been declared. 
-        expression = eval(expression,{'__builtins__': None},self._koq)
+        if isinstance(expression,str):
+            # Evaluates the KoQ expression using only those KoQ 
+            # objects that have been declared in this context. 
+            expression = eval(expression,{'__builtins__': None},self._koq)
         
         if isinstance(expression,KindOfQuantity):
             if expression in self._koq_dimension:
@@ -128,6 +140,7 @@ class Context(object):
             dim = self._evaluate_dimension(expression)
             
             koq = KindOfQuantity(koq_name,koq_term)
+
             self._koq_dimension[koq] = dim
             self._koq.update( {koq_name:koq, koq_term:koq} )
                 
@@ -135,7 +148,15 @@ class Context(object):
         
     def evaluate(self,expression):
         """
-        Evaluate the kind of quantity in ``expression``
+        Evaluate the kind of quantity represented by ``expression``
+                
+        The argument ``expression`` may be an arbitrary number of 
+        multiplications and divisions among :obj:`.KindOfQuantity` objects, 
+        or a string representing such a sequence of operations.
+        
+        A ``RuntimeError`` is raised if the dimensions of the result 
+        of the expression are not associated with a kind of quantity 
+        in the context.
         
         """
         if isinstance(expression,str):
@@ -146,18 +167,21 @@ class Context(object):
         dim = self._evaluate_dimension(expression)
         
         try:
-            return self._koq_dimension.inverse[dim]
+            return self._dim_to_koq(dim)
         except KeyError:
             raise RuntimeError(
                 "No quantity is associated with {!r}".format(dim)
             )
             
-    def dimensions(self,koq_name):
+    def dimensions(self,koq):
         """
-        Return the dimensions of ``koq_name`` in this context 
+        Return the dimensions of ``koq`` 
         
         """
-        koq = self._koq[koq_name] 
+        # Can be a name
+        if isinstance(koq,str):
+            koq = self._koq[koq] 
+            
         return self._koq_dimension[koq]    
         
     # def conversion_from_to(self,ref_unit_1,ref_unit_2,factor):
