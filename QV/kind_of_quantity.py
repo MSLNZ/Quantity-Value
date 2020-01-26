@@ -2,16 +2,11 @@ from __future__ import division
 
 __all__ = ( 'KindOfQuantity', 'Numeric' )
 
-# KindOfQuantity is fundamental. 
-# Using a Context, KoQs are associated with dimensions. 
-# There could be different contexts that retain references 
-# to the same KoQ objects. 
-
 #----------------------------------------------------------------------------
 class KindOfQuantity(object):
 
     """
-    A general quantity, like Mass, Length, etc.
+    A type of quantity like mass, length, etc.
     """
 
     def __init__(self,name,term):
@@ -223,6 +218,7 @@ class Ratio(BinaryOp):
         stack.append( l // r )
 
 #----------------------------------------------------------------------------
+# The kind of quantity of all numbers
 Numeric = KindOfQuantity('Numeric','1')
 
 # ===========================================================================    

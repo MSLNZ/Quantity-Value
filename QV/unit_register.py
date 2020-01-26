@@ -184,6 +184,21 @@ def related_unit(reference_unit,fraction,name,term):
     Define and register a unit that is multiple of the
     reference unit for the same kind of quantity.
     
+    Example::
+        >>> context = Context( ("Distance","L"), ("Volume","V") )
+        >>> FuelConsumption = context.declare('FuelConsumption','FC','Volume/Distance')
+        >>> ureg =  UnitRegister("ureg",context)
+        >>> kilometre = ureg.unit('Distance','kilometre','km') 
+        >>> litre = ureg.unit('Volume','litre','L')
+        >>> litres_per_km = ureg.unit('FuelConsumption','litres_per_km','L/km')
+        >>> litres_per_100_km = related_unit(
+        ...     ureg.litres_per_km,
+        ...     Fraction(1,100),
+        ...     'litres_per_100_km','L/(100 km)'
+        ... )
+        >>> print( litres_per_100_km )
+        L/(100 km)
+        
     """
     kind_of_quantity = reference_unit.scale.kind_of_quantity
     register = reference_unit._register 
@@ -212,9 +227,17 @@ def related_unit(reference_unit,fraction,name,term):
 #----------------------------------------------------------------------------
 def metric_unit(prefix,reference_unit):
     """
-    Define a unit that is a metric multiple of the
+    Define and register a metric multiple of the
     reference unit for the same quantity.
     
+    Example ::
+        >>> context = Context(('Length','L')) 
+        >>> SI =  UnitRegister("SI",context)
+        >>> metre = SI.unit('Length','metre','m')  
+        >>> centimetre = metric_prefix.centi(metre) 
+        >>> print( centimetre )
+        cm
+
     """
     kind_of_quantity = reference_unit.scale.kind_of_quantity
     register = reference_unit._register 

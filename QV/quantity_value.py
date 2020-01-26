@@ -1,4 +1,6 @@
 from __future__ import division 
+from __future__ import print_function 
+
 
 from QV.scale import Unit
 
@@ -22,10 +24,10 @@ class ValueUnit(object):
     # We want the object to appear to be ``qvalue``,
     # because that is how we would create such an object.
     def __repr__(self):
-        return "{!s}({!r},{!r})".format(
+        return "{!s}({!s},{!s})".format(
             'qvalue',
             self.value,
-            self.unit 
+            self.unit.scale.name 
         )
         
     def __str__(self):
@@ -199,6 +201,14 @@ def qvalue(value,unit):
     ``value`` is the measure,
     ``unit`` is the measurement scale
     
+    Example ::
+    
+        >>> context = Context( ("Length","L"), ("Time","T") )
+        >>> si = UnitRegister("si",context)
+        >>> metre = si.unit('Length','metre','m') 
+        >>> qvalue( 1.84, metre )
+        qvalue(1.84,metre)
+        
     """
     return ValueUnit(value,unit)
     
@@ -238,16 +248,32 @@ def qresult(
     """
     Return a ``qvalue``.
     
-    ``value_unit`` is a ``qvalue`` object or expression of ``qvalue`` objects. 
-    
+    ``value_unit`` is a quantity-value or expression of quantity-values. 
     
     If a ``unit`` is supplied it will be used to report the measure. If  
     not the measure will be converted to the reference unit.
     
     If ``simplify`` is ``True`` the unit dimensions will be simplified.
     
-    A ``value_result`` function can be applied 
-    to the value as a final processing step.
+    The function ``value_result`` will be applied to the value as a final processing step.
+    
+    Example ::
+    
+        >>> context = Context( ("Length","L"), ("Time","T") )
+        >>> Speed = context.declare('Speed','V','Length/Time')
+        >>> si =  UnitRegister("si",context)
+        >>> metre = si.unit('Length','metre','m') 
+        >>> second = si.unit('Time','second','s') 
+        >>> metre_per_second = si.unit('Speed','metre_per_second','m*s-1')
+        >>> d = qvalue(0.5,metre)
+        >>> t = qvalue(1.0,second)
+        >>> v0 = qresult(d/t)
+        >>> print( "average speed =", v0 )
+        average speed = 0.5 m*s-1
+        >>> x0 = qvalue(.3,metre)
+        >>> print( "displacement =", x0 + v0*t )
+        displacement = 0.8 m
+        
     """
     if unit:
         # Use a preferred unit 
@@ -301,10 +327,23 @@ def qresult(
 #----------------------------------------------------------------------------
 def qratio(value_unit_1, value_unit_2, unit=None ):
     """
-    Return a quantity value for ``value_unit_1/value_unit_2``  keeping   
-    while the dimensions of the numerator and denominator separate.
+    Return a quantity value for ``value_unit_1/value_unit_2``.
+    If the dimensions of the associated units are in simplified form,
+    dimensional information will be retained in the quotient.
 
     If no ``unit`` is supplied the reference unit is used. 
+
+    Example ::
+    
+        >>> context = Context( ("Current","I"),("Voltage","V") )
+        >>> ureg = UnitRegister("ureg",context)
+        >>> volt = ureg.unit('Voltage','volt','V') 
+        >>> voltage_ratio = context.declare('voltage_ratio','V/V','Voltage//Voltage')
+        >>> volt_per_volt = ureg.unit('voltage_ratio','volt_per_volt','V/V')
+        >>> v1 = qvalue(1.23, volt)
+        >>> v2 = qvalue(9.51, volt)
+        >>> qratio( v2,v1 )
+        qvalue(7.73170731...,volt_per_volt)
 
     """
     register = value_unit_1.unit.register 

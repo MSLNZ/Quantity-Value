@@ -7,12 +7,11 @@ __all__ = ( 'Scale', 'Unit', )
 class Scale(object):
 
     """
-    The measurement of a specific quantity must be represented on a scale,  
-    for example, the metre is the SI scale for measurement of lengths.   
+    The measured values of a specific quantity are reported on a scale,  
+    for example, the metre is the SI scale for length measurement.   
         
-    The Scale class defines a name (and a short name or term) for a scale 
-    and contains a reference to the kind of quantity associated with 
-    measurements.
+    The Scale class defines a name (and a short name, or term) for a scale 
+    and contains a reference to the kind of quantity.
     """
     
     def __init__(self,kind_of_quantity,name,term):
@@ -44,14 +43,17 @@ class Scale(object):
         
     @property 
     def name(self):
+        """The quantity name"""
         return str(self._name)
         
     @property 
     def term(self):
+        """Short name for the quantity"""
         return str(self._term)
         
     @property 
     def kind_of_quantity(self):
+        """The associated kind of quantity"""
         return self._kind_of_quantity
   
 #----------------------------------------------------------------------------
@@ -61,12 +63,16 @@ class Scale(object):
 class Unit(object):
 
     """
-    A Unit represents a measurement scale, such as the metre 
-    is the unit of length in the SI (length measured on the 
-    metre scale). 
+    A Unit class implements the behaviour of a measurement scale. 
     
-    A Unit class will be associated with a :class:`Scale` 
-    and a :class:`.UnitRegister`.       
+    The class is associated with a :class:`Scale` and with a :class:`.UnitRegister`. 
+    
+    Multiplication and division of units is supported. 
+    
+    The 'floor' division operator is implemented to support the retention of 
+    dimensional information for 'dimensionless' quantities (ratios of the 
+    same kind of quantity). 
+    
     """
 
     def __init__(self,kind_of_quantity,name,term,register,multiplier):
@@ -81,10 +87,12 @@ class Unit(object):
     
     @property 
     def scale(self):
+        """The unit scale"""
         return self._scale 
 
     @property 
-    def kind_of_quantity(self):  
+    def kind_of_quantity(self): 
+        """The associated kind of quantity"""
         return self._kind_of_quantity
 
     @property 
@@ -96,6 +104,7 @@ class Unit(object):
 
     @property 
     def register(self):
+        """The associated unit register"""
         return self._register
         
     @register.setter

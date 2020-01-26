@@ -54,15 +54,15 @@ metric_prefixes = (
     tera
 )
 
-# Common prefixes for numbers
+# Common numerical postfixes
 #
 percent = MetricPrefix('per-cent','%',1E-2)
 per_mille = MetricPrefix('per-mille','%%',1E-3)
 per_million = MetricPrefix('per-million','ppm',1E-6)
 per_billion = MetricPrefix('per-billion','ppb',1E-9)
 
-# Useful to iterate over all prefixes
-number_prefixes = (
+# Useful to iterate over all postfixes
+number_postfixes = (
     percent,
     per_mille,
     per_million,

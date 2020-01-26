@@ -1,11 +1,11 @@
 
-from .kind_of_quantity import *
-from .scale import *
-from .metric_prefix import *
-from .quantity_value import *
-from .unit_register import *
-from .context import *
+from QV.kind_of_quantity import *
+from QV.scale import *
+from QV.quantity_value import *
+from QV.unit_register import *
+from QV.context import *
 
+from QV import metric_prefix 
 #----------------------------------------------------------------------------
 
 __all__ = (
@@ -17,7 +17,8 @@ __all__ = (
     'Context',
     'UnitRegister',
     'related_unit',
-    'metric_unit'
+    'metric_unit',
+    'metric_prefix'
 )
 
 #----------------------------------------------------------------------------
