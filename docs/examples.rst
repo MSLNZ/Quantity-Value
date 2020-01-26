@@ -150,16 +150,17 @@ In this package, dimensionless quantity ratios retain quantity information when 
     
     v_in = qvalue( 5.12, volt) 
     
-    koq = divider.unit.kind_of_quantity
-    print( "Ratio of resistance" if koq.is_ratio_of(context['Resistance']) else "Oops!" )
-    print( "Divider ratio =",divider )
-    print( "v_out =", qresult(v_divider * v_in) )
+    koq_dim = context.dimensions( divider.unit.kind_of_quantity.name )
+    if koq_dim.is_ratio_of( context.dimensions('Resistance') ):
+        print( "Resistive divider" )
+        print( "  ratio =",divider )
+        print( "  v_out =", qresult(v_divider * v_in) )
 
 produces the output ::
   
-    Ratio of resistance
-    Divider ratio = 0.832214765101 Ohm/Ohm
-    v_out = 4.26093959732 V
+    Resistive divider
+      ratio = 0.832214765101 Ohm/Ohm
+      v_out = 4.26093959732 V
 
 .. [#FN1] The distance reference unit could have been chosen as  100 km, instead of 1 km, but it seems more natural to proceed as shown. The reference unit for consumption, ``litres_per_km``, is determined by the reference units for volume and distance. The related unit of ``litres_per_100_km`` must be introduced with an appropriate scale factor.
 .. [#FN2] The argument ``litres_per_100_km`` is passed to ``qresult()``  to obtain results in the required unit. The default would be the reference unit declared for the kind of quantity (``litres_per_km`` in this case). 

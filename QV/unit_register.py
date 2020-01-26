@@ -20,16 +20,12 @@ __all__ = (
 class UnitRegister(object):
 
     """
-    A UnitRegister maintains references between kinds of quantities and units.
+    A UnitRegister holds associations between kinds of quantities and units.
     
     A distinction is made between a reference unit for a kind of quantity 
     and other related units for the same kind of quantity. There can be 
-    only one reference units for each kind of quantity in the register.
+    only one reference unit for each kind of quantity in the register.
     
-    Units can be looked up by name or by term (short name),
-    such as ``SI['metre']`` or ``SI['m']`` or ``'metre' in SI``. 
-    Unit names  can also be used as an attribute to access the unit,
-    for example, ``SI.metre``.   
     """ 
     
     def __init__(self,name,context):
