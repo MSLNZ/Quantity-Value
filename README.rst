@@ -21,7 +21,7 @@ Calculations involving electrical measurements can be described in terms of a si
     >>> context = Context( ("Current","I"),("Voltage","V") )
     >>> Resistance = context.declare('Resistance','R','Voltage/Current')
 
-Units can be declared in terms of these quantities and then quantity-values can be created and manipulated
+Units can be declared in terms of these quantities 
 
 .. code-block:: pycon 
 
@@ -31,6 +31,11 @@ Units can be declared in terms of these quantities and then quantity-values can 
     >>> amp = ureg.unit('Current','amp','A') 
     >>> milliamp = metric_prefix.milli(amp)
     >>> ohm = ureg.unit('Resistance','Ohm','Ohm')
+    
+and then quantity-values can be created and manipulated
+
+.. code-block:: pycon 
+   
     >>> v1 = qvalue(0.10,volt)
     >>> i1 = qvalue(15,milliamp) 
     >>> print( qresult( v1/i1 ) )

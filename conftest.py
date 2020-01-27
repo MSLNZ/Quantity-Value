@@ -1,6 +1,7 @@
 """
 Injects Quantity-Value in to the doctest namespace for pytest.
 """
+from __future__ import division
 import sys
 
 import pytest
