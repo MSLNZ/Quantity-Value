@@ -15,20 +15,22 @@ Example
 
 Calculations involving electrical measurements can be described in terms of a simple set of base quantities, here we declare current and voltage and the dependent quantity resistance
 
-Units can be declared in terms of these quantities and then quantity-values can be created and manipulated
-
 .. code-block:: pycon 
 
     >>> from QV import *
     >>> context = Context( ("Current","I"),("Voltage","V") )
     >>> Resistance = context.declare('Resistance','R','Voltage/Current')
-    >>>
-    >>> ureg =  UnitRegister("ureg",context)
+
+Units can be declared in terms of these quantities and then quantity-values can be created and manipulated
+
+.. code-block:: pycon 
+
+    >>> ureg = UnitRegister("ureg",context)
     >>>
     >>> volt = ureg.unit('Voltage','volt','V') 
     >>> amp = ureg.unit('Current','amp','A') 
     >>> milliamp = metric_prefix.milli(amp)
-    >>>
+    >>> ohm = ureg.unit('Resistance','Ohm','Ohm')
     >>> v1 = qvalue(0.10,volt)
     >>> i1 = qvalue(15,milliamp) 
     >>> print( qresult( v1/i1 ) )
