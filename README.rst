@@ -34,7 +34,7 @@ Units can be declared in terms of these quantities and then quantity-values can 
     >>> v1 = qvalue(0.10,volt)
     >>> i1 = qvalue(15,milliamp) 
     >>> print( qresult( v1/i1 ) )
-    6.66666666667 Ohm
+    6.6666666666... Ohm
  
 Status
 ======
