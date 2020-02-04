@@ -18,8 +18,9 @@ class Dimension(object):
     quantity to be retained. 
     
     A Dimension object is in 'simplified' form when the 
-    denominator is empty. A Dimension object may be converted
-    to 'simplified' form by setting the numerator equal to the 
+    denominator is empty (or contains only zeros). 
+    A Dimension object may be converted
+    to 'simplified' form by setting the numerator to the 
     difference between the numerator and the denominator and setting the 
     exponents in the denominator to zero.
     

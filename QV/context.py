@@ -15,15 +15,15 @@ class Context(object):
 
     """
     A Context keeps a register of :class:`.KindOfQuantity` instances,
-    and associates each instance with a unique dimension.
+    and associates each with a unique dimension.
     
-    A Context is initialised by a set of :math:`n` 
-    kinds of quantity that become the base quantities for  
-    that context. Other kinds of quantity can be declared as products  
+    A Context is initialised by providing a set of :math:`n` 
+    kinds of quantity that become the base quantities. 
+    Other kinds of quantity can then be declared as products  
     and quotients of base quantities, or of other 
-    quantities already declared. 
+    derived quantities already declared. 
     
-    The dimensions of declared quantities must be unique
+    The dimensions of all declared quantities must be unique
     in the context.
         
     Example::

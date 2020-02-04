@@ -22,9 +22,9 @@ class UnitRegister(object):
     """
     A UnitRegister holds associations between kinds of quantities and units.
     
-    A distinction is made between a reference unit for a kind of quantity 
-    and other related units for the same kind of quantity. There can be 
-    only one reference unit for each kind of quantity in the register.
+    A distinction is made between a reference unit and other related units 
+    for the same kind of quantity. There can be only one reference unit 
+    in the register for each kind of quantity.
     
     """ 
     
@@ -154,7 +154,7 @@ class UnitRegister(object):
   
     def from_to(self,source_unit,target_unit):
         """
-        Return a sacel factor to convert from `source_unit` to `target_unit`
+        Return the scale factor to convert from `source_unit` to `target_unit`
         """
         assert source_unit.scale.name in self,\
             "{!r} is not registered".format(source_unit)

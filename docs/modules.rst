@@ -14,10 +14,10 @@ These are the package modules
 
 .. toctree::
 
-    Kind of quantity <kind_of_quantity>
-    Dimension <dimension>
     Context <context>
-    Scale <scale>
+    Dimension <dimension>
+    Kind of quantity <kind_of_quantity>
     Unit register <unit_register>
+    Scale <scale>
     Quantity value <quantity_value>
     Prefix <prefix>

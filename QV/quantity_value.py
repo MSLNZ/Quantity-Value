@@ -250,12 +250,12 @@ def qresult(
     
     ``value_unit`` is a quantity-value or expression of quantity-values. 
     
-    If a ``unit`` is supplied it will be used to report the measure. If  
-    not the measure will be converted to the reference unit.
+    If a ``unit`` is supplied, it is used to report the measure. If  
+    not, the measure is reported in the reference unit.
     
-    If ``simplify`` is ``True`` the unit dimensions will be simplified.
+    If ``simplify`` is ``True`` the unit dimensions are simplified.
     
-    The function ``value_result`` will be applied to the value as a final processing step.
+    The function ``value_result`` is applied to the value as a final processing step.
     
     Example ::
     

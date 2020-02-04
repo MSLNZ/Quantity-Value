@@ -65,7 +65,7 @@ When `ad hoc` units are preferred, this package facilitates their use. For examp
     ...     'litres_per_100_km','L/(100 km)'
     ...     )
 
-Calculations proceed as might be expected
+Calculations proceed as might be expected ::
 
     distance = qvalue(25.6,kilometre)
     fuel = qvalue(2.2,litre)
@@ -81,11 +81,11 @@ which gives the following results [#FN2]_.  ::
     average consumption = 8.59375 L/(100 km)
     fuel required = 13.3203125 L
     
-It is interesting that QV is able to treat distance and volume as quite distinct quantities, whereas they share the dimension of length in the SI [#FN3]_. 
+It is interesting that QV can treat distance and volume as quite distinct quantities, although they share the dimension of length in the SI [#FN3]_. 
 
 Electrical quantities
 =====================
-Electrical problems use particular quantities, and associated units. With basis dimensions :math:`VIT`, for potential difference, current and duration, respectively, additional kinds of quantity of interest include: resistance, capacitance, inductance, energy, power and angular frequency. The context can be configured, as follows :: 
+Electrical measurements involve particular quantities, and associated units. We can use base dimensions :math:`V`, :math:`I` and :math:`T`, for potential difference, current and duration, respectively. Then additional kinds of quantity of interest include: resistance, capacitance, inductance, energy, power and angular frequency. The context can be configured, as follows :: 
 
     context = Context( ("Current","I"),("Voltage","V"),("Time","T") )
     
@@ -96,7 +96,7 @@ Electrical problems use particular quantities, and associated units. With basis 
     context.declare('Energy','E','P*T')
     context.declare('Power','P','V*I')
 
-Suitable units are:
+Suitable units are::
 
     ureg =  UnitRegister("Reg",context)
     
@@ -138,9 +138,9 @@ Which produces ::
 Dimensionless ratios
 --------------------
 
-Ratios of quantities of the same kind often arise in physical calculations. They are usually described as `dimensionless` quantities, because the ratio is independent of the choice of units. Nonetheless, they are not plain numbers; the quantities involved should not be ignored. 
+Often ratios of quantities of the same kind arise in physical calculations. These are described as `dimensionless` quantities, but they are not plain numbers; the quantities involved should not be ignored. 
 
-In this package, dimensionless quantity ratios retain quantity information when they are defined using the function ``qratio``. A typical example of a dimensionless quantity in the electrical context, considered above, is a resistance ratio (potential divider). Adding to the code shown above (where ``r1`` is evaluated), ::
+Dimensionless ratios can retain quantity information if they are defined using the function ``qratio``. A typical example of a dimensionless quantity, in the electrical context considered above, is a resistance ratio (potential divider). Adding to the code above (where ``r1`` was evaluated), ::
 
     context.declare( 'Resistance_ratio','R/R', 'Resistance//Resistance' )
     ureg.unit('Resistance_ratio','ohm_per_ohm','Ohm/Ohm')

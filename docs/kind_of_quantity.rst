@@ -14,7 +14,7 @@ A :class:`.KindOfQuantity` represents the general notion of a quantity, such as:
     context = Context( ("Length","L"), ("Time","T") )
     Length, Time = context.base_quantities
     
-Quantity calculus is defined for :class:`.KindOfQuantity` objects (see, :mod:`.context`).
+The algebraic rules of quantity calculus are defined for :class:`.KindOfQuantity` objects (see, :mod:`.context`).
 
 .. _kind_of_quantity_module:
 
