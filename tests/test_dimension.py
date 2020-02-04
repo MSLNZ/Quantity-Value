@@ -28,8 +28,8 @@ class TestDimension(unittest.TestCase):
         
         self.assertTrue( Dimension( context, (0,0,0) ).is_dimensionless )
         # Default - always present
-        Numeric = context['Numeric']
-        self.assertTrue( context._koq_to_dim(Numeric).is_dimensionless )
+        Number = context['Number']
+        self.assertTrue( context._koq_to_dim(Number).is_dimensionless )
         
         # Derived KoQ
         Speed = context.declare('Speed','V','Length/Time')

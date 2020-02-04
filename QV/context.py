@@ -7,7 +7,7 @@ warnings.filterwarnings(
 )
 from bidict import bidict 
 
-from QV.kind_of_quantity import KindOfQuantity, Numeric
+from QV.kind_of_quantity import KindOfQuantity, Number
 from QV.dimension import Dimension
 
 #----------------------------------------------------------------------------
@@ -51,8 +51,8 @@ class Context(object):
         dimension = [0] * len(argv)
         
         # Dimensionless case is included by default
-        self._koq_dimension[Numeric] = Dimension(self,dimension)
-        self._koq.update( {'Numeric':Numeric, '1':Numeric} ) 
+        self._koq_dimension[Number] = Dimension(self,dimension)
+        self._koq.update( {'Number':Number, '1':Number} ) 
         
         for i,koq in enumerate( self._basis ):
             if koq in self._koq_dimension:

@@ -1,6 +1,6 @@
 from __future__ import division 
 
-__all__ = ( 'KindOfQuantity', 'Numeric' )
+__all__ = ( 'KindOfQuantity', 'Number' )
 
 #----------------------------------------------------------------------------
 class KindOfQuantity(object):
@@ -48,7 +48,7 @@ class KindOfQuantity(object):
             
     def __rmul__(self,lhs):
         # Assume that the lhs will behave as a number
-        return Mul(Numeric,self)
+        return Mul(Number,self)
             
     def __truediv__(self,rhs):
         # NB deliberately don't allow `rhs` to be numeric
@@ -56,7 +56,7 @@ class KindOfQuantity(object):
 
     def __rtruediv__(self,lhs):
         # Assume that lhs behaves like a number
-        return Div(Numeric,self)
+        return Div(Number,self)
         
     # def __div__(self,rhs):
         # return KindOfQuantity.__truediv__(self,rhs)
@@ -70,7 +70,7 @@ class KindOfQuantity(object):
 
     def __rfloordiv__(self,lhs):
         # Assume that lhs behaves like a number
-        return Ratio(Numeric,self)
+        return Ratio(Number,self)
         
     def _simplify(self):
         return Simplify(self)
@@ -219,7 +219,7 @@ class Ratio(BinaryOp):
 
 #----------------------------------------------------------------------------
 # The kind of quantity of all numbers
-Numeric = KindOfQuantity('Numeric','1')
+Number = KindOfQuantity('Number','1')
 
 # ===========================================================================    
 if __name__ == "__main__":

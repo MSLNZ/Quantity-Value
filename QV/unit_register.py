@@ -36,9 +36,9 @@ class UnitRegister(object):
         self._name_to_unit = dict() # unit name -> unit
         
         # There must always be a unit for numbers
-        Numeric = context['Numeric']
-        unity = Unit(Numeric,'','',self,1)        
-        self._koq_to_unit[Numeric] = unity
+        Number = context['Number']
+        unity = Unit(Number,'','',self,1)        
+        self._koq_to_unit[Number] = unity
         self._name_to_unit['unity'] = unity
         self.__dict__['unity'] = unity 
             

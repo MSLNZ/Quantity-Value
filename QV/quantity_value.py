@@ -77,7 +77,7 @@ class ValueUnit(object):
     def __radd__(self,lhs):
         rhs = self
         # Can add numbers to numeric QVs
-        if rhs.unit.scale.kind_of_quantity is Numeric:
+        if rhs.unit.scale.kind_of_quantity is Number:
             return ValueUnit( lhs + rhs.value, rhs.unit )
         else:
             return NotImplemented
@@ -124,7 +124,7 @@ class ValueUnit(object):
     def __rsub__(self,lhs):
         rhs = self
         # Can subtract numeric QVs from numbers
-        if rhs.unit.scale.kind_of_quantity is Numeric:
+        if rhs.unit.scale.kind_of_quantity is Number:
             return ValueUnit( lhs - rhs.value, rhs.unit )
         else:
             return NotImplemented
@@ -233,7 +233,7 @@ def unit(quantity_value):
         return quantity_value.unit 
     except AttributeError:
         # TODO: This must be interpreted as being  
-        # equivalent to `unity`, the Numeric unit.
+        # equivalent to `unity`, the Number unit.
         return None 
        
 #----------------------------------------------------------------------------
