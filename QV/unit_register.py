@@ -234,7 +234,7 @@ def metric_unit(prefix,reference_unit):
         >>> context = Context(('Length','L')) 
         >>> SI =  UnitRegister("SI",context)
         >>> metre = SI.unit('Length','metre','m')  
-        >>> centimetre = metric_prefix.centi(metre) 
+        >>> centimetre = prefix.centi(metre) 
         >>> print( centimetre )
         cm
 

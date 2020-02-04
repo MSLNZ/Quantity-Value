@@ -5,7 +5,7 @@ from QV.quantity_value import *
 from QV.unit_register import *
 from QV.context import *
 
-from QV import metric_prefix 
+from QV import prefix 
 #----------------------------------------------------------------------------
 
 __all__ = (
@@ -18,7 +18,7 @@ __all__ = (
     'UnitRegister',
     'related_unit',
     'metric_unit',
-    'metric_prefix'
+    'prefix'
 )
 
 #----------------------------------------------------------------------------
