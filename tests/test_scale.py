@@ -6,7 +6,7 @@ import unittest
 from QV import * 
 from QV.kind_of_quantity import * 
 from QV.scale import *
-from QV.metric_prefix import *
+from QV.prefix import *
 
 #----------------------------------------------------------------------------
 class TestPrefix(unittest.TestCase):
@@ -16,9 +16,9 @@ class TestPrefix(unittest.TestCase):
         abrev = 'c'
         value = 1E-2
         
-        centi = MetricPrefix(name,abrev,value)
+        centi = Prefix(name,abrev,value)
         
-        self.assertTrue( type(centi) is MetricPrefix )
+        self.assertTrue( type(centi) is Prefix )
         self.assertEqual( centi.name, name )
         self.assertEqual( str(centi), abrev )
         self.assertAlmostEqual( value, centi.value, 15 )

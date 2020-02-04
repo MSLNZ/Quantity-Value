@@ -4,7 +4,7 @@ from __future__ import division
 import unittest
 
 from QV import * 
-from QV.metric_prefix import *
+from QV.prefix import *
 from QV.quantity_value import ValueUnit
 
 #----------------------------------------------------------------------------

@@ -20,4 +20,4 @@ These are the package modules
     Scale <scale>
     Unit register <unit_register>
     Quantity value <quantity_value>
-    Metric prefix <metric_prefix>
+    Prefix <prefix>
