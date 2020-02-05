@@ -103,6 +103,29 @@ class Unit(object):
             return 1 
 
     @property 
+    def is_dimensionless(self):
+        """True when the associated kind of quantity is dimensionless in the current context"""
+        context = self.register.context 
+        return context.dimensions( self.kind_of_quantity ).is_dimensionless
+
+        
+    def is_ratio_of(self,other_koq):
+        """
+        True when the kind of quantity associated with ``self`` is a dimensionless 
+        ratio and the dimensions of the numerator are the same dimensions as 
+        the numerator dimensions associated with the ``other`` kind of quantity.
+        
+        """
+        context = self.register.context 
+        lhs = context.dimensions( self.kind_of_quantity )
+        rhs = context.dimensions( other_koq )
+        
+        if lhs.numerator == lhs.denominator and rhs.is_simplified:
+            return lhs.numerator == rhs.numerator
+        else:
+            return False
+
+    @property 
     def register(self):
         """The associated unit register"""
         return self._register

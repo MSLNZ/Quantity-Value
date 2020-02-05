@@ -1,7 +1,6 @@
 from __future__ import division 
 from __future__ import print_function 
 
-
 from QV.scale import Unit
 
 __all__ = ('qvalue','value','unit','qresult','qratio')
@@ -215,7 +214,7 @@ def qvalue(value,unit):
 #----------------------------------------------------------------------------
 def value(quantity_value):
     """
-    Return the value of a quantity value object.
+    Return the value
     
     """
     try:
@@ -226,7 +225,7 @@ def value(quantity_value):
 #----------------------------------------------------------------------------
 def unit(quantity_value):
     """
-    Return the measurement unit (scale) of a quantity value object.
+    Return the unit (measurement scale)
     
     """
     try:

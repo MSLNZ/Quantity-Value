@@ -150,8 +150,7 @@ Dimensionless ratios can retain quantity information if they are defined using t
     
     v_in = qvalue( 5.12, volt) 
     
-    koq_dim = context.dimensions( divider.unit.kind_of_quantity.name )
-    if koq_dim.is_ratio_of( context.dimensions('Resistance') ):
+    if v_divider.unit.is_ratio_of(ohm.kind_of_quantity) ):
         print( "Resistive divider" )
         print( "  ratio =",divider )
         print( "  v_out =", qresult(v_divider * v_in) )
