@@ -112,7 +112,24 @@ class TestContext(unittest.TestCase):
             'Length*Length'
         )
  
+    def test_simple_quantity_calculus(self):
+        
+        context = Context( ("Current","I"),("Voltage","V"),("Time","T") )
 
+        context.declare('Resistance','R','Voltage/Current')
+        context.declare('Power','P','V*V/R')
+
+        Voltage = context['Voltage']
+        Resistance = context['Resistance']
+
+        I = context.evaluate(  Voltage/Resistance )
+        self.assertEqual( 
+            context.dimensions(I), context.dimensions('Current') 
+        )
+        tmp = context.evaluate( I*Voltage )
+        self.assertEqual( 
+            context.dimensions(tmp), context.dimensions('Power') 
+        )
 #============================================================================
 if __name__ == '__main__':
     unittest.main()
