@@ -85,6 +85,7 @@ It is interesting that QV can treat distance and volume as quite distinct quanti
 
 Electrical quantities
 =====================
+
 Electrical measurements involve particular quantities, and associated units. We can use base dimensions :math:`V`, :math:`I` and :math:`T`, for potential difference, current and duration, respectively. Then additional kinds of quantity of interest include: resistance, capacitance, inductance, energy, power and angular frequency. The context can be configured, as follows :: 
 
     context = Context( ("Current","I"),("Voltage","V"),("Time","T") )
@@ -135,12 +136,14 @@ Which produces ::
     parallel resistance = 416.10738255 Ohm
 
 
-Dimensionless ratios
---------------------
+Ratios
+======
 
-Often ratios of quantities of the same kind arise in physical calculations. These are described as `dimensionless` quantities, but they are not plain numbers; the quantities involved should not be ignored. 
+Often ratios of quantities of the same kind arise in physical calculations. These are often described as `dimensionless` quantities, but they are not plain numbers and the quantities involved should not be ignored. 
 
-Dimensionless ratios can retain quantity information if they are defined using the function ``qratio``. A typical example of a dimensionless quantity, in the electrical context considered above, is a resistance ratio (potential divider). Adding to the code above (where ``r1`` was evaluated), ::
+Dimensionless ratios can retain quantity information if defined using the function ``qratio``. 
+
+For example, continuing the electrical case above (where ``r1`` was evaluated), a resistance ratio (potential divider) can be defined ::
 
     context.declare( 'Resistance_ratio','R/R', 'Resistance//Resistance' )
     ureg.unit('Resistance_ratio','ohm_per_ohm','Ohm/Ohm')
@@ -149,11 +152,12 @@ Dimensionless ratios can retain quantity information if they are defined using t
     divider = qratio( r2,(r1+r2) )
     
     v_in = qvalue( 5.12, volt) 
+    v_out = qresult(v_divider * v_in)
     
     if v_divider.unit.is_ratio_of(ohm.kind_of_quantity) ):
         print( "Resistive divider" )
-        print( "  ratio =",divider )
-        print( "  v_out =", qresult(v_divider * v_in) )
+        print( "  ratio =", divider )
+        print( "  v_out =", v_out )
 
 produces the output ::
   
@@ -161,6 +165,23 @@ produces the output ::
       ratio = 0.832214765101 Ohm/Ohm
       v_out = 4.26093959732 V
 
+Another example is the voltage gain of an amplifying stage ::
+
+    context.declare('Voltage_ratio','V/V','Voltage//Voltage')
+    volt_per_volt= ureg.unit('Voltage_ratio','volt_per_volt','V/V')
+    millivolt = milli(volt)
+    millivolt_per_volt = milli(volt_per_volt)
+    
+    v1 = qvalue(0.5,volt)
+    v2 = qvalue(1.5,millivolt)
+    gain = qratio( v2, v1 )
+    print( "Gain =", qresult(gain,millivolt_per_volt,simplify=False) )
+
+The output is ::
+
+    Gain = 3.0 mV/V
+    
+ 
 .. [#FN1] The distance reference unit could have been chosen as  100 km, instead of 1 km, but it seems more natural to proceed as shown. The reference unit for consumption, ``litres_per_km``, is determined by the reference units for volume and distance. The related unit of ``litres_per_100_km`` must be introduced with an appropriate scale factor.
 .. [#FN2] The argument ``litres_per_100_km`` is passed to ``qresult()``  to obtain results in the required unit. The default would be the reference unit declared for the kind of quantity (``litres_per_km`` in this case). 
 .. [#FN3] Reduced to SI base units, the consumption is about :math:`8.6 \times 10^{-8}\,m^2`. This area, multiplied by the distance travelled, is the volume of fuel required.
