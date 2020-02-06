@@ -1,12 +1,11 @@
 from __future__ import division 
 
-# Note, mappings from KoQ to unit can be many-to-one. 
-#
 # `UnitRegister` does not represent the concept of a 'system of units'. 
 # Different types of units belong in different systems, like the SI 
 # would have m, cm, km, etc, and Imperial would have the foot, yard,
 # etc. However, all those length scales are "self-similar" in the 
 # sense that a scale factor converts from one to the other.
+# Mappings from KoQ to unit objects can be many-to-one. 
  
 from fractions import *
 
@@ -139,7 +138,7 @@ class UnitRegister(object):
             # "{!s} is a reserved name".format(term)
         # self.__dict__[term] = unit 
  
-    def unit(self,koq_name,unit_name,unit_term):
+    def reference_unit(self,koq_name,unit_name,unit_term):
         """
         Create a reference unit for ``koq_name``
         
@@ -188,9 +187,9 @@ def related_unit(reference_unit,fraction,name,term):
         >>> context = Context( ("Distance","L"), ("Volume","V") )
         >>> FuelConsumption = context.declare('FuelConsumption','FC','Volume/Distance')
         >>> ureg =  UnitRegister("ureg",context)
-        >>> kilometre = ureg.unit('Distance','kilometre','km') 
-        >>> litre = ureg.unit('Volume','litre','L')
-        >>> litres_per_km = ureg.unit('FuelConsumption','litres_per_km','L/km')
+        >>> kilometre = ureg.reference_unit('Distance','kilometre','km') 
+        >>> litre = ureg.reference_unit('Volume','litre','L')
+        >>> litres_per_km = ureg.reference_unit('FuelConsumption','litres_per_km','L/km')
         >>> litres_per_100_km = related_unit(
         ...     ureg.litres_per_km,
         ...     Fraction(1,100),
@@ -224,59 +223,7 @@ def related_unit(reference_unit,fraction,name,term):
         
         return rational_unit
         
-# #----------------------------------------------------------------------------
-# def _prefixed_unit(prefix,reference_unit):
-    # """
-    # Define and register a multiple or sub-multiple of a
-    # reference unit for the same quantity.
-    
-    # Example ::
-        # >>> context = Context(('Length','L')) 
-        # >>> SI =  UnitRegister("SI",context)
-        # >>> metre = SI.unit('Length','metre','m')  
-        # >>> centimetre = prefix.centi(metre) 
-        # >>> print( centimetre )
-        # cm
 
-    # """
-    # kind_of_quantity = reference_unit.scale.kind_of_quantity
-    # register = reference_unit._register 
-
-    # # Check that `self` is a reference unit in the register,
-    # # because things like `centi(centi(metre))` are not permitted.
-    # if not reference_unit is register.reference_unit_for(
-        # reference_unit.scale.kind_of_quantity
-    # ):
-        # raise RuntimeError(
-            # "{!r} is not a reference unit".format(reference_unit.scale.name)  
-        # )     
-
-    # name = "{!s}{!s}".format(
-        # prefix.name,
-        # reference_unit.scale.name
-    # )
-    
-    # if name in register:
-        # return register[name]
-    # else:
-        # term = "{!s}{!s}".format(
-            # prefix.term,
-            # reference_unit.scale
-        # )
-        
-        # pq = Unit(
-            # kind_of_quantity,
-            # name,
-            # term,
-            # register,
-            # prefix.value
-        # )
-        
-        # # Buffer related quantities        
-        # register._register_by_name(pq)
-        
-        # return pq 
-        
 # ===========================================================================    
 if __name__ == "__main__":
     import doctest

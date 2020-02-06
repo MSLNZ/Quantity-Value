@@ -204,7 +204,7 @@ def qvalue(value,unit):
     
         >>> context = Context( ("Length","L"), ("Time","T") )
         >>> si = UnitRegister("si",context)
-        >>> metre = si.unit('Length','metre','m') 
+        >>> metre = si.reference_unit('Length','metre','m') 
         >>> qvalue( 1.84, metre )
         qvalue(1.84,metre)
         
@@ -261,9 +261,9 @@ def qresult(
         >>> context = Context( ("Length","L"), ("Time","T") )
         >>> Speed = context.declare('Speed','V','Length/Time')
         >>> si =  UnitRegister("si",context)
-        >>> metre = si.unit('Length','metre','m') 
-        >>> second = si.unit('Time','second','s') 
-        >>> metre_per_second = si.unit('Speed','metre_per_second','m*s-1')
+        >>> metre = si.reference_unit('Length','metre','m') 
+        >>> second = si.reference_unit('Time','second','s') 
+        >>> metre_per_second = si.reference_unit('Speed','metre_per_second','m*s-1')
         >>> d = qvalue(0.5,metre)
         >>> t = qvalue(1.0,second)
         >>> v0 = qresult(d/t)
@@ -339,9 +339,9 @@ def qratio(value_unit_1, value_unit_2, unit=None ):
     
         >>> context = Context( ("Current","I"),("Voltage","V") )
         >>> ureg = UnitRegister("ureg",context)
-        >>> volt = ureg.unit('Voltage','volt','V') 
+        >>> volt = ureg.reference_unit('Voltage','volt','V') 
         >>> voltage_ratio = context.declare('voltage_ratio','V/V','Voltage//Voltage')
-        >>> volt_per_volt = ureg.unit('voltage_ratio','volt_per_volt','V/V')
+        >>> volt_per_volt = ureg.reference_unit('voltage_ratio','volt_per_volt','V/V')
         >>> v1 = qvalue(1.23, volt)
         >>> v2 = qvalue(9.51, volt)
         >>> qratio( v2,v1 )

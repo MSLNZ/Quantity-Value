@@ -1,4 +1,4 @@
-# from QV.unit_register import _prefixed_unit
+from QV.unit_register import related_unit
 from QV.scale import Unit 
 
 #----------------------------------------------------------------------------
@@ -71,7 +71,7 @@ class Prefix(object):
 #============================================================================
 # Metric prefixes (multiples and sub-multiples of 10) 
 #
-yocto =         Prefix('yocto','5',1E-24)
+yocto =         Prefix('yocto','y',1E-24)
 zepto =         Prefix('zepto','z',1E-21)
 atto =          Prefix('atto','a',1E-18)
 femto =         Prefix('femto','f',1E-15)
@@ -102,6 +102,34 @@ metric_prefixes = (
     peta, exa, zetta, yotta
 )
 
+# The kilogram is a special case. 
+def si_mass_units(kg_reference_unit):
+    """
+    Generate multiples and sub-multiples for mass units in the SI
+    
+    ``kg_reference_unit`` must be the kilogram, defined as reference unit 
+    
+    """
+    if (
+        kg_reference_unit.scale.name != 'kilogram' and 
+        kg_reference_unit.scale.term != 'kg'
+    ):
+        raise RuntimeError(
+            "conventional name required, got {0.name} and{0.term}".format(
+                kg_reference_unit
+            )
+        )
+        
+    related_unit(kg_reference_unit,1E-3,'gram','g')
+    
+    for p_i in metric_prefixes:
+        if p_i.value != 1E3: 
+            related_unit(kg_reference_unit,
+                p_i.value / 1000.0,
+                p_i.name+'gram',
+                p_i.term+'g' 
+            )
+    
 #============================================================================
 # Binary prefixes 
 #
