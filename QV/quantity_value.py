@@ -275,15 +275,15 @@ def qresult(
         
     """
     if unit:
-        # Do not simplify dimensionless units 
-        simplify = not unit.is_dimensionless and simplify 
-        
         # Use a preferred unit 
         register = value_unit.unit.register
         if isinstance(unit,str):
             # `unit` is the name of a unit, so look up the object
             unit = register[unit]
             
+        # Do not simplify dimensionless units 
+        simplify = not unit.is_dimensionless and simplify 
+        
         if simplify:
             ref_unit = register.reference_unit_for( 
                 value_unit.unit.simplify() 
