@@ -169,18 +169,25 @@ Another example is the voltage gain of an amplifying stage ::
 
     context.declare('Voltage_ratio','V/V','Voltage//Voltage')
     volt_per_volt= ureg.unit('Voltage_ratio','volt_per_volt','V/V')
-    millivolt = milli(volt)
-    millivolt_per_volt = milli(volt_per_volt)
-    
+
+    volt_per_millivolt = related_unit(volt_per_volt,1E3,'volt_per_millivolt','V/mV')
+    volt_per_microvolt = related_unit(volt_per_volt,1E6,'volt_per_micovolt','V/uV')
+        
     v1 = qvalue(0.5,volt)
-    v2 = qvalue(1.5,millivolt)
-    gain = qratio( v2, v1 )
-    print( "Gain =", qresult(gain,millivolt_per_volt,simplify=False) )
-
-The output is ::
-
-    Gain = 3.0 mV/V
+    v2 = qvalue(0.5,micro(volt))
+    gain = qratio( v1, v2 )    
     
+    print( "Gain =", qresult(gain) )
+    print( "Gain =", qresult(gain,volt_per_microvolt) )
+    print( "Gain =", qresult(gain,volt_per_millivolt) )
+    print( "Gain =", qresult(gain,volt_per_volt) )
+
+The output is (Note, when no preferred unit is given (the first case), units are simplified.) ::
+
+    Gain = 1000000.0
+    Gain = 1.0 V/uV
+    Gain = 1000.0 V/mV
+    Gain = 1000000.0 V/V
  
 .. [#FN1] The distance reference unit could have been chosen as  100 km, instead of 1 km, but it seems more natural to proceed as shown. The reference unit for consumption, ``litres_per_km``, is determined by the reference units for volume and distance. The related unit of ``litres_per_100_km`` must be introduced with an appropriate scale factor.
 .. [#FN2] The argument ``litres_per_100_km`` is passed to ``qresult()``  to obtain results in the required unit. The default would be the reference unit declared for the kind of quantity (``litres_per_km`` in this case). 

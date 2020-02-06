@@ -275,6 +275,9 @@ def qresult(
         
     """
     if unit:
+        # Do not simplify dimensionless units 
+        simplify = not unit.is_dimensionless and simplify 
+        
         # Use a preferred unit 
         register = value_unit.unit.register
         if isinstance(unit,str):
