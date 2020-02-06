@@ -30,14 +30,14 @@ class TestPrefix(unittest.TestCase):
         SI =  UnitRegister("SI",context)
 
         # Create complete sets of prefixed units
-        metre = SI.unit('Length','metre','m') 
+        metre = SI.reference_unit('Length','metre','m') 
         for p_i in prefix.metric_prefixes: p_i(metre)
 
-        second = SI.unit('Time','second','s')  
+        second = SI.reference_unit('Time','second','s')  
         for p_i in prefix.metric_prefixes: p_i(second)
 
         # Doesn't matter that this is not the traditional 'base' unit
-        gram = SI.unit('Mass','gram','g')  
+        gram = SI.reference_unit('Mass','gram','g')  
         for p_i in prefix.metric_prefixes: p_i(gram) 
         
         self.assertRaises( AttributeError, getattr,SI,'millihenry')

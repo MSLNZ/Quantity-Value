@@ -42,7 +42,7 @@ class TestUnit(unittest.TestCase):
         Length = 'Length'
         name = 'metre'
         symbol = 'm' 
-        metre = SI.unit(Length,name,symbol)  
+        metre = SI.reference_unit(Length,name,symbol)  
 
         self.assertTrue( type(metre) is Unit )
         self.assertEqual( str(metre.scale), symbol )
@@ -69,7 +69,7 @@ class TestUnit(unittest.TestCase):
         # operations 
         # NB, the resolution of unit expressions is handled 
         # in quantity_value.py 
-        second = SI.unit('Time','second','s')  
+        second = SI.reference_unit('Time','second','s')  
         
         tmp = metre * second
         self.assertTrue( isinstance(tmp,scale.Mul) )

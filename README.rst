@@ -27,10 +27,10 @@ Units can be declared in terms of these quantities
 
     >>> ureg = UnitRegister("ureg",context)
     >>>
-    >>> volt = ureg.unit('Voltage','volt','V') 
-    >>> amp = ureg.unit('Current','amp','A') 
+    >>> volt = ureg.reference_unit('Voltage','volt','V') 
+    >>> amp = ureg.reference_unit('Current','amp','A') 
     >>> milliamp = prefix.milli(amp)
-    >>> ohm = ureg.unit('Resistance','Ohm','Ohm')
+    >>> ohm = ureg.reference_unit('Resistance','Ohm','Ohm')
     
 and then quantity-values can be created and manipulated
 

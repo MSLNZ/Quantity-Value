@@ -15,7 +15,7 @@ class TestQuantityValue(unittest.TestCase):
         context = Context( ('Length','L') )
         SI =  UnitRegister("SI",context)
         Length = 'Length'
-        metre = SI.unit(Length,'metre','m')
+        metre = SI.reference_unit(Length,'metre','m')
         
         x = 1.234
         vu = qvalue(x,metre)
@@ -32,7 +32,7 @@ class TestQuantityValue(unittest.TestCase):
         SI =  UnitRegister("SI",context)
         Length = 'Length'
         
-        metre = SI.unit(Length,'metre','m')
+        metre = SI.reference_unit(Length,'metre','m')
 
         x1 = 1.2 
         x2 = 3.4 
@@ -61,7 +61,7 @@ class TestQuantityValue(unittest.TestCase):
 
         # Illegal case 
         Imperial = UnitRegister("Imperial",context)
-        foot = Imperial.unit(Length,'foot','ft')
+        foot = Imperial.reference_unit(Length,'foot','ft')
         qv3 = qvalue(x1,foot)
         
         # When QVs use different unit registers, they cannot be combined
@@ -88,10 +88,10 @@ class TestQuantityValue(unittest.TestCase):
 
         si =  UnitRegister("si",context)
 
-        metre = si.unit('Length','metre','m') 
-        second = si.unit('Time','second','s') 
-        metre_per_second = si.unit('Speed','metre_per_second','m*s-1')
-        metre_per_second_per_second = si.unit(
+        metre = si.reference_unit('Length','metre','m') 
+        second = si.reference_unit('Time','second','s') 
+        metre_per_second = si.reference_unit('Speed','metre_per_second','m*s-1')
+        metre_per_second_per_second = si.reference_unit(
             'Acceleration',
             'metre_per_second_per_second',
             'm*s-2'
@@ -130,10 +130,10 @@ class TestQuantityValue(unittest.TestCase):
         ureg =  UnitRegister("ureg",context)
 
         # Reference units 
-        kilometre = ureg.unit('Distance','kilometre','km') 
-        litre = ureg.unit('Volume','litre','L')
+        kilometre = ureg.reference_unit('Distance','kilometre','km') 
+        litre = ureg.reference_unit('Volume','litre','L')
 
-        ureg.unit('FuelConsumption','litres_per_km','L/km')
+        ureg.reference_unit('FuelConsumption','litres_per_km','L/km')
         litres_per_100_km = related_unit(
             ureg.litres_per_km,
             Fraction(1,100),
@@ -159,9 +159,9 @@ class TestQuantityValue(unittest.TestCase):
         context.declare('Resistance','R','Voltage/Current')
         ureg =  UnitRegister("ureg",context)
 
-        volt = ureg.unit('Voltage','volt','V') 
-        ampere = ureg.unit('Current','ampere','A') 
-        ohm = ureg.unit('Resistance','Ohm','Ohm')
+        volt = ureg.reference_unit('Voltage','volt','V') 
+        ampere = ureg.reference_unit('Current','ampere','A') 
+        ohm = ureg.reference_unit('Resistance','Ohm','Ohm')
 
         v1 = qvalue(0.5,volt)
         i1 = qvalue(1.E-3,ampere)
@@ -177,7 +177,7 @@ class TestQuantityValue(unittest.TestCase):
         )
 
         Resistance_ratio = context.declare('Resistance_ratio','R/R','Resistance//Resistance')
-        r_ratio = ureg.unit('Resistance_ratio','ohm_per_ohm','Ohm/Ohm')
+        r_ratio = ureg.reference_unit('Resistance_ratio','ohm_per_ohm','Ohm/Ohm')
 
         v_divider = qratio( r2,(r1+r2) )    
         
