@@ -5,15 +5,15 @@ from __future__ import division
 # `UnitRegister` does not represent the concept of a 'system of units'. 
 # Different types of units belong in different systems, like the SI 
 # would have m, cm, km, etc, and Imperial would have the foot, yard,
-# etc. However, all those length scales are "similar" in the 
-# sense that a simple multiplier converts from one to the other.
+# etc. However, all those length scales are "self-similar" in the 
+# sense that a scale factor converts from one to the other.
  
 from fractions import *
 
 from QV.scale import Unit 
 
 __all__ = (
-    'UnitRegister', 'related_unit', 'metric_unit'
+    'UnitRegister', 'related_unit'
 )
 
 #----------------------------------------------------------------------------
@@ -224,58 +224,58 @@ def related_unit(reference_unit,fraction,name,term):
         
         return rational_unit
         
-#----------------------------------------------------------------------------
-def metric_unit(prefix,reference_unit):
-    """
-    Define and register a metric multiple of the
-    reference unit for the same quantity.
+# #----------------------------------------------------------------------------
+# def _prefixed_unit(prefix,reference_unit):
+    # """
+    # Define and register a multiple or sub-multiple of a
+    # reference unit for the same quantity.
     
-    Example ::
-        >>> context = Context(('Length','L')) 
-        >>> SI =  UnitRegister("SI",context)
-        >>> metre = SI.unit('Length','metre','m')  
-        >>> centimetre = prefix.centi(metre) 
-        >>> print( centimetre )
-        cm
+    # Example ::
+        # >>> context = Context(('Length','L')) 
+        # >>> SI =  UnitRegister("SI",context)
+        # >>> metre = SI.unit('Length','metre','m')  
+        # >>> centimetre = prefix.centi(metre) 
+        # >>> print( centimetre )
+        # cm
 
-    """
-    kind_of_quantity = reference_unit.scale.kind_of_quantity
-    register = reference_unit._register 
+    # """
+    # kind_of_quantity = reference_unit.scale.kind_of_quantity
+    # register = reference_unit._register 
 
-    # Check that `self` is a reference unit in the register,
-    # because things like `centi(centi(metre))` are not permitted.
-    if not reference_unit is register.reference_unit_for(
-        reference_unit.scale.kind_of_quantity
-    ):
-        raise RuntimeError(
-            "{!r} is not a reference unit".format(reference_unit.scale.name)  
-        )     
+    # # Check that `self` is a reference unit in the register,
+    # # because things like `centi(centi(metre))` are not permitted.
+    # if not reference_unit is register.reference_unit_for(
+        # reference_unit.scale.kind_of_quantity
+    # ):
+        # raise RuntimeError(
+            # "{!r} is not a reference unit".format(reference_unit.scale.name)  
+        # )     
 
-    name = "{!s}{!s}".format(
-        prefix.name,
-        reference_unit.scale.name
-    )
+    # name = "{!s}{!s}".format(
+        # prefix.name,
+        # reference_unit.scale.name
+    # )
     
-    if name in register:
-        return register[name]
-    else:
-        term = "{!s}{!s}".format(
-            prefix.term,
-            reference_unit.scale
-        )
+    # if name in register:
+        # return register[name]
+    # else:
+        # term = "{!s}{!s}".format(
+            # prefix.term,
+            # reference_unit.scale
+        # )
         
-        pq = Unit(
-            kind_of_quantity,
-            name,
-            term,
-            register,
-            prefix.value
-        )
+        # pq = Unit(
+            # kind_of_quantity,
+            # name,
+            # term,
+            # register,
+            # prefix.value
+        # )
         
-        # Buffer related quantities        
-        register._register_by_name(pq)
+        # # Buffer related quantities        
+        # register._register_by_name(pq)
         
-        return pq 
+        # return pq 
         
 # ===========================================================================    
 if __name__ == "__main__":

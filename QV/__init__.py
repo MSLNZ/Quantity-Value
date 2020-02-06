@@ -17,7 +17,6 @@ __all__ = (
     'Context',
     'UnitRegister',
     'related_unit',
-    'metric_unit',
     'prefix'
 )
 
