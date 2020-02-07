@@ -121,7 +121,7 @@ metric_prefixes = (
         >>> for p_i in prefix.metric_prefixes: 
         ...     related = p_i(second)
         ...     print( "{0.scale.name} ({0.scale.term}): {0.multiplier:.1E}".format(related) )
-
+        ...
         yoctosecond (ys): 1.00E-24
         zeptosecond (zs): 1.00E-21
         attosecond (as): 1.00E-18
@@ -200,7 +200,7 @@ binary_prefixes = (
         >>> for p_i in prefix.binary_prefixes: 
         ...     related = p_i(byte)
         ...     print( "{0.scale.name} ({0.scale.term}): {0.multiplier}".format(related) )
-        
+        ...        
         kibibyte (kib): 1048
         mebibyte (Mib): 1098304
         gibibyte (Gib): 1151022592
