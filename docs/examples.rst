@@ -22,9 +22,9 @@ Units are defined in relation to kinds of quantity. In this case, we might write
 
     SI =  UnitRegister("SI",context)
 
-    metre = SI.unit('Length','metre','m') 
-    second = SI.unit('Time','second','s') 
-    metre_per_second = SI.unit( 'Speed','metre_per_second','m/s' )
+    metre = SI.reference_unit('Length','metre','m') 
+    second = SI.reference_unit('Time','second','s') 
+    metre_per_second = SI.reference_unit( 'Speed','metre_per_second','m/s' )
 
 Here, the ``SI`` object is a register of units, each associated with the measurement of a kind of quantity and hence to the dimensions of that quantity in the context. The ``unit`` declaration creates a reference unit within the register; other units of the same kind of quantity can also be registered, but must be related to the reference unit by a conversion factor (see below, where a related unit, L/(100 km), is created for fuel consumption.)
 
@@ -55,9 +55,9 @@ When `ad hoc` units are preferred, this package facilitates their use. For examp
     ureg =  UnitRegister("ureg",context)
 
     # Reference units 
-    kilometre = ureg.unit('Distance','kilometre','km') 
-    litre = ureg.unit('Volume','litre','L')
-    litres_per_km = ureg.unit( 'FuelConsumption','litres_per_km','L/km' )
+    kilometre = ureg.reference_unit('Distance','kilometre','km') 
+    litre = ureg.reference_unit('Volume','litre','L')
+    litres_per_km = ureg.reference_unit( 'FuelConsumption','litres_per_km','L/km' )
     
     litres_per_100_km = related_unit(
     ...     litres_per_km,
@@ -101,14 +101,14 @@ Suitable units are::
 
     ureg =  UnitRegister("Reg",context)
     
-    volt = ureg.unit('Voltage','volt','V') 
-    second = ureg.unit('Time','second','s') 
-    ampere = ureg.unit('Current','ampere','A') 
-    ohm = ureg.unit('Resistance','Ohm','Ohm')
-    henry = ureg.unit('Inductance','henry','H')
-    rad_per_s = ureg.unit( 'Angular_frequency','radian_per_second','rad/s' )
-    joule = ureg.unit('Energy','joule','J')
-    watt = ureg.unit('Power','watt','W')
+    volt = ureg.reference_unit('Voltage','volt','V') 
+    second = ureg.reference_unit('Time','second','s') 
+    ampere = ureg.reference_unit('Current','ampere','A') 
+    ohm = ureg.reference_unit('Resistance','Ohm','Ohm')
+    henry = ureg.reference_unit('Inductance','henry','H')
+    rad_per_s = ureg.reference_unit( 'Angular_frequency','radian_per_second','rad/s' )
+    joule = ureg.reference_unit('Energy','joule','J')
+    watt = ureg.reference_unit('Power','watt','W')
 
 Calculations are then straightforward. For example, ::
 
@@ -146,7 +146,7 @@ Dimensionless ratios can retain quantity information if defined using the functi
 For example, continuing the electrical case above (where ``r1`` was evaluated), a resistance ratio (potential divider) can be defined ::
 
     context.declare( 'Resistance_ratio','R/R', 'Resistance//Resistance' )
-    ureg.unit('Resistance_ratio','ohm_per_ohm','Ohm/Ohm')
+    ureg.reference_unit('Resistance_ratio','ohm_per_ohm','Ohm/Ohm')
     
     r2 = qvalue(2.48E3,ohm)
     divider = qratio( r2,(r1+r2) )
@@ -168,7 +168,7 @@ produces the output ::
 Another example is the voltage gain of an amplifying stage ::
 
     context.declare('Voltage_ratio','V/V','Voltage//Voltage')
-    volt_per_volt= ureg.unit('Voltage_ratio','volt_per_volt','V/V')
+    volt_per_volt= ureg.reference_unit('Voltage_ratio','volt_per_volt','V/V')
 
     volt_per_millivolt = related_unit(volt_per_volt,1E3,'volt_per_millivolt','V/mV')
     volt_per_microvolt = related_unit(volt_per_volt,1E6,'volt_per_micovolt','V/uV')

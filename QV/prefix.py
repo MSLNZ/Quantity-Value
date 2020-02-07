@@ -1,12 +1,23 @@
 from QV.unit_register import related_unit
 from QV.scale import Unit 
 
+
 #----------------------------------------------------------------------------
 class Prefix(object):
 
     """
-    Holds the name, term and scale factor for a prefix
-    and can be called to generate a new related unit.
+    Holds the name, short name (term) and scale factor 
+    for a prefix. It can be called to generate a new related unit.
+   
+    For example::
+    
+        >>> context = Context( ('Length','L') )
+        >>> SI =  UnitRegister("SI",context)
+        >>> metre = SI.reference_unit('Length','metre','m')
+        >>> centimetre = prefix.centi(metre)
+        >>> print( centimetre )
+        cm
+        
     """
     
     def __init__(self,name,term,value):
@@ -101,13 +112,45 @@ metric_prefixes = (
     kilo, mega, giga, tera,
     peta, exa, zetta, yotta
 )
+"""A collection of all metric prefixes. 
+
+    Useful for generating all related units by iteration::
+    
+        >>> context = Context( ('Time','T') )
+        >>> second = SI.reference_unit('Time','second','s')  
+        >>> for p_i in prefix.metric_prefixes: 
+        ...     related = p_i(second)
+        ...     print( "{0.scale.name} ({0.scale.term}): {0.multiplier:.1E}".format(related) )
+
+        yoctosecond (ys): 1.00E-24
+        zeptosecond (zs): 1.00E-21
+        attosecond (as): 1.00E-18
+        femtosecond (fs): 1.00E-15
+        picosecond (ps): 1.00E-12
+        nanosecond (ns): 1.00E-09
+        microsecond (us): 1.00E-06
+        millisecond (ms): 1.00E-03
+        centisecond (cs): 1.00E-02
+        decisecond (ds): 1.00E-01
+        dekasecond (das): 1.00E+01
+        hectosecond (hs): 1.00E+02
+        kilosecond (ks): 1.00E+03
+        megasecond (Ms): 1.00E+06
+        gigasecond (Gs): 1.00E+09
+        terasecond (Ts): 1.00E+12
+        petasecond (Ps): 1.00E+15
+        exasecond (Es): 1.00E+18
+        zettasecond (Zs): 1.00E+21
+        yottasecond (Ys): 1.00E+24
+"""
 
 # The kilogram is a special case. 
 def si_mass_units(kg_reference_unit):
     """
     Generate multiples and sub-multiples for mass units in the SI
     
-    ``kg_reference_unit`` must be the kilogram, defined as reference unit 
+    ``kg_reference_unit`` must be defined as a reference unit, with 
+    name ``kilogram`` and term ``kg``
     
     """
     if (
@@ -133,7 +176,7 @@ def si_mass_units(kg_reference_unit):
 #============================================================================
 # Binary prefixes 
 #
-kibi =          Prefix('kibi','ki',1048)
+kibi =          Prefix('kibi','ki',1048)        
 mebi =          Prefix('mebi','Mi',1048**2)
 gibi =          Prefix('gibi','Gi',1048**3)
 tebi =          Prefix('tebi','Ti',1048**4)
@@ -147,3 +190,24 @@ binary_prefixes = (
     kibi, mebi, gibi, tebi,
     pebi, exbi, zebi, yobi
 )
+"""A collection of binary prefixes. 
+
+    Useful for generating all related units by iteration::
+    
+        >>> context = Context( ('Data','D') )
+        >>> ureg =  UnitRegister("Reg",context)
+        >>> byte = ureg.reference_unit('Data','byte','b')
+        >>> for p_i in prefix.binary_prefixes: 
+        ...     related = p_i(byte)
+        ...     print( "{0.scale.name} ({0.scale.term}): {0.multiplier}".format(related) )
+        
+        kibibyte (kib): 1048
+        mebibyte (Mib): 1098304
+        gibibyte (Gib): 1151022592
+        tebibyte (Tib): 1206271676416
+        pebibyte (Pib): 1264172716883968
+        exbibyte (Eib): 1324853007294398464
+        zebibyte (Zib): 1388445951644529590272
+        yottabyte (Yib): 1455091357323467010605056
+
+"""

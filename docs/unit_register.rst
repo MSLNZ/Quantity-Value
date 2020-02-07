@@ -11,7 +11,7 @@ The :mod:`.unit_register` combines with the :mod:`.scale` and the :mod:`.context
 Units are declared by providing the name of the kind of quantity, the unit name and a term symbol (short name) for the unit, for example ::
 
     SI =  UnitRegister("SI",context)
-    metre = SI.unit('Length','metre','m')   # reference unit
+    metre = SI.reference_unit('Length','metre','m')   # reference unit
     centimetre = metric_prefix.centi(metre) # related unit 
     
 Units can be looked up in the register by name or by term, or the name may be used as an attribute of the register. These expressions return the ``metre`` unit ::
