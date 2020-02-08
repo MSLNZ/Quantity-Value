@@ -189,9 +189,64 @@ The output is (Note, when no preferred unit is given (the first case), units are
     Gain = 1000.0 V/mV
     Gain = 1000000.0 V/V
  
+Angles
+======
+
+It well known that some SI quantities cannot be distinguished by dimensional analysis because they have the same dimensions [Brownstein]_. This ambiguity can be removed by introducing a base dimension for angle, and a new dimensional constant :math:`\eta`, but then some of the basic equations of physics also have to be changed [Quincey]_. 
+
+It is not as bad as it sounds. For example, the well-known equation 
+
+.. math::
+
+    s = r \cdot \theta \;,
+ 
+for the length of arc subtended by an angle :math:`\theta` on a circle of radius :math:`r`, becomes 
+
+.. math::
+
+    s = \eta \cdot r \cdot \theta \;.
+
+In this equation, angle has the dimension :math:`A` and the constant :math:`\eta` has the dimension :math:`A^{-1}`, so :math:`s` has the dimension of length, as expected (references [Brownstein]_ and [Quincey]_ should be consulted for more detail).
+
+No one is suggesting that a dimension for angle should be added to the SI, however, a number of authors have remarked that using an extra dimension in computer systems would obtain more reliable dimensional homogeneity checks. The quantity-value package is perfect for this. The following simple example shows how the arc length calculation can be coded. More particularly, it shows how to introduce the dimension for angle and define the dimensional constant :math:`\eta`. ::
+
+    context = Context( ("Length","L"), ("Time","T"), ("Angle","A") )
+    InverseAngle = context.declare('InverseAngle','1/A','1/A')
+
+    xi = UnitRegister("xi",context)
+
+    metre = xi.reference_unit('Length','metre','m') 
+    second = xi.reference_unit('Time','second','s') 
+    radian = xi.reference_unit('Angle','radian','rad') 
+    inv_radian = xi.reference_unit('InverseAngle','per radian','1/rad') 
+
+    from math import pi
+
+    # Constants
+    PI = qvalue( pi, radian )
+    ETA = qresult( 1.0 / PI )
+    
+    print( "pi =", PI)
+    print( "eta =", ETA )    
+
+    radius = qvalue( 0.1, metre )
+    angle = qresult( PI/8 )
+    arc_length = qresult( ETA * angle * radius )
+
+    print( "arc length =", arc_length )
+
+The output displays ::
+
+    pi = 3.14159265359 rad
+    eta = 0.318309886184 1/rad
+    arc length = 0.0125 m
+    
+.. rubric:: Footnotes
+
 .. [#FN1] The distance reference unit could have been chosen as  100 km, instead of 1 km, but it seems more natural to proceed as shown. The reference unit for consumption, ``litres_per_km``, is determined by the reference units for volume and distance. The related unit of ``litres_per_100_km`` must be introduced with an appropriate scale factor.
 .. [#FN2] The argument ``litres_per_100_km`` is passed to ``qresult()``  to obtain results in the required unit. The default would be the reference unit declared for the kind of quantity (``litres_per_km`` in this case). 
 .. [#FN3] Reduced to SI base units, the consumption is about :math:`8.6 \times 10^{-8}\,m^2`. This area, multiplied by the distance travelled, is the volume of fuel required.
 
-
+.. [Brownstein] K. R. Brownstein, *"Angles - lets treat them squarely"* , Am. J. Phys. **65** (7), July 1997, pp 605-614.
+.. [Quincey] P. Quincey and R. J. C. Brown, *"Implications of adopting plane angle as a base quantity in the SI"* , Metrologia **53** , 2016, pp 998-1002.
 
