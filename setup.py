@@ -6,7 +6,7 @@ from setuptools import setup, find_packages
 tests_require = ['pytest-cov']
 
 if sys.version_info[:2] == (2, 7):
-    install_requires = ['bidict<=0.19.0']
+    install_requires = ['bidict<0.19.0']
     tests_require.extend(['zipp<2.0.0','pytest>=3.0,<5.0'])
 else:
     install_requires = ['bidict']
