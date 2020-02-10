@@ -5,6 +5,7 @@ import unittest
 
 from QV import * 
 from QV.prefix import *
+from QV.kind_of_quantity import Number
 from QV.quantity_value import ValueUnit
 
 #----------------------------------------------------------------------------
@@ -58,6 +59,15 @@ class TestQuantityValue(unittest.TestCase):
         vu = qv1 - qv2 
         self.assertAlmostEqual( vu.value, x1*100 - x2, 15 )       
         self.assertTrue( vu.unit is centi(metre) )
+        
+        # QV object on the right
+        qv4 = 1 + qvalue( 2, SI.unity )
+        self.assertAlmostEqual(qv4.value,3)
+        self.assertEqual(qv4.unit,SI.unity)
+
+        qv5 = 1 - qvalue( 2, SI.unity )
+        self.assertAlmostEqual(qv5.value,-1)
+        self.assertEqual(qv5.unit,SI.unity)
 
         # Illegal case 
         Imperial = UnitRegister("Imperial",context)
@@ -184,6 +194,23 @@ class TestQuantityValue(unittest.TestCase):
         self.assertTrue( v_divider.unit.is_dimensionless )
         self.assertTrue( v_divider.unit.is_ratio_of(ohm.kind_of_quantity) )
 
+        # Voltage divider
+        context.declare('Voltage_ratio','V/V','Voltage//Voltage')
+        volt_per_volt= ureg.reference_unit('Voltage_ratio','volt_per_volt','V/V')
+        volt_per_millivolt = related_unit(volt_per_volt,1E3,'volt_per_millivolt','V/mV')
+        volt_per_microvolt = related_unit(volt_per_volt,1E6,'volt_per_micovolt','V/uV')
+        
+        v1 = qvalue(0.5,volt)
+        v2 = qvalue(0.5,micro(volt))
+        gain = qratio( v1, v2 )
+        
+        self.assertAlmostEqual( 1000000.0, qresult(gain).value )
+        self.assertEqual( "1.0 V/uV", str( qresult(gain,volt_per_microvolt) ) )
+        self.assertEqual( "1000.0 V/mV", str( qresult(gain,volt_per_millivolt) ) )
+        self.assertEqual( "1000000.0 V/V", str( qresult(gain,volt_per_volt) ) )
+        # Inappropriate unit
+        self.assertRaises( RuntimeError, qratio, v1, v2, unit = volt  )
+        
 #============================================================================
 if __name__ == '__main__':
     unittest.main()

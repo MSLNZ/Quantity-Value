@@ -2,6 +2,7 @@ from __future__ import division
 from __future__ import print_function 
 
 from QV.scale import Unit
+from QV.kind_of_quantity import Number
 
 __all__ = ('qvalue','value','unit','qresult','qratio')
 
@@ -293,9 +294,9 @@ def qresult(
                 
         if unit.scale.kind_of_quantity != ref_unit.scale.kind_of_quantity:
             raise RuntimeError(
-                "{} are incompatible with {}".format(
+                "{} are incompatible with {!r}".format(
                     unit,
-                    ref_unit
+                    ref_unit.kind_of_quantity
                 )
             )
             
@@ -350,49 +351,36 @@ def qratio(value_unit_1, value_unit_2, unit=None ):
     """
     register = value_unit_1.unit.register 
     if not register is value_unit_1.unit.register :
-        raise RuntimeError("Different unit systems: {}, {}".format(
+        raise RuntimeError("Different unit registers: {}, {}".format(
             register, value_unit_1.unit.register)
         )
     
-    koq_1 = register.reference_unit_for( value_unit_1.unit ).scale.kind_of_quantity 
-    koq_2 = register.reference_unit_for( value_unit_2.unit ).scale.kind_of_quantity 
-    
-    if koq_1 != koq_2:
-        raise RuntimeError(
-            "Different kinds of quantity: {} and {}".format(
-                koq_1,koq_2
-            )
-        )
-    
-    if unit and koq_1 != unit.scale.kind_of_quantity:
-        raise RuntimeError(
-            "Different kinds of quantity: {} and {}".format(
-                koq_1, unit.scale.kind_of_quantity
-            )
-        )
-   
+    default_unit = register.reference_unit_for(value_unit_1.unit//value_unit_2.unit)
+    # Check that the user-supplied unit is compatible wit the quantity 
     if unit:
+        koq_1 = default_unit.scale.kind_of_quantity 
+        koq_2 = unit.scale.kind_of_quantity 
+        
+        if koq_1 != koq_2:
+            raise RuntimeError(
+                "Different kinds of quantity: {} and {}".format(
+                    koq_1,koq_2
+                )
+            )
+
         value = (
             value_unit_1.unit.multiplier*value_unit_1.value /
             (value_unit_2.unit.multiplier*value_unit_2.value) 
         )/unit.multiplier
         
-        return ValueUnit( 
-            value_unit.unit.multiplier*value_unit.value, 
-            unit
-        )    
+        return ValueUnit( value, unit )    
     else:
         value = (
             value_unit_1.unit.multiplier*value_unit_1.value /
             (value_unit_2.unit.multiplier*value_unit_2.value) 
         )
 
-        ureg = value_unit_1.unit.register
-        unit = register.reference_unit_for(value_unit_1.unit//value_unit_2.unit)
-        return ValueUnit( 
-            value, 
-            unit
-        )
+        return ValueUnit( value, default_unit )
     
 # ===========================================================================    
 if __name__ == "__main__":

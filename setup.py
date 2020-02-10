@@ -6,10 +6,10 @@ from setuptools import setup, find_packages
 tests_require = ['pytest-cov']
 
 if sys.version_info[:2] == (2, 7):
-    install_requires = ['bidict<=0.18']
+    install_requires = ['bidict<=0.19.0']
     tests_require.extend(['zipp<2.0.0','pytest>=3.0,<5.0'])
 else:
-    install_requires = ['bidict>=0.18']
+    install_requires = ['bidict']
     tests_require.append('pytest>=3.0')
 
 
@@ -104,7 +104,7 @@ sphinx = ['sphinx', 'sphinx_rtd_theme'] + install_requires if needs_sphinx else 
 
 
 setup(
-    name='Quantity Value',
+    name='Quantity-Value',
     version=fetch_init('version'),
     author='Measurement Standards Laboratory of New Zealand',
     author_email='info@measurement.govt.nz',
