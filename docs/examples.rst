@@ -34,8 +34,8 @@ Quantity values may be defined with the function ``qvalue()`` and used in calcul
     t = qvalue(1.0,second)
     print( "average speed =", qresult(d/t) )
 
-    x = qvalue(0.5,metre)
-    t = qvalue(1.0,second)
+    v0 = qvalue(5.2,metre_per_second)
+    x0 = qvalue(0.3,metre)
     print( "displacement =", x0 + v0*t )
 
 The output is ::
@@ -49,6 +49,8 @@ Fuel consumption
 ================
 When `ad hoc` units are preferred, this package facilitates their use. For example, fuel consumption is typically stated in units of litres per 100 km. This can be handled as follows [#FN1]_  ::
 
+    from fractions import Fraction
+    
     context = Context( ("Distance","L"), ("Volume","V") )
     FuelConsumption = context.declare( 'FuelConsumption','FC','Volume/Distance' )
     
@@ -60,10 +62,10 @@ When `ad hoc` units are preferred, this package facilitates their use. For examp
     litres_per_km = ureg.reference_unit( 'FuelConsumption','litres_per_km','L/km' )
     
     litres_per_100_km = related_unit(
-    ...     litres_per_km,
-    ...     Fraction(1,100),
-    ...     'litres_per_100_km','L/(100 km)'
-    ...     )
+         litres_per_km,
+         Fraction(1,100),
+         'litres_per_100_km','L/(100 km)'
+    )
 
 Calculations proceed as might be expected ::
 

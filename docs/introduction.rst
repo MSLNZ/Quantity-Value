@@ -33,9 +33,9 @@ The rules of quantity calculus are usually presented as arithmetic operations ap
 
 Dimensional analysis
 --------------------
-Dimensional analysis is based on the idea that physical laws do not depend on the units in which quantities are measured. It is an analytical technique used to study relationships among quantities subject to a physical laws. 
+Dimensional analysis is an analytical technique that can be used to study relationships among quantities subject to physical laws. It is based on the idea that physical laws do not depend on the units in which quantities are measured.
 
-The seven familiar SI base units and the convention of representing other units as a product of base-unit symbols, possibly exponentiated, is an application of dimensional analysis [SI_brochure]_. Hoverer, it is important to remember that the choice of SI dimensions is conventional. There is still freedom to choose the most convenient set of dimensions for a particular problem. It is also useful to remember that SI symbols are really just names for scales. The process of generating a name (by multiplying and dividing the names of base units) does not guarantee the existence of a meaningful physical quantity to be measured.  
+The seven familiar SI base units and the convention of representing other units as a product of base-unit symbols, possibly exponentiated, is an application of dimensional analysis [SI_brochure]_. However, it is important to remember that the choice of SI dimensions is conventional. There is still freedom to choose the most convenient set of dimensions for a particular problem. It is also useful to remember that SI symbols are really just names for scales. The process of generating a name (by multiplying and dividing the names of base units) does not guarantee the existence of a meaningful physical quantity to be measured.  
 
 .. rubric:: Footnotes
 
