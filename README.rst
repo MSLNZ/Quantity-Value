@@ -15,6 +15,10 @@ Example
 
 Calculations involving electrical measurements can be described in terms of a simple set of base quantities, here we declare current and voltage and the dependent quantity resistance
 
+.. invisible-code-block: pycon
+
+    >>> from __future__ import division
+
 .. code-block:: pycon 
 
     >>> from QV import *

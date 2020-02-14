@@ -3,7 +3,7 @@ import sys
 from distutils.cmd import Command
 from setuptools import setup, find_packages
 
-tests_require = ['pytest-cov']
+tests_require = ['pytest-cov','sybil']
 
 if sys.version_info[:2] == (2, 7):
     install_requires = ['bidict<0.19.0']

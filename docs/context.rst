@@ -26,7 +26,9 @@ For instance, the following displays the tuple ``(1,1,0)`` representing the dime
     print( context.dimensions('P') )
 
 
-:class:`.KindOfQuantity` objects can be retrieved from a context and used in expressions::
+:class:`.KindOfQuantity` objects can be retrieved from a context and used in expressions:
+
+.. code-block:: python 
 
     Voltage = context['Voltage']
     Resistance = context['Resistance']
@@ -36,7 +38,9 @@ For instance, the following displays the tuple ``(1,1,0)`` representing the dime
     print( tmp )
     print( context.evaluate( tmp ) )
 
-which displays ::
+which displays 
+
+.. code-block:: pycon 
 
     Div(V,R) 
     I 

@@ -9,7 +9,9 @@ Simple kinematics
 
 When using the package, the first task is to select a set of base dimensions. This basis is immutable after definition. 
 
-For instance, the basis :math:`LT` (distance and duration) may be used for a straight-line kinematics problems. Other kinds of quantity are then declared in terms of this basis, for example the dimensions of speed are :math:`LT^{-1}`. ::
+For instance, the basis :math:`LT` (distance and duration) may be used for a straight-line kinematics problems. Other kinds of quantity are then declared in terms of this basis, for example the dimensions of speed are :math:`LT^{-1}`. 
+
+.. code-block:: python 
 
     from QV import *
     
@@ -18,7 +20,9 @@ For instance, the basis :math:`LT` (distance and duration) may be used for a str
 
 Here, the object ``context`` maintains one-to-one relationships between the names, and short symbols, of kinds of quantities and the dimensions associated with measurements of them. So, after the declaration of speed, ``context`` will not allow any other quantity with the same dimensions to be declared. 
 
-Units are defined in relation to kinds of quantity. In this case, we might write ::
+Units are defined in relation to kinds of quantity. In this case, we might write 
+
+.. code-block:: python 
 
     SI =  UnitRegister("SI",context)
 
@@ -28,7 +32,9 @@ Units are defined in relation to kinds of quantity. In this case, we might write
 
 Here, the ``SI`` object is a register of units, each associated with the measurement of a kind of quantity and hence to the dimensions of that quantity in the context. The ``unit`` declaration creates a reference unit within the register; other units of the same kind of quantity can also be registered, but must be related to the reference unit by a conversion factor (see below, where a related unit, L/(100 km), is created for fuel consumption.)
 
-Quantity values may be defined with the function ``qvalue()`` and used in calculations. For instance, ::
+Quantity values may be defined with the function ``qvalue()`` and used in calculations. For instance, 
+
+.. code-block:: python 
 
     d = qvalue(0.5,metre)
     t = qvalue(1.0,second)
@@ -38,7 +44,9 @@ Quantity values may be defined with the function ``qvalue()`` and used in calcul
     x0 = qvalue(0.3,metre)
     print( "displacement =", x0 + v0*t )
 
-The output is ::
+The output is 
+
+.. code-block:: pycon 
 
     average speed = 0.5 m/s
     displacement = 5.5 m
@@ -47,7 +55,9 @@ An interesting implementation detail is apparent here. The function ``qresult()`
 
 Fuel consumption
 ================
-When `ad hoc` units are preferred, this package facilitates their use. For example, fuel consumption is typically stated in units of litres per 100 km. This can be handled as follows [#FN1]_  ::
+When `ad hoc` units are preferred, this package facilitates their use. For example, fuel consumption is typically stated in units of litres per 100 km. This can be handled as follows [#FN1]_  
+
+.. code-block:: python 
 
     from fractions import Fraction
     
@@ -67,7 +77,9 @@ When `ad hoc` units are preferred, this package facilitates their use. For examp
          'litres_per_100_km','L/(100 km)'
     )
 
-Calculations proceed as might be expected ::
+Calculations proceed as might be expected 
+
+.. code-block:: python 
 
     distance = qvalue(25.6,kilometre)
     fuel = qvalue(2.2,litre)
@@ -78,7 +90,9 @@ Calculations proceed as might be expected ::
     distance = qvalue(155,kilometre)
     print( 'fuel required =', qresult( consumes * distance ) )
 
-which gives the following results [#FN2]_.  ::
+which gives the following results [#FN2]_.  
+
+.. code-block:: pycon 
 
     average consumption = 8.59375 L/(100 km)
     fuel required = 13.3203125 L
@@ -88,7 +102,9 @@ It is interesting that QV can treat distance and volume as quite distinct quanti
 Electrical quantities
 =====================
 
-Electrical measurements involve particular quantities, and associated units. We can use base dimensions :math:`V`, :math:`I` and :math:`T`, for potential difference, current and duration, respectively. Then additional kinds of quantity of interest include: resistance, capacitance, inductance, energy, power and angular frequency. The context can be configured, as follows :: 
+Electrical measurements involve particular quantities, and associated units. We can use base dimensions :math:`V`, :math:`I` and :math:`T`, for potential difference, current and duration, respectively. Then additional kinds of quantity of interest include: resistance, capacitance, inductance, energy, power and angular frequency. The context can be configured, as follows 
+
+.. code-block:: python  
 
     context = Context( ("Current","I"),("Voltage","V"),("Time","T") )
     
@@ -99,7 +115,9 @@ Electrical measurements involve particular quantities, and associated units. We 
     context.declare('Energy','E','P*T')
     context.declare('Power','P','V*I')
 
-Suitable units are::
+Suitable units are:
+
+.. code-block:: python 
 
     ureg =  UnitRegister("Reg",context)
     
@@ -112,7 +130,9 @@ Suitable units are::
     joule = ureg.reference_unit('Energy','joule','J')
     watt = ureg.reference_unit('Power','watt','W')
 
-Calculations are then straightforward. For example, ::
+Calculations are then straightforward. For example, 
+
+.. code-block:: python 
 
     v1 = qvalue(0.5,volt)
     i1 = qvalue(1.E-3,ampere)
@@ -129,7 +149,9 @@ Calculations are then straightforward. For example, ::
     r2 = qvalue(2.48E3,ohm)
     print(  "parallel resistance =",  qresult( (r1*r2)/(r1 + r2) ) )
 
-Which produces ::
+Which produces 
+
+.. code-block:: pycon 
 
     resistance = 500.0 Ohm
     reactance = 4.33539786195 Ohm
@@ -145,7 +167,9 @@ Often ratios of quantities of the same kind arise in physical calculations. Thes
 
 Dimensionless ratios can retain quantity information if defined using the function ``qratio``. 
 
-For example, continuing the electrical case above (where ``r1`` was evaluated), a resistance ratio (potential divider) can be defined ::
+For example, continuing the electrical case above (where ``r1`` was evaluated), a resistance ratio (potential divider) can be defined 
+
+.. code-block:: python 
 
     context.declare( 'Resistance_ratio','R/R', 'Resistance//Resistance' )
     ureg.reference_unit('Resistance_ratio','ohm_per_ohm','Ohm/Ohm')
@@ -161,13 +185,17 @@ For example, continuing the electrical case above (where ``r1`` was evaluated), 
         print( "  ratio =", divider )
         print( "  v_out =", v_out )
 
-produces the output ::
+produces the output 
+
+.. code-block:: pycon 
   
     Resistive divider
       ratio = 0.832214765101 Ohm/Ohm
       v_out = 4.26093959732 V
 
-Another example is the voltage gain of an amplifying stage ::
+Another example is the voltage gain of an amplifying stage 
+
+.. code-block:: python 
 
     context.declare('Voltage_ratio','V/V','Voltage//Voltage')
     volt_per_volt= ureg.reference_unit('Voltage_ratio','volt_per_volt','V/V')
@@ -184,7 +212,9 @@ Another example is the voltage gain of an amplifying stage ::
     print( "Gain =", qresult(gain,volt_per_millivolt) )
     print( "Gain =", qresult(gain,volt_per_volt) )
 
-The output is (Note, when no preferred unit is given (the first case), units are simplified.) ::
+The output is (Note, when no preferred unit is given (the first case), units are simplified.) 
+
+.. code-block:: pycon 
 
     Gain = 1000000.0
     Gain = 1.0 V/uV
@@ -210,7 +240,9 @@ for the length of arc subtended by an angle :math:`\theta` on a circle of radius
 
 In this equation, angle has the dimension :math:`A` and the constant :math:`\eta` has the dimension :math:`A^{-1}`, so :math:`s` has the dimension of length, as expected (references [Brownstein]_ and [Quincey]_ should be consulted for more detail).
 
-No one is suggesting that a dimension for angle should be added to the SI, however, a number of authors have remarked that using an extra dimension in computer systems would obtain more reliable dimensional homogeneity checks. The quantity-value package is perfect for this. The following simple example shows how the arc length calculation can be coded. More particularly, it shows how to introduce the dimension for angle and define the dimensional constant :math:`\eta`. ::
+No one is suggesting that a dimension for angle should be added to the SI, however, a number of authors have remarked that using an extra dimension in computer systems would obtain more reliable dimensional homogeneity checks. The quantity-value package is perfect for this. The following simple example shows how the arc length calculation can be coded. More particularly, it shows how to introduce the dimension for angle and define the dimensional constant :math:`\eta`. 
+
+.. code-block:: python 
 
     context = Context( ("Length","L"), ("Time","T"), ("Angle","A") )
     InverseAngle = context.declare('InverseAngle','1/A','1/A')
@@ -237,7 +269,9 @@ No one is suggesting that a dimension for angle should be added to the SI, howev
 
     print( "arc length =", arc_length )
 
-The output displays ::
+The output displays 
+
+.. code-block:: pycon 
 
     pi = 3.14159265359 rad
     eta = 0.318309886184 1/rad
