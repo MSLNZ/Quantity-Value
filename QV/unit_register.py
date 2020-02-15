@@ -7,8 +7,6 @@ from __future__ import division
 # sense that a scale factor converts from one to the other.
 # Mappings from KoQ to unit objects can be many-to-one. 
  
-from fractions import *
-
 from QV.scale import Unit 
 
 __all__ = (
@@ -180,7 +178,7 @@ class UnitRegister(object):
 #----------------------------------------------------------------------------
 def related_unit(reference_unit,fraction,name,term):
     """
-    Define and register a unit that is multiple of the
+    Register a unit that is multiple or submultiple of the
     reference unit for the same kind of quantity.
     
     Example::
@@ -192,7 +190,7 @@ def related_unit(reference_unit,fraction,name,term):
         >>> litres_per_km = ureg.reference_unit('FuelConsumption','litres_per_km','L/km')
         >>> litres_per_100_km = related_unit(
         ...     ureg.litres_per_km,
-        ...     Fraction(1,100),
+        ...     1E-2,
         ...     'litres_per_100_km','L/(100 km)'
         ... )
         >>> print( litres_per_100_km )
@@ -228,4 +226,5 @@ def related_unit(reference_unit,fraction,name,term):
 if __name__ == "__main__":
     import doctest
     from QV import *
+    
     doctest.testmod(  optionflags= doctest.NORMALIZE_WHITESPACE | doctest.ELLIPSIS  )

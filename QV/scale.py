@@ -7,11 +7,11 @@ __all__ = ( 'Scale', 'Unit', )
 class Scale(object):
 
     """
-    The measured values of a specific quantity are reported on a scale,  
-    for example, the metre is the SI scale for length measurement.   
+    Measured values of a quantity are reported on a scale.  
+    For example, the SI scale for length measurement is the metre.   
         
-    The Scale class defines a name (and a short name, or term) for a scale 
-    and contains a reference to the kind of quantity.
+    A Scale object has a name (and a short name, or term) 
+    and contains a reference to the associated kind of quantity.
     """
     
     def __init__(self,kind_of_quantity,name,term):
@@ -65,13 +65,13 @@ class Unit(object):
     """
     A Unit class implements the behaviour of a measurement scale. 
     
-    The class is associated with a :class:`Scale` and with a :class:`.UnitRegister`. 
+    A :class:`Unit` is associated with a :class:`Scale` and with a :class:`.UnitRegister`. 
     
     Multiplication and division of units is supported. 
     
-    The 'floor' division operator is implemented to support the retention of 
-    dimensional information for 'dimensionless' quantities (ratios of the 
-    same kind of quantity). 
+    The 'floor' division operator supports retention of 
+    information about the dimensions of 'dimensionless' quantities 
+    (ratios of the same kind of quantity). 
     
     """
 
@@ -111,9 +111,9 @@ class Unit(object):
         
     def is_ratio_of(self,other_koq):
         """
-        True when the kind of quantity associated with ``self`` is a dimensionless 
-        ratio and the dimensions of the numerator are the same dimensions as 
-        the numerator dimensions associated with the ``other`` kind of quantity.
+        True when the kind of quantity of ``self`` is a dimensionless 
+        ratio and the dimensions of the kind of quantity of ``other_koq``
+        match the numerator dimensions of the kind of quantity of ``self``.
         
         """
         context = self.register.context 

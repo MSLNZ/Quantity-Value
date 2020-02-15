@@ -7,7 +7,7 @@ Quantity value
 .. contents::
    :local:
 
-The term 'quantity value' refers to a measured value paired with the unit of measurement. ``QV`` supports the notion of quantity values by providing several functions in the :mod:`.quantity_value` module:
+The term 'quantity value' refers to a measured value paired with the unit of measurement. ``QV`` provides several functions in the :mod:`.quantity_value` module that support the notion of quantity values:
 
     * :func:`.qvalue` creates a quantity-value, 
     * :func:`.qratio` creates a quantity-value that is a dimensionless ratio, 

@@ -106,14 +106,16 @@ Electrical measurements involve particular quantities, and associated units. We 
 
 .. code-block:: python  
 
+    from math import pi
+
     context = Context( ("Current","I"),("Voltage","V"),("Time","T") )
     
     context.declare('Resistance','R','Voltage/Current')
     context.declare('Capacitance','C','I*T/V')
     context.declare('Inductance','L','V*T/I')
     context.declare('Angular_frequency','F','1/T')
-    context.declare('Energy','E','P*T')
     context.declare('Power','P','V*I')
+    context.declare('Energy','E','P*T')
 
 Suitable units are:
 
@@ -127,8 +129,8 @@ Suitable units are:
     ohm = ureg.reference_unit('Resistance','Ohm','Ohm')
     henry = ureg.reference_unit('Inductance','henry','H')
     rad_per_s = ureg.reference_unit( 'Angular_frequency','radian_per_second','rad/s' )
-    joule = ureg.reference_unit('Energy','joule','J')
     watt = ureg.reference_unit('Power','watt','W')
+    joule = ureg.reference_unit('Energy','joule','J')
 
 Calculations are then straightforward. For example, 
 
@@ -137,7 +139,7 @@ Calculations are then straightforward. For example,
     v1 = qvalue(0.5,volt)
     i1 = qvalue(1.E-3,ampere)
     l1 = qvalue(0.3E-3,henry)
-    w1 = qvalue(2*PI*2.3E3,rad_per_s)
+    w1 = qvalue(2*pi*2.3E3,rad_per_s)
     
     r1 = v1/i1
     
@@ -178,9 +180,9 @@ For example, continuing the electrical case above (where ``r1`` was evaluated), 
     divider = qratio( r2,(r1+r2) )
     
     v_in = qvalue( 5.12, volt) 
-    v_out = qresult(v_divider * v_in)
+    v_out = qresult(divider * v_in)
     
-    if v_divider.unit.is_ratio_of(ohm.kind_of_quantity) ):
+    if divider.unit.is_ratio_of(ohm.kind_of_quantity):
         print( "Resistive divider" )
         print( "  ratio =", divider )
         print( "  v_out =", v_out )
@@ -197,6 +199,8 @@ Another example is the voltage gain of an amplifying stage
 
 .. code-block:: python 
 
+    from QV.prefix import micro
+    
     context.declare('Voltage_ratio','V/V','Voltage//Voltage')
     volt_per_volt= ureg.reference_unit('Voltage_ratio','volt_per_volt','V/V')
 

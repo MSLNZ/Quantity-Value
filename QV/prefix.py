@@ -152,6 +152,18 @@ def si_mass_units(kg_reference_unit):
     ``kg_reference_unit`` must be defined as a reference unit, with 
     name ``kilogram`` and term ``kg``
     
+    Example::
+    
+        >>> context = Context( ('Mass','M') )
+        >>> SI =  UnitRegister("SI",context)        
+        >>> kilogram = SI.reference_unit('Mass','kilogram','kg')  
+        >>> prefix.si_mass_units(kilogram)
+        >>> print( SI.gram.scale.name )
+        gram
+        >>> print( repr(SI.gram) )
+        Unit(KindOfQuantity('Mass','M'),'gram','g',UnitRegister(SI))        
+
+
     """
     if (
         kg_reference_unit.scale.name != 'kilogram' and 

@@ -13,6 +13,8 @@ A :class:`.KindOfQuantity` represents the general notion of a quantity, such as:
 
 .. code-block:: python 
 
+    from QV import *
+    
     context = Context( ("Length","L"), ("Time","T") )
     Length, Time = context.base_quantities
     

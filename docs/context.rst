@@ -13,7 +13,9 @@ Kinds of quantity are considered independent entities that become associated wit
 
 A :class:`.Context` is initialised by a set of kinds of quantity, which become the base quantities for that context. Other kinds of quantity of quantity can be declared by a defining expression in terms of base quantities and other quantities already declared. 
 
-For instance, the following displays the tuple ``(1,1,0)`` representing the dimensions :math:`I^1V^1T^0`, i.e., dimensions of current and voltage.  ::
+For instance, the following displays the tuple ``(1,1,0)`` representing the dimensions :math:`I^1V^1T^0`, i.e., dimensions of current and voltage.  
+
+.. code-block:: python 
 
     from QV import *
     
