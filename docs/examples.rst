@@ -161,7 +161,6 @@ Which produces
     power = 0.0005 W
     parallel resistance = 416.10738255 Ohm
 
-
 Ratios
 ======
 
@@ -235,7 +234,7 @@ It is not as bad as it sounds. For example, the well-known equation
 .. math::
 
     s = r \cdot \theta \;,
- 
+
 for the length of arc subtended by an angle :math:`\theta` on a circle of radius :math:`r`, becomes 
 
 .. math::

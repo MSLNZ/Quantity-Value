@@ -27,7 +27,6 @@ For instance, the following displays the tuple ``(1,1,0)`` representing the dime
     context.declare('Power','P','V*V/R')
     print( context.dimensions('P') )
 
-
 :class:`.KindOfQuantity` objects can be retrieved from a context and used in expressions:
 
 .. code-block:: python 
