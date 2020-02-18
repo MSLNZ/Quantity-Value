@@ -85,7 +85,7 @@ Calculations proceed as might be expected
     fuel = qvalue(2.2,litre)
     
     consumes = fuel/distance
-    print( "average consumption =", qresult( fuel/distance, litres_per_100_km ) )
+    print( "average consumption =", qresult( consumes, litres_per_100_km ) )
     
     distance = qvalue(155,kilometre)
     print( 'fuel required =', qresult( consumes * distance ) )
@@ -105,8 +105,6 @@ Electrical quantities
 Electrical measurements involve particular quantities, and associated units. We can use base dimensions :math:`V`, :math:`I` and :math:`T`, for potential difference, current and duration, respectively. Then additional kinds of quantity of interest include: resistance, capacitance, inductance, energy, power and angular frequency. The context can be configured, as follows 
 
 .. code-block:: python  
-
-    from math import pi
 
     context = Context( ("Current","I"),("Voltage","V"),("Time","T") )
     
@@ -135,6 +133,8 @@ Suitable units are:
 Calculations are then straightforward. For example, 
 
 .. code-block:: python 
+
+    from math import pi
 
     v1 = qvalue(0.5,volt)
     i1 = qvalue(1.E-3,ampere)
@@ -168,14 +168,13 @@ Often ratios of quantities of the same kind arise in physical calculations. Thes
 
 Dimensionless ratios can retain quantity information if defined using the function ``qratio``. 
 
-For example, continuing the electrical case above (where ``r1`` was evaluated), a resistance ratio (potential divider) can be defined 
+For example, continuing the electrical case above (where ``r1`` and ``r2`` were evaluated), a resistor network may be used to scale down a voltage by some fraction (often called a potential, or resistive, divider). The resistance ratio can be defined as a dimensionless quantity in this way
 
 .. code-block:: python 
 
     context.declare( 'Resistance_ratio','R/R', 'Resistance//Resistance' )
     ureg.reference_unit('Resistance_ratio','ohm_per_ohm','Ohm/Ohm')
     
-    r2 = qvalue(2.48E3,ohm)
     divider = qratio( r2,(r1+r2) )
     
     v_in = qvalue( 5.12, volt) 
@@ -186,13 +185,15 @@ For example, continuing the electrical case above (where ``r1`` was evaluated), 
         print( "  ratio =", divider )
         print( "  v_out =", v_out )
 
-produces the output 
+which produces the output 
 
 .. code-block:: pycon 
   
     Resistive divider
       ratio = 0.832214765101 Ohm/Ohm
-      v_out = 4.26093959732 V
+      v_out = 4.26093959732 V 
+
+Note, we use the operator ``//`` when declaring a dimensionless ratio as a kind of quantity. This is necessary to preserve information about the quantities in the ratio.
 
 Another example is the voltage gain of an amplifying stage 
 
@@ -215,7 +216,7 @@ Another example is the voltage gain of an amplifying stage
     print( "Gain =", qresult(gain,volt_per_millivolt) )
     print( "Gain =", qresult(gain,volt_per_volt) )
 
-The output is (Note, when no preferred unit is given (the first case), units are simplified.) 
+The output is (Note, when no preferred unit is given (the first case), units are simplified to a dimensionless quantity.) 
 
 .. code-block:: pycon 
 
@@ -227,7 +228,7 @@ The output is (Note, when no preferred unit is given (the first case), units are
 Angles
 ======
 
-It well known that some SI quantities cannot be distinguished by dimensional analysis because they have the same dimensions [Brownstein]_. This ambiguity can be removed by introducing a base dimension for angle, and a new dimensional constant :math:`\eta`, but then some of the basic equations of physics also have to be changed [Quincey]_. 
+It is well known that some SI quantities cannot be distinguished by dimensional analysis because they have the same dimensions [Brownstein]_. This ambiguity can be removed by introducing a base dimension for angle, and a new dimensional constant :math:`\eta`, but then some of the basic equations of physics also have to be changed [Quincey]_. 
 
 It is not as bad as it sounds. For example, the well-known equation 
 
@@ -241,7 +242,7 @@ for the length of arc subtended by an angle :math:`\theta` on a circle of radius
 
     s = \eta \cdot r \cdot \theta \;.
 
-In this equation, angle has the dimension :math:`A` and the constant :math:`\eta` has the dimension :math:`A^{-1}`, so :math:`s` has the dimension of length, as expected (references [Brownstein]_ and [Quincey]_ should be consulted for more detail).
+In this equation, :math:`\theta` has the dimension :math:`A` and the constant :math:`\eta` has the dimension :math:`A^{-1}`, so :math:`s` has the dimension of length, as expected (references [Brownstein]_ and [Quincey]_ should be consulted for more detail).
 
 No one is suggesting that a dimension for angle should be added to the SI, however, a number of authors have remarked that using an extra dimension in computer systems would obtain more reliable dimensional homogeneity checks. The quantity-value package is perfect for this. The following simple example shows how the arc length calculation can be coded. More particularly, it shows how to introduce the dimension for angle and define the dimensional constant :math:`\eta`. 
 
@@ -286,6 +287,6 @@ The output displays
 .. [#FN2] The argument ``litres_per_100_km`` is passed to ``qresult()``  to obtain results in the required unit. The default would be the reference unit declared for the kind of quantity (``litres_per_km`` in this case). 
 .. [#FN3] Reduced to SI base units, the consumption is about :math:`8.6 \times 10^{-8}\,m^2`. This area, multiplied by the distance travelled, is the volume of fuel required.
 
-.. [Brownstein] K. R. Brownstein, *"Angles - lets treat them squarely"* , Am. J. Phys. **65** (7), July 1997, pp 605-614.
-.. [Quincey] P. Quincey and R. J. C. Brown, *"Implications of adopting plane angle as a base quantity in the SI"* , Metrologia **53** , 2016, pp 998-1002.
+.. [Brownstein] K. R. Brownstein, *Angles - lets treat them squarely*, `Am. J. Phys. **65** (7), July 1997, pp 605-614 <https://doi.org/10.1119/1.18616>`_ .
+.. [Quincey] P. Quincey and R. J. C. Brown, *Implications of adopting plane angle as a base quantity in the SI*, `Metrologia **53** , 2016, pp 998-1002 <https://doi.org/10.1088/0026-1394/53/3/998>`_.
 

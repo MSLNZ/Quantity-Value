@@ -14,16 +14,16 @@ Units are declared by providing the name of the kind of quantity, the unit name 
     metre = SI.reference_unit('Length','metre','m')   # reference unit
     centimetre = metric_prefix.centi(metre) # related unit 
     
-Units can be looked up in the register by name or by term, or the name may be used as an attribute of the register. These expressions return the ``metre`` unit ::
+Units can be looked up in the register by name or by term, or the name may be used as an attribute of the register. These expressions return the ``metre`` unit 
+
+.. code-block:: python
 
     SI['metre'] 
     SI['m']
     SI.metre
-    
 
 .. contents::
    :local:
-
 
 .. _unit_register_module:
 

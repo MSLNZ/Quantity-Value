@@ -118,7 +118,7 @@ class Context(object):
         multiplications and divisions among :obj:`.KindOfQuantity` objects, 
         or a string representing such a sequence of operations.
         
-        A ``RuntimeError`` is raised if if the dimensions of the 
+        A ``RuntimeError`` is raised if the dimensions of the 
         ``expression`` are already associated with a kind 
         of quantity in the context.
         
