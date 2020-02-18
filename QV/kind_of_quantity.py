@@ -10,37 +10,37 @@ class KindOfQuantity(object):
     """
 
     def __init__(self,name,term):
-        self._name = name 
-        self._term = term 
+        self._name = str(name) 
+        self._term = str(term) 
      
     def __repr__(self):
         return "{!s}({!r},{!r})".format(
             self.__class__.__name__,
-            self.name,
-            self.term
+            self._name,
+            self._term
         )
 
     def __str__(self):
-        return str(self.term)
+        return self._term
 
     # __hash__ and __eq__ are required for mapping keys
     def __hash__(self):
-        return hash( ( self.name, self.term ) )
+        return hash( ( self._name, self._term ) )
         
     def __eq__(self,other):
         return (
-            self.name == other.name 
+            self._name == other.name 
         and 
-            self.term == other.term 
+            self._term == other.term 
         ) 
         
     @property 
     def name(self):
-        return str(self._name) 
+        return self._name
         
     @property 
     def term(self):
-        return str(self._term) 
+        return self._term
 
     def __mul__(self,rhs):
         # NB deliberately don't allow `rhs` to be numeric

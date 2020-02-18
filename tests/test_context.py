@@ -36,6 +36,9 @@ class TestContext(unittest.TestCase):
 
         self.assertTrue( Length is context._dim_to_koq( d1 ) ) 
         self.assertTrue( Time is context._dim_to_koq( d2 ) )
+        
+        self.assertRaises(RuntimeError,Context,('Length','L'), ('Length','T'))
+        self.assertRaises(RuntimeError,Context,('Length','L'), ('Time','L'))
    
     def test_decalare(self):
     

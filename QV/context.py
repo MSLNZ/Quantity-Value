@@ -40,8 +40,12 @@ class Context(object):
             
         self._basis = tuple( KindOfQuantity(n,t) for (n,t) in argv )
         
-        self._koq = { koq_i._term: koq_i for koq_i in self._basis }
-        self._koq.update( { koq_i._name: koq_i for koq_i in self._basis } )
+        self._koq = dict()
+        for koq_i in self._basis:
+            if self._valid_koq_name_or_term(koq_i._term):
+                self._koq[koq_i._term] = koq_i
+            if self._valid_koq_name_or_term(koq_i._name):
+                self._koq[koq_i._name] = koq_i
         
         # # For conversions between different unit registers
         # self._conversion_factors = dict()
@@ -76,6 +80,15 @@ class Context(object):
   
     def _dim_to_koq(self,dim):
         return self._koq_dimension.inverse[dim]
+        
+    def _valid_koq_name_or_term(self,koq_id):
+        if koq_id in self._koq:
+            raise RuntimeError(
+                "{!r} is already declared".format(koq_id)
+            )
+        else:
+            return True 
+             
   
     # `expression` is a sequence of binary multiplication
     # and division operations, represented as a tree of 
@@ -110,15 +123,8 @@ class Context(object):
         of quantity in the context.
         
         """
-        if koq_name in self._koq:
-            raise RuntimeError(
-                "{!r} is already declared".format(koq_name)
-            )
-
-        if koq_term in self._koq:
-            raise RuntimeError(
-                "{!r} is already declared".format(koq_term)
-            )
+        self._valid_koq_name_or_term(koq_name)
+        self._valid_koq_name_or_term(koq_term)
             
         # Evaluates the KoQ expression using only those KoQ 
         # objects that have been declared. 
