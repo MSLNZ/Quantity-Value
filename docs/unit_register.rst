@@ -8,11 +8,17 @@ The unit register holds a collection of :class:`.Unit` objects, which are classi
 
 The :mod:`.unit_register` combines with the :mod:`.scale` and the :mod:`.context` modules to provide support for units. A :class:`.UnitRegister` is associated with a :class:`.Context` to allow the validity of unit expressions to be checked by quantity calculus. 
 
-Units are declared by providing the name of the kind of quantity, the unit name and a term symbol (short name) for the unit, for example ::
+Units are declared by providing the name of the kind of quantity, the unit name and a term symbol (short name) for the unit, for example 
+
+.. code-block:: python
+
+    from QV import *
+    
+    context = Context(('Length','L'))
 
     SI =  UnitRegister("SI",context)
     metre = SI.reference_unit('Length','metre','m')   # reference unit
-    centimetre = metric_prefix.centi(metre) # related unit 
+    centimetre = prefix.centi(metre) # related unit 
     
 Units can be looked up in the register by name or by term, or the name may be used as an attribute of the register. These expressions return the ``metre`` unit 
 
