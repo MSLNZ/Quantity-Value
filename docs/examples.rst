@@ -287,6 +287,6 @@ The output displays
 .. [#FN2] The argument ``litres_per_100_km`` is passed to ``qresult()``  to obtain results in the required unit. The default would be the reference unit declared for the kind of quantity (``litres_per_km`` in this case). 
 .. [#FN3] Reduced to SI base units, the consumption is about :math:`8.6 \times 10^{-8}\,m^2`. This area, multiplied by the distance travelled, is the volume of fuel required.
 
-.. [Brownstein] K. R. Brownstein, *Angles - lets treat them squarely*, `Am. J. Phys. **65** (7), July 1997, pp 605-614 <https://doi.org/10.1119/1.18616>`_ .
-.. [Quincey] P. Quincey and R. J. C. Brown, *Implications of adopting plane angle as a base quantity in the SI*, `Metrologia **53** , 2016, pp 998-1002 <https://doi.org/10.1088/0026-1394/53/3/998>`_.
+.. [Brownstein] K. R. Brownstein, *Angles - lets treat them squarely*, `Am. J. Phys. 5(7), July 1997, pp 605-614 <https://doi.org/10.1119/1.18616>`_ .
+.. [Quincey] P. Quincey and R. J. C. Brown, *Implications of adopting plane angle as a base quantity in the SI*, `Metrologia 53, 2016, pp 998-1002 <https://doi.org/10.1088/0026-1394/53/3/998>`_.
 
