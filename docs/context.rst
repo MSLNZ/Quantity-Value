@@ -11,9 +11,9 @@ The :mod:`.context` module provides support for quantity calculus when combined 
 
 Kinds of quantity are considered independent entities that become associated with unique dimensions in a context. 
 
-A :class:`.Context` is initialised by a set of kinds of quantity, which become the base quantities for that context. Other kinds of quantity of quantity can be declared by a defining expression in terms of base quantities and other quantities already declared. 
+A :class:`.Context` is initialised by a set of kinds of quantity, which become the base quantities for that context. Other kinds of quantity can be declared by providing an expression that describes quantity in terms of the base quantities and possibly other quantities already declared. 
 
-For instance, the following displays the tuple ``(1,1,0)`` representing the dimensions :math:`I^1V^1T^0`, i.e., dimensions of current and voltage.  
+For instance, in the following code block, power is declared in terms of voltage and resistance, and resistance is declared in terms of voltage and current. The  dimensions of power in terms of the base quantities are :math:`I^1V^1T^0`, which is displayed by the print statement as ``(1,1,0)``. 
 
 .. code-block:: python 
 
