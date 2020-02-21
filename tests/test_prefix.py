@@ -40,11 +40,12 @@ class TestPrefix(unittest.TestCase):
         gram = SI.reference_unit('Mass','gram','g')  
         for p_i in prefix.metric_prefixes: p_i(gram) 
         
-        self.assertRaises( AttributeError, getattr,SI,'millihenry')
+        self.assertRaises( AttributeError, getattr,SI,'Inductance')
+        
         try:
-            SI.kilogram
-            SI.microsecond
-            SI.picosecond
+            SI.Mass.kilogram
+            SI.Time.microsecond
+            SI.Time.picosecond
         except AttributeError:
             self.fail('Should not happen')
             

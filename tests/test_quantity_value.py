@@ -61,13 +61,13 @@ class TestQuantityValue(unittest.TestCase):
         self.assertTrue( vu.unit is centi(metre) )
         
         # QV object on the right
-        qv4 = 1 + qvalue( 2, SI.unity )
+        qv4 = 1 + qvalue( 2, SI.Number.unity )
         self.assertAlmostEqual(qv4.value,3)
-        self.assertEqual(qv4.unit,SI.unity)
+        self.assertEqual(qv4.unit,SI.Number.unity)
 
-        qv5 = 1 - qvalue( 2, SI.unity )
+        qv5 = 1 - qvalue( 2, SI.Number.unity )
         self.assertAlmostEqual(qv5.value,-1)
-        self.assertEqual(qv5.unit,SI.unity)
+        self.assertEqual(qv5.unit,SI.Number.unity)
 
         # Illegal case 
         Imperial = UnitRegister("Imperial",context)
@@ -145,7 +145,7 @@ class TestQuantityValue(unittest.TestCase):
 
         ureg.reference_unit('FuelConsumption','litres_per_km','L/km')
         litres_per_100_km = related_unit(
-            ureg.litres_per_km,
+            ureg.FuelConsumption.litres_per_km,
             Fraction(1,100),
             'litres_per_100_km','L/(100 km)'
         )
@@ -161,7 +161,8 @@ class TestQuantityValue(unittest.TestCase):
         distance = qvalue(155,kilometre)
         required = qresult( consumes * distance ) 
         self.assertTrue( required.unit is litre )
-        self.assertAlmostEqual( required.value, distance.value * 2.2/25.6, 15 )
+        self.assertAlmostEqual( required.value, distance.value * 2.2/(25.6), 15 )
+        print(required.value)
 
     def test_dimensionless(self):
     
