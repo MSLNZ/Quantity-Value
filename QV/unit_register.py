@@ -5,9 +5,9 @@ from __future__ import division
 # would have m, cm, km, etc, and Imperial would have the foot, yard,
 # etc. However, all those length scales are "self-similar" in the 
 # sense that a scale factor converts from one to the other.
-# Mappings from KoQ to unit objects can be many-to-one. 
  
 from QV.scale import Unit 
+from QV.units_dict import UnitsDict
 
 __all__ = (
     'UnitRegister', 'related_unit'
@@ -29,16 +29,16 @@ class UnitRegister(object):
         self._name = name
         self._context = context
         
-        self._koq_to_unit = dict()  # koq -> unit
-        self._name_to_unit = dict() # unit name -> unit
-        
-        # There must always be a unit for numbers
+        self._koq_to_ref_unit = dict()          # koq -> unit
+        self._koq_to_units_dict = dict()         # Length.metre -> Unit 
+                
+        # There must always be a unit for numbers and it is a 
+        # special case because the name and term are blank
         Number = context['Number']
         unity = Unit(Number,'','',self,1)        
-        self._koq_to_unit[Number] = unity
-        self._name_to_unit['unity'] = unity
-        self.__dict__['unity'] = unity 
-            
+        self._koq_to_ref_unit[Number] = unity       
+        self._koq_to_units_dict[Number] = UnitsDict({ 'unity': unity })        
+        
     def __str__(self):
         return self._name
 
@@ -80,62 +80,67 @@ class UnitRegister(object):
                 self.context._evaluate_dimension( koq ) 
             )
             
-        return self._koq_to_unit[koq]        
-  
-    def __contains__(self,name_or_term):
-        return name_or_term in self._name_to_unit 
+        return self._koq_to_ref_unit[koq]        
+
+    def __getattr__(self,attr):
+        # Convert koq name to koq object
+        attr = getattr(self._context,attr)
+        try:  
+            return self._koq_to_units_dict[ attr ]
+        except KeyError:
+            raise AttributeError
+    
+    def __getitem__(self,koq):
+        if isinstance(koq,str):
+            koq = self._context[koq]
+            
+        return self._koq_to_units_dict[koq]
         
-    def __getitem__(self,name_or_term):
-        return self._name_to_unit[name_or_term]
-        
-    def get(self,name_or_term,default=None):
-        # unit name -> unit
-        return self._name_to_unit.get(name_or_term,default)
+    def get(self,koq,default=None):
+        if isinstance(koq,str):
+            koq = self._context[koq]
+            
+        return self._koq_to_units_dict.get(
+            koq,
+            UnitsDict({})
+        )
             
     def _register_reference_unit(self,unit):
         # key: koq; value: unit
         koq = unit.scale.kind_of_quantity
         
-        if koq in self._koq_to_unit: 
-            if not self._koq_to_unit[koq] is unit:
+        if koq in self._koq_to_ref_unit: 
+            if not self._koq_to_ref_unit[koq] is unit:
                 raise RuntimeError(
                     "{!r} is already registered".format(koq)
                 )
         else:
-            self._koq_to_unit[koq] = unit 
-            self._register_by_name(unit)
+            self._koq_to_ref_unit[koq] = unit 
+            self._set_units_dict(koq,unit)
             
-    def _register_by_name(self,unit):
-        # `_name_to_unit` can refer to any units, not just reference ones,
-        # provided their names and terms are distinct dictionary keys
-        if unit.scale.name in self._name_to_unit:
-            raise RuntimeError(
-                "The name {!s} registered to {!r}".format(
-                    unit.scale.name,
-                    self._name_to_unit[unit.scale.name]
-                )
-            ) 
-        if unit.scale.term in self._name_to_unit:
-            raise RuntimeError(
-                "The name {!s} registered to {!r}".format(
-                    unit.scale.term,
-                    self._name_to_unit[unit.scale.term]
-                )
-            ) 
+    def _set_units_dict(self,koq,unit):
+        if koq in self._koq_to_units_dict:
+            koq_units = self._koq_to_units_dict[koq]           
+            koq_units.update({ 
+                unit.scale.name: unit, unit.scale.term: unit 
+            })
+        else:
+            self._koq_to_units_dict[koq] = UnitsDict({ 
+                unit.scale.name: unit, unit.scale.term: unit 
+            })
             
-        assert not unit.scale.name in self.__dict__,\
-            "{!s} is a reserved name".format(unit.scale.name)
-
-        self._name_to_unit[unit.scale.name] = unit
-        self._name_to_unit[unit.scale.term] = unit
-        self.__dict__[unit.scale.name] = unit 
+    def _register_related_unit(self,unit):
         
-        # # Don't express terms as object attributes 
-        # # because they usually aren't valid identifiers 
-        # assert not term in self.__dict__,\
-            # "{!s} is a reserved name".format(term)
-        # self.__dict__[term] = unit 
- 
+        # The same unit names can be used with different KoQs,
+        # but the mapping koq -> unit must be unique.
+        koq = unit.scale.kind_of_quantity
+        if koq in self._koq_to_ref_unit:
+            self._set_units_dict(koq,unit)
+        else:
+            raise RuntimeError(
+                "No reference unit defined for {!s}".format(koq)
+            )
+         
     def reference_unit(self,koq_name,unit_name,unit_term):
         """
         Create a reference unit for ``koq_name``
@@ -153,14 +158,18 @@ class UnitRegister(object):
         """
         Return the scale factor to convert from `source_unit` to `target_unit`
         """
-        assert source_unit.scale.name in self,\
-            "{!r} is not registered".format(source_unit)
-            
-        assert target_unit.scale.name in self,\
-            "{!r} is not registered".format(target_unit)
-            
         src_koq = source_unit.scale.kind_of_quantity
         dst_koq = target_unit.scale.kind_of_quantity
+        
+        if src_koq not in self._koq_to_units_dict:
+            raise RuntimeError(
+                "{!r} is not registered".format(source_unit)
+            )
+        if dst_koq not in self._koq_to_units_dict:
+            raise RuntimeError(
+                "{!r} is not registered".format(target_unit)
+            )
+        
         if not src_koq is dst_koq:
             raise RuntimeError(
                 "{} and {} are different kinds of quantity".format(
@@ -189,7 +198,7 @@ def related_unit(reference_unit,fraction,name,term):
         >>> litre = ureg.reference_unit('Volume','litre','L')
         >>> litres_per_km = ureg.reference_unit('FuelConsumption','litres_per_km','L/km')
         >>> litres_per_100_km = related_unit(
-        ...     ureg.litres_per_km,
+        ...     ureg.FuelConsumption.litres_per_km,
         ...     1E-2,
         ...     'litres_per_100_km','L/(100 km)'
         ... )
@@ -197,29 +206,28 @@ def related_unit(reference_unit,fraction,name,term):
         L/(100 km)
         
     """
-    kind_of_quantity = reference_unit.scale.kind_of_quantity
+    koq = reference_unit.scale.kind_of_quantity
     register = reference_unit._register 
 
-    if not reference_unit is register.reference_unit_for(
-        reference_unit.scale.kind_of_quantity
-    ):
+    if not reference_unit is register.reference_unit_for(koq):
         raise RuntimeError(
             "{!r} is not a reference unit".format(reference_unit.scale.name)  
         )     
 
-    if name in register:
-        return register[name]
+    units_dict = register[koq]
+    if name in units_dict:
+        return units_dict[name]
     else:
-        rational_unit = Unit(
-            kind_of_quantity,
+        unit = Unit(
+            koq,
             name,
             term,
             register,
             fraction
         )
-        register._register_by_name(rational_unit)
+        register._register_related_unit(unit)
         
-        return rational_unit
+        return unit
         
 
 # ===========================================================================    

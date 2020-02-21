@@ -74,6 +74,12 @@ class Context(object):
     def __getitem__(self,name):
         if name in self._koq:
             return self._koq[name]
+ 
+    def __getattr__(self,attr):
+        try:
+            return self._koq[attr]
+        except KeyError:
+            raise AttributeError
         
     def _koq_to_dim(self,koq):
         return self._koq_dimension[koq]
@@ -82,10 +88,22 @@ class Context(object):
         return self._koq_dimension.inverse[dim]
         
     def _valid_koq_name_or_term(self,koq_id):
-        if koq_id in self._koq:
-            raise RuntimeError(
-                "{!r} is already declared".format(koq_id)
-            )
+        if hasattr(self,koq_id):     
+            if koq_id in self._koq:
+                raise RuntimeError(
+                    "{!r} is used for {!r}".format(
+                        koq_id,
+                        self._koq[koq_id]
+                    )
+                )
+            else:
+                raise RuntimeError(
+                    "{!r} is an attribute of {!s}".format(
+                        koq_id,
+                        self.__class__.__name__
+                    )
+                )
+                
         else:
             return True 
              

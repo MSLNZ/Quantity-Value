@@ -145,7 +145,7 @@ class ValueUnit(object):
             # Assume that the `rhs` behaves as a number 
             return ValueUnit(
                 rhs * lhs.value, 
-                lhs.unit.register.unity * lhs.unit
+                lhs.unit.register.Number.unity * lhs.unit
             )
             
     def __rmul__(self,lhs):
@@ -153,7 +153,7 @@ class ValueUnit(object):
         # Assume that the `lhs` behaves as a number 
         return ValueUnit(
             lhs * rhs.value, 
-            rhs.unit.register.unity * rhs.unit
+            rhs.unit.register.Number.unity * rhs.unit
         )
             
     def __truediv__(self,rhs):
@@ -171,7 +171,7 @@ class ValueUnit(object):
             # Assume that the `rhs` behaves as a number 
             return ValueUnit(
                 lhs.value / rhs, 
-                lhs.unit / lhs.unit.register.unity 
+                lhs.unit / lhs.unit.register.Number.unity 
             )
         
     def __rtruediv__(self,lhs):
@@ -179,7 +179,7 @@ class ValueUnit(object):
         # Assume that the `lhs` behaves as a number 
         return ValueUnit(
             lhs / rhs.value, 
-            rhs.unit.register.unity / rhs.unit
+            rhs.unit.register.Number.unity / rhs.unit
         )
                 
     # # Python 2.x backward compatibility
@@ -239,7 +239,7 @@ def unit(quantity_value):
 #----------------------------------------------------------------------------
 def qresult(
     value_unit, 
-    unit=None, 
+    preferred_unit=None, 
     simplify=True, 
     value_result = lambda x, *arg, **kwarg: x, 
     *arg,
@@ -251,9 +251,9 @@ def qresult(
     ``value_unit`` is a quantity-value or expression of quantity-values. 
     
     If a ``unit`` is supplied, it is used to report the measure. If  
-    not, the measure is reported in the reference unit.
+    not, the measure is reported in the reference unit for that quantity.
     
-    If ``simplify`` is ``True`` the unit dimensions are simplified.
+    If ``simplify`` is ``True``, unit dimensions are simplified.
     
     The function ``value_result`` is applied to the value as a final processing step.
     
@@ -275,56 +275,59 @@ def qresult(
         displacement = 0.8 m
         
     """
-    if unit:
-        # Use a preferred unit 
-        register = value_unit.unit.register
-        if isinstance(unit,str):
-            # `unit` is the name of a unit, so look up the object
-            unit = register[unit]
-            
-        # Do not simplify dimensionless units 
-        simplify = not unit.is_dimensionless and simplify 
+    register = value_unit.unit.register 
+    
+    if simplify:
+        unit = value_unit.unit.simplify()
+    else:
+        unit = value_unit.unit
         
-        if simplify:
-            ref_unit = register.reference_unit_for( 
-                value_unit.unit.simplify() 
-            ) 
-        else:
-            ref_unit = register.reference_unit_for( value_unit.unit )
-                
-        if unit.scale.kind_of_quantity != ref_unit.scale.kind_of_quantity:
-            raise RuntimeError(
-                "{} are incompatible with {!r}".format(
-                    unit,
-                    ref_unit.kind_of_quantity
+    ref_unit = register.reference_unit_for( unit )
+    
+    if preferred_unit:
+    
+        koq = ref_unit.scale.kind_of_quantity
+        units_dict = register[koq]
+        
+        if isinstance(preferred_unit,str):
+            if preferred_unit in units_dict:
+                preferred_unit = units_dict[preferred_unit]
+            else:
+                raise RuntimeError(
+                    "{} is not a unit for {!r}".format(
+                        preferred_unit,
+                        koq
+                    )
                 )
-            )
             
-        multiplier = value_unit.unit.multiplier/unit.multiplier
+        # # Do not simplify dimensionless units 
+        # simplify = not preferred_unit.is_dimensionless and simplify 
+        
+        # if simplify:
+            # ref_unit = register.reference_unit_for( 
+                # value_unit.unit.simplify() 
+            # ) 
+        # else:
+            # ref_unit = register.reference_unit_for( value_unit.unit )
+                
+            
+        multiplier = value_unit.unit.multiplier/preferred_unit.multiplier
         return ValueUnit( 
             value_result(
-                value_unit.value*multiplier , 
+                multiplier*value_unit.value, 
                 *arg, 
                 **kwarg
             ), 
-            unit 
+            preferred_unit 
         )
-    else:
-        if simplify:
-            unit = value_unit.unit.simplify()
-        else:
-            unit = value_unit.unit
-            
-        register = value_unit.unit.register 
-        unit = register.reference_unit_for( unit )
-        
+    else:       
         return ValueUnit( 
             value_result(
                 value_unit.unit.multiplier*value_unit.value, 
                 *arg, 
                 **kwarg
             ), 
-            unit  
+            ref_unit  
         )
         
 #----------------------------------------------------------------------------

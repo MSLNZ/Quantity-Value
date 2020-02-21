@@ -40,11 +40,11 @@ class Prefix(object):
         """Return a new unit related to reference unit"""
         
         kind_of_quantity = reference_unit.scale.kind_of_quantity
-        register = reference_unit._register 
+        unit_register = reference_unit._register
 
         # Check that `reference_unit` is in the register,
         # because things like `centi(centi(metre))` are not permitted.
-        if not reference_unit is register.reference_unit_for(
+        if not reference_unit is unit_register.reference_unit_for(
             reference_unit.scale.kind_of_quantity
         ):
             raise RuntimeError(
@@ -58,8 +58,9 @@ class Prefix(object):
             reference_unit.scale.name
         )
         
-        if name in register:
-            return register[name]
+        unit_dict = unit_register[kind_of_quantity]
+        if name in unit_dict:
+            return unit_dict[name]
         else:
             term = "{!s}{!s}".format(
                 self.term,
@@ -70,12 +71,12 @@ class Prefix(object):
                 kind_of_quantity,
                 name,
                 term,
-                register,
+                unit_register,
                 self.value
             )
             
             # Buffer related quantities        
-            register._register_by_name(pq)
+            unit_register._register_related_unit(pq)
             
             return pq         
             
@@ -158,9 +159,9 @@ def si_mass_units(kg_reference_unit):
         >>> SI =  UnitRegister("SI",context)        
         >>> kilogram = SI.reference_unit('Mass','kilogram','kg')  
         >>> prefix.si_mass_units(kilogram)
-        >>> print( SI.gram.scale.name )
+        >>> print( SI.Mass.gram.scale.name )
         gram
-        >>> print( repr(SI.gram) )
+        >>> print( repr(SI.Mass.gram) )
         Unit(KindOfQuantity('Mass','M'),'gram','g',UnitRegister(SI))        
 
 
