@@ -7,7 +7,7 @@ Context
 .. contents::
    :local:
 
-The :mod:`.context` module provides support for quantity calculus when combined with the modules :mod:`.dimension` and :mod:`.kind_of_quantity`. 
+The :mod:`.context` module provides support for quantity calculus, in combination with the modules :mod:`.dimension` and :mod:`.kind_of_quantity`. 
 
 Kinds of quantity are considered independent entities that become associated with unique dimensions in a context. 
 

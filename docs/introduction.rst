@@ -6,7 +6,7 @@ Introduction
 
 This package supports the representation of physical quantities as a measured value paired with a unit, for example 10.5 kg. It is possible to declare quantities like ``m = qvalue(10.5,kg)`` and then use ``m`` in mathematical expressions. The rules governing calculations with quantities are handled by the software.
 
-The package intends to become a tool to ensure quantity correctness in calculations that manipulate physical quantities, but it is still in the early stages of development. 
+We intend the package to become a tool to ensure quantity correctness in calculations that manipulate physical quantities, but it is still in the early stages of development. 
 
 Background
 ==========

@@ -7,7 +7,7 @@ Examples
 Simple kinematics
 =================
 
-When using the package, the first task is to select a set of base dimensions. This basis is immutable after definition. 
+When using the package, the first task is to select a set of base dimensions. 
 
 For instance, the basis :math:`LT` (distance and duration) may be used for a straight-line kinematics problems. Other kinds of quantity are then declared in terms of this basis, for example the dimensions of speed are :math:`LT^{-1}`. 
 
@@ -164,7 +164,7 @@ Which produces
 Ratios
 ======
 
-Often ratios of quantities of the same kind arise in physical calculations. These are often described as `dimensionless` quantities, but they are not plain numbers and the quantities involved should not be ignored. 
+Ratios of the same kind of quantities arise frequently in calculations. These ratios are often described as `dimensionless` quantities, but they are not plain numbers and the quantities involved should not be ignored. 
 
 Dimensionless ratios can retain quantity information if defined using the function ``qratio``. 
 
