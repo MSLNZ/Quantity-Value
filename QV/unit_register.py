@@ -96,12 +96,15 @@ class UnitRegister(object):
             
         return self._koq_to_units_dict[koq]
         
-    def get(self,koq,default=None):
-        if isinstance(koq,str):
-            koq = self._context[koq]
-            
+    def get(self,kind_of_quantity):
+        """
+        Return a mapping of names and terms to units for ``kind_of_quantity``
+        """
+        if isinstance(kind_of_quantity,str):
+            kind_of_quantity = self._context[kind_of_quantity]
+           
         return self._koq_to_units_dict.get(
-            koq,
+            kind_of_quantity,
             UnitsDict({})
         )
             
