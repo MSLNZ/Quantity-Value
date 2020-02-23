@@ -35,7 +35,7 @@ class UnitsDict(MutableMapping):
                 )
             else:
                 # Cannot use object attribute names, like 'update'
-                raise RuntimeError( 
+                raise AttributeError( 
                     "'{!s}' is an attribute of {}".format(
                         key,self.__class__.__name__
                     ) 
