@@ -1,16 +1,10 @@
 import re
 import sys
-from distutils.cmd import Command
-from setuptools import setup, find_packages
-
-tests_require = ['pytest-cov','sybil']
-
-if sys.version_info[:2] == (2, 7):
-    install_requires = ['bidict<0.19.0']
-    tests_require.extend(['zipp<2.0.0','pytest>=3.0,<5.0'])
-else:
-    install_requires = ['bidict']
-    tests_require.append('pytest>=3.0')
+from setuptools import (
+    setup,
+    find_packages,
+    Command,
+)
 
 
 class ApiDocs(Command):
@@ -96,6 +90,14 @@ def fetch_init(key):
     return re.compile(r'{}\s*=\s*(.*)'.format(key)).search(init_text).group(1)[1:-1]
 
 
+install_requires = ['bidict']
+
+tests_require = [
+    'pytest>=4.4',  # >=4.4 to support the "-p conftest" option
+    'pytest-cov',
+    'sybil',
+]
+
 testing = {'test', 'tests', 'pytest'}.intersection(sys.argv)
 pytest_runner = ['pytest-runner'] if testing else []
 
@@ -132,6 +134,7 @@ setup(
     setup_requires=sphinx + pytest_runner,
     tests_require=tests_require,
     install_requires=install_requires,
+    extras_require={'tests': tests_require},
     cmdclass={'docs': BuildDocs, 'apidocs': ApiDocs},
     packages=find_packages(include=('QV*',)),
 )
