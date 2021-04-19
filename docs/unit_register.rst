@@ -4,7 +4,7 @@
 Unit register
 *************
 
-The unit register holds a collection of :class:`.Unit` objects, which are a generalisation of the conventional notion of a measurement unit. Some :class:`.Unit` objects are considered as reference units, the others are called related units. There can be only one reference unit for each kind of quantity, but any number of related units. Each related unit has a multiplier that can be used to convert a measure expressed in the related unit to a measure expressed in the reference unit. 
+The unit register holds a collection of :class:`.RegisteredUnit` objects, which are a generalisation of the conventional notion of a measurement unit. Some :class:`.RegisteredUnit` objects are considered as reference units, the others are called related units. There can be only one reference unit for each kind of quantity, but any number of related units. Each related unit has a multiplier that can be used to convert a measure expressed in the related unit to a measure expressed in the reference unit. 
 
 The :mod:`.unit_register` is associated with a :class:`.Context` to allow the validity of unit expressions to be checked by quantity calculus. 
 

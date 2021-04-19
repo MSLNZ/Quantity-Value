@@ -15,7 +15,7 @@ class RegisteredUnit(object):
     """
     A RegisteredUnit class implements the behaviour of a measurement scale. 
     
-    A :class:`RegisteredUnit` is associated with a :class:`Scale` 
+    A :class:`.RegisteredUnit` is associated with a :class:`.Scale` 
     and with a :class:`.UnitRegister`. 
     
     Multiplication and division of units is supported. 

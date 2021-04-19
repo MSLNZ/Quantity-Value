@@ -9,7 +9,7 @@ Simple kinematics
 
 When using the package, the first task is to select a set of base quantities. 
 
-For instance, the basis :math:`LT` (distance and duration) may be used for a straight-line kinematics problems. Other kinds of quantity are then declared in terms of this basis, for example the signature for speed is :math:`LT^{-1}`. 
+For instance, the basis distance and duration (dimensions, LT) may be used for a straight-line kinematics problems. Other kinds of quantity are then declared in terms of this basis. For example, speed is the time required to cover a distance. 
 
 .. code-block:: python 
 

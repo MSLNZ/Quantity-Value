@@ -22,3 +22,4 @@ These are the package modules
     Registered unit <registered_unit>
     Quantity value <quantity_value>
     Prefix <prefix>
+    Units dictionary <units_dict>

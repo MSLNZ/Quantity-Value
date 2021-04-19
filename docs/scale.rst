@@ -10,8 +10,6 @@ The :class:`.Scale` class represents the conventional notion of a measurement sc
 
 At present, all scales associated with the same kind of quantity are proportional to one another (conversion from one scale to another requires only a multiplicative scale factor). However, this may change in future. We will probably implement support for 'interval' scales (for which a scale factor and an offset are needed to convert from one scale to another).
 
-The :class:`.UnitRegister` class handles the creation of :class:`.Scale` and :class:`.Unit` instances.
-
 .. contents::
    :local:
 

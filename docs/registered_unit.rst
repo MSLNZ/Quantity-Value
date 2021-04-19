@@ -13,7 +13,7 @@ The :class:`.UnitRegister` class handles the creation of :class:`.RegisteredUnit
    :local:
 
 
-.. _scale_module:
+.. _registered_unit_module:
 
 .. automodule:: QV.registered_unit
     :members: 
