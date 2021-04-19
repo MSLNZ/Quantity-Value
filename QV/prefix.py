@@ -163,7 +163,7 @@ def si_mass_units(kg_reference_unit):
         >>> print( SI.Mass.gram.scale.name )
         gram
         >>> print( repr(SI.Mass.gram) )
-        Unit(KindOfQuantity('Mass','M'),'gram','g',UnitRegister(SI))        
+        RegisteredUnit(KindOfQuantity('Mass','M'),'gram','g',UnitRegister(SI))        
 
 
     """
