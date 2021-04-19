@@ -1,7 +1,7 @@
 from __future__ import division 
 from __future__ import print_function 
 
-from QV.scale import Unit
+from QV.unit_register import RegisteredUnit as Unit
 from QV.kind_of_quantity import Number
 
 __all__ = ('qvalue','value','unit','qresult','qratio')
@@ -253,7 +253,7 @@ def qresult(
     If a ``unit`` is supplied, it is used to report the measure. If  
     not, the measure is reported in the reference unit for that quantity.
     
-    If ``simplify`` is ``True``, unit dimensions are simplified.
+    If ``simplify`` is ``True``, unit signatures are simplified.
     
     The function ``value_result`` is applied to the value as a final processing step.
     
@@ -334,8 +334,8 @@ def qresult(
 def qratio(value_unit_1, value_unit_2, unit=None ):
     """
     Return a quantity value for ``value_unit_1/value_unit_2``.
-    If the dimensions of the associated units are in simplified form,
-    dimensional information will be retained in the quotient.
+    If the signature of the associated units are in simplified form,
+    signature information will be retained in the quotient.
 
     If no ``unit`` is supplied the reference unit is used. 
 

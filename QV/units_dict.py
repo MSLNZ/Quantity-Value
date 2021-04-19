@@ -3,7 +3,7 @@ from collections import MutableMapping
 class UnitsDict(MutableMapping):
 
     """
-    Holds a mapping of names and short names (terms) to units.
+    Holds a mapping of names and short names (symbol) to units.
     The names and short names are unique and cannot be 
     overwritten once defined (but, they can be deleted).
     """

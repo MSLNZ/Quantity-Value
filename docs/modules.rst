@@ -15,9 +15,10 @@ These are the package modules
 .. toctree::
 
     Context <context>
-    Dimension <dimension>
+    Signature <signature>
     Kind of quantity <kind_of_quantity>
     Unit register <unit_register>
     Scale <scale>
+    Registered unit <registered_unit>
     Quantity value <quantity_value>
     Prefix <prefix>

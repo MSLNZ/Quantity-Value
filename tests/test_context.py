@@ -11,7 +11,7 @@ from bidict import ValueDuplicationError
 import unittest
  
 from QV import * 
-from QV.dimension import Dimension 
+from QV.signature import Signature 
 
 #----------------------------------------------------------------------------
 class TestContext(unittest.TestCase):
@@ -26,16 +26,16 @@ class TestContext(unittest.TestCase):
         Length = context['Length'] 
         Time = context['Time']
     
-        self.assertEqual( len(context._koq_dimension[Length]), 2 )
+        self.assertEqual( len(context._koq_signature[Length]), 2 )
         
-        d1 = context._koq_to_dim(Length)
-        self.assertEqual( d1, Dimension( context, (1,0) ) )
+        d1 = context._kog_to_signature(Length)
+        self.assertEqual( d1, Signature( context, (1,0) ) )
         
-        d2 = context._koq_to_dim(Time)
-        self.assertEqual( d2, Dimension( context, (0,1) ) )
+        d2 = context._kog_to_signature(Time)
+        self.assertEqual( d2, Signature( context, (0,1) ) )
 
-        self.assertTrue( Length is context._dim_to_koq( d1 ) ) 
-        self.assertTrue( Time is context._dim_to_koq( d2 ) )
+        self.assertTrue( Length is context._signature_to_koq( d1 ) ) 
+        self.assertTrue( Time is context._signature_to_koq( d2 ) )
         
         self.assertRaises(RuntimeError,Context,('Length','L'), ('Length','T'))
         self.assertRaises(RuntimeError,Context,('Length','L'), ('Time','L'))
@@ -51,7 +51,7 @@ class TestContext(unittest.TestCase):
         
         self.assertTrue( Speed is context['Speed'] )
         self.assertTrue( Speed is context['V'] )
-        self.assertTrue( context._koq_to_dim(Speed) == Dimension( context, (1,-1), () ) )
+        self.assertTrue( context._kog_to_signature(Speed) == Signature( context, (1,-1), () ) )
         
         # Multiplication by a number of the left is OK
         self.assertTrue( Speed is context.evaluate('1*Length/Time') )
@@ -62,15 +62,15 @@ class TestContext(unittest.TestCase):
         # Division by by a number on the right is not tolerated
         self.assertRaises( KeyError, context.evaluate,'Length/Time/1' )
  
-        self.assertTrue( Speed is context._dim_to_koq( Dimension( context, (1,-1) ) ) ) 
-        self.assertEqual( context._koq_to_dim(Speed), Dimension( context, (1,-1) ) )
+        self.assertTrue( Speed is context._signature_to_koq( Signature( context, (1,-1) ) ) ) 
+        self.assertEqual( context._kog_to_signature(Speed), Signature( context, (1,-1) ) )
 
         SpeedRatio = context.declare('SpeedRatio','V/V','Speed//Speed')
 
-        self.assertEqual( context._koq_to_dim(SpeedRatio), Dimension( context, (1,-1), (1,-1)) )
-        self.assertTrue( SpeedRatio is context._dim_to_koq( Dimension( context, (1,-1), (1,-1)) ) )
+        self.assertEqual( context._kog_to_signature(SpeedRatio), Signature( context, (1,-1), (1,-1)) )
+        self.assertTrue( SpeedRatio is context._signature_to_koq( Signature( context, (1,-1), (1,-1)) ) )
         
-        self.assertTrue( context.dimensions('SpeedRatio').is_dimensionless )
+        self.assertTrue( context.signature('SpeedRatio').is_dimensionless )
 
     def test_evaluate(self):
 
@@ -127,11 +127,11 @@ class TestContext(unittest.TestCase):
 
         I = context.evaluate(  Voltage/Resistance )
         self.assertEqual( 
-            context.dimensions(I), context.dimensions('Current') 
+            context.signature(I), context.signature('Current') 
         )
         tmp = context.evaluate( I*Voltage )
         self.assertEqual( 
-            context.dimensions(tmp), context.dimensions('Power') 
+            context.signature(tmp), context.signature('Power') 
         )
 #============================================================================
 if __name__ == '__main__':

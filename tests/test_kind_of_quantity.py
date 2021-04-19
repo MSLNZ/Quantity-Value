@@ -19,13 +19,13 @@ class TestKindOfQuantity(unittest.TestCase):
     def tests(self):
         # Construction
         name = 'Length'
-        term = 'L'
+        symbol = 'L'
         
-        Length = KindOfQuantity(name,term) 
+        Length = KindOfQuantity(name,symbol) 
         
         self.assertTrue( type(Length) is KindOfQuantity )
         self.assertEqual( Length.name, name )
-        self.assertEqual( str(Length), term )
+        self.assertEqual( str(Length), symbol )
         
         Time = KindOfQuantity('Time','T') 
 

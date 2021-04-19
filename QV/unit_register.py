@@ -6,7 +6,7 @@ from __future__ import division
 # etc. However, all those length scales are "self-similar" in the 
 # sense that a scale factor converts from one to the other.
  
-from QV.scale import Unit 
+from QV.registered_unit import RegisteredUnit 
 from QV.units_dict import UnitsDict
 
 __all__ = (
@@ -30,12 +30,12 @@ class UnitRegister(object):
         self._context = context
         
         self._koq_to_ref_unit = dict()          # koq -> unit
-        self._koq_to_units_dict = dict()         # Length.metre -> Unit 
+        self._koq_to_units_dict = dict()        # Length.metre -> UnitsDict 
                 
         # There must always be a unit for numbers and it is a 
-        # special case because the name and term are blank
+        # special case because the name and symbol are blank
         Number = context['Number']
-        unity = Unit(Number,'','',self,1)        
+        unity = RegisteredUnit(Number,'','',self,1)        
         self._koq_to_ref_unit[Number] = unity       
         self._koq_to_units_dict[Number] = UnitsDict({ 'unity': unity })        
         
@@ -63,12 +63,11 @@ class UnitRegister(object):
         """
         # If `expr` has `kind_of_quantity` then `expr` is 
         # a unit or a unit expression. In the first case, 
-        # we obtain a kind-of-quantity directly and should
-        # immediately look up the unit.
-        # In the second case, a kind-of-quantity
-        # expression must be evaluated.
-        # If `expr` has `execute` it is a kind-of-quantity
-        # expression that must be evaluated.
+        # we can obtain a kind-of-quantity directly and 
+        # should immediately look up the unit.
+        # In the second case, the expression must be evaluated.
+        # If `expr` has `execute` it is a 
+        # kind-of-quantity expression.
         if hasattr(expr,'kind_of_quantity'):
             koq = expr.kind_of_quantity
         else:
@@ -76,8 +75,8 @@ class UnitRegister(object):
             koq = expr 
             
         if hasattr(koq,'execute'):
-            koq = self.context._dim_to_koq( 
-                self.context._evaluate_dimension( koq ) 
+            koq = self.context._signature_to_koq( 
+                self.context._evaluate_signature( koq ) 
             )
             
         return self._koq_to_ref_unit[koq]        
@@ -98,7 +97,7 @@ class UnitRegister(object):
         
     def get(self,kind_of_quantity):
         """
-        Return a mapping of names and terms to units for ``kind_of_quantity``
+        Return a mapping of names and symbols to units for ``kind_of_quantity``
         """
         if isinstance(kind_of_quantity,str):
             kind_of_quantity = self._context[kind_of_quantity]
@@ -125,11 +124,11 @@ class UnitRegister(object):
         if koq in self._koq_to_units_dict:
             koq_units = self._koq_to_units_dict[koq]           
             koq_units.update({ 
-                unit.scale.name: unit, unit.scale.term: unit 
+                unit.scale.name: unit, unit.scale.symbol: unit 
             })
         else:
             self._koq_to_units_dict[koq] = UnitsDict({ 
-                unit.scale.name: unit, unit.scale.term: unit 
+                unit.scale.name: unit, unit.scale.symbol: unit 
             })
             
     def _register_related_unit(self,unit):
@@ -144,7 +143,7 @@ class UnitRegister(object):
                 "No reference unit defined for {!s}".format(koq)
             )
          
-    def reference_unit(self,koq_name,unit_name,unit_term):
+    def reference_unit(self,koq_name,unit_name,unit_symbol):
         """
         Create a reference unit for ``koq_name``
         
@@ -152,7 +151,7 @@ class UnitRegister(object):
         koq = self.context._koq[koq_name]
         
         # Reference units all have multiplier = 1
-        u = Unit(koq,unit_name,unit_term,self,multiplier=1)
+        u = RegisteredUnit(koq,unit_name,unit_symbol,self,multiplier=1)
         self._register_reference_unit(u) 
         
         return u
@@ -188,7 +187,7 @@ class UnitRegister(object):
         return multiplier 
        
 #----------------------------------------------------------------------------
-def related_unit(reference_unit,fraction,name,term):
+def related_unit(reference_unit,fraction,name,symbol):
     """
     Register a unit that is multiple or submultiple of the
     reference unit for the same kind of quantity.
@@ -221,10 +220,10 @@ def related_unit(reference_unit,fraction,name,term):
     if name in units_dict:
         return units_dict[name]
     else:
-        unit = Unit(
+        unit = RegisteredUnit(
             koq,
             name,
-            term,
+            symbol,
             register,
             fraction
         )

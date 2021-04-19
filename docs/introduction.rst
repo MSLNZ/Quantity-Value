@@ -4,9 +4,9 @@
 Introduction
 ************
 
-This package supports the representation of physical quantities as a measured value paired with a unit, for example 10.5 kg. It is possible to declare quantities like ``m = qvalue(10.5,kg)`` and then use ``m`` in mathematical expressions. The rules governing calculations with quantities are handled by the software.
+This package supports the representation of physical quantities as a value paired with a unit, for example 10.5 kg. It is possible to declare quantities like ``m = qvalue(10.5,kg)`` and then use ``m`` in mathematical expressions. The rules governing calculations with quantities are handled by the software.
 
-We intend the package to become a tool to ensure quantity correctness in calculations that manipulate physical quantities, but it is still in the early stages of development. 
+We intend the package to demonstrate methods of implementing quantity correctness in calculations with physical quantities, but it is still in the early stages of development. 
 
 Background
 ==========
@@ -17,7 +17,7 @@ When digital systems handle data representing physical quantities, one might exp
 
 From early days of general-purpose computing in the 1970s to the present, many suggestions have been made about how to support quantities, but no general solution has emerged. It appears that the challenge of encoding the semantics of physical quantity data in software is harder than it appears. This project is trying to use contextual information about a problem to tailor support to the context. The approach is similar to what happens in scientific writing. Careful attention must be given to a description of terms in calculations when quantities are involved. Without this, a text becomes obscure and only a reader familiar with the missing contextual information can make sense of it. Similar principles should apply to software representations of quantities. 
 
-Our work addresses the difficulties encountered when units are encoded by their dimensional exponents in a conventional basis. When quantity calculus is then used to track quantities, there are inevitably problems of ambiguity and difficulties of expression. For instance, fuel consumption is conventionally expressed in L/(100 km) but has the dimensions of area (in the SI), whereas rainfall, when measured as a volume divided by a cross-sectional area, is conventionally simplified and reported as a length. There are also the many so-called 'dimensionless' quantities which are effectively unit-less, but certainly should not be considered pure numbers. And then there is the problem of disambiguating quantities like torque and energy, which have the SI dimensions :math:`M^2LT^{-2}`, because the choice of base quantities is inadequate. 
+Our work addresses the difficulties encountered when units are encoded by a dimensional exponents in a conventional basis. When quantity calculus is then used to track quantities, there are inevitably problems of ambiguity and difficulties of expression. For instance, fuel consumption is conventionally expressed in L/(100 km) but has the dimensions of area (in the SI), whereas rainfall, when measured as a volume divided by a cross-sectional area, is conventionally simplified and reported as a length. There are also the many so-called 'dimensionless' quantities which are effectively unit-less, but certainly should not be considered pure numbers. And then there is the problem of disambiguating quantities like torque and energy, which have the SI dimensions :math:`M^2LT^{-2}`, because the choice of base quantities is inadequate. 
 
 Kind of quantity, individual quantity and quantity value
 --------------------------------------------------------

@@ -9,29 +9,29 @@ class KindOfQuantity(object):
     A type of quantity like mass, length, etc.
     """
 
-    def __init__(self,name,term):
+    def __init__(self,name,symbol):
         self._name = str(name) 
-        self._term = str(term) 
+        self._symbol = str(symbol) 
      
     def __repr__(self):
         return "{!s}({!r},{!r})".format(
             self.__class__.__name__,
             self._name,
-            self._term
+            self._symbol
         )
 
     def __str__(self):
-        return self._term
+        return self._symbol
 
     # __hash__ and __eq__ are required for mapping keys
     def __hash__(self):
-        return hash( ( self._name, self._term ) )
+        return hash( ( self._name, self._symbol ) )
         
     def __eq__(self,other):
         return (
             self._name == other.name 
         and 
-            self._term == other.term 
+            self._symbol == other.symbol 
         ) 
         
     @property 
@@ -39,8 +39,8 @@ class KindOfQuantity(object):
         return self._name
         
     @property 
-    def term(self):
-        return self._term
+    def symbol(self):
+        return self._symbol
 
     def __mul__(self,rhs):
         # NB deliberately don't allow `rhs` to be numeric
@@ -140,8 +140,8 @@ class BinaryOp(object):
     # Execution is a recursive process that reduces a tree 
     # of Mul and Div objects to a single result.
     # The `converter` argument is a `Context` method
-    # that converts a KindOfQuantity object into a Dimension.
-    # The `stack` holds dimensions. 
+    # that converts a KindOfQuantity object into a Signature.
+    # The `stack` holds signatures. 
     def execute(self,stack,converter):
         if isinstance( self.lhs,(BinaryOp,UnaryOp) ):
             self.lhs.execute(stack,converter)
@@ -161,7 +161,7 @@ class Simplify(UnaryOp):
 
     def execute(self,stack,converter):
         super(Simplify,self).execute(stack,converter)    
-        # The stack holds Dimension objects
+        # The stack holds Signature objects
         x = stack.pop()
         stack.append( x.simplify() )
 
@@ -173,7 +173,7 @@ class Pow(BinaryOp):
 
     def execute(self,stack,converter):
         super(Pow,self).execute(stack,converter)    
-        # The stack holds Dimension objects
+        # The stack holds Signature objects
         r = stack.pop()
         l = stack.pop()
         stack.append( l ** r )
@@ -186,7 +186,7 @@ class Mul(BinaryOp):
 
     def execute(self,stack,converter):
         super(Mul,self).execute(stack,converter)    
-        # The stack holds Dimension objects
+        # The stack holds Signature objects
         r = stack.pop()
         l = stack.pop()
         stack.append( l * r )
@@ -199,7 +199,7 @@ class Div(BinaryOp):
     
     def execute(self,stack,converter):
         super(Div,self).execute(stack,converter)    
-        # The stack holds Dimension objects
+        # The stack holds Signature objects
         r = stack.pop()
         l = stack.pop()
         stack.append( l / r )
@@ -212,7 +212,7 @@ class Ratio(BinaryOp):
 
     def execute(self,stack,converter):
         super(Ratio,self).execute(stack,converter)    
-        # The stack holds Dimension objects
+        # The stack holds Signature objects
         r = stack.pop()
         l = stack.pop()
         stack.append( l // r )

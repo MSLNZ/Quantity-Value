@@ -162,7 +162,6 @@ class TestQuantityValue(unittest.TestCase):
         required = qresult( consumes * distance ) 
         self.assertTrue( required.unit is litre )
         self.assertAlmostEqual( required.value, distance.value * 2.2/(25.6), 15 )
-        print(required.value)
 
     def test_dimensionless(self):
     

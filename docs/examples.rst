@@ -7,9 +7,9 @@ Examples
 Simple kinematics
 =================
 
-When using the package, the first task is to select a set of base dimensions. 
+When using the package, the first task is to select a set of base quantities. 
 
-For instance, the basis :math:`LT` (distance and duration) may be used for a straight-line kinematics problems. Other kinds of quantity are then declared in terms of this basis, for example the dimensions of speed are :math:`LT^{-1}`. 
+For instance, the basis :math:`LT` (distance and duration) may be used for a straight-line kinematics problems. Other kinds of quantity are then declared in terms of this basis, for example the signature for speed is :math:`LT^{-1}`. 
 
 .. code-block:: python 
 
@@ -18,7 +18,7 @@ For instance, the basis :math:`LT` (distance and duration) may be used for a str
     context = Context( ("Length","L"),("Time","T") )
     context.declare('Speed','V','Length/Time')
 
-Here, the object ``context`` maintains one-to-one relationships between the names, and short symbols, of kinds of quantities and the dimensions associated with measurements of them. So, after the declaration of speed, ``context`` will not allow any other quantity with the same dimensions to be declared. 
+Here, the object ``context`` maintains one-to-one relationships between the names, and short symbols, of kinds of quantities and the signatures associated with measurements of them. So, after the declaration of speed, ``context`` will not allow any other quantity with the same signature to be declared. 
 
 Units are defined in relation to kinds of quantity. In this case, we might write 
 
@@ -30,7 +30,7 @@ Units are defined in relation to kinds of quantity. In this case, we might write
     second = SI.reference_unit('Time','second','s') 
     metre_per_second = SI.reference_unit( 'Speed','metre_per_second','m/s' )
 
-Here, the ``SI`` object is a register of units, each associated with the measurement of a kind of quantity and hence to the dimensions of that quantity in the context. The ``unit`` declaration creates a reference unit within the register; other units of the same kind of quantity can also be registered, but must be related to the reference unit by a conversion factor (see below, where a related unit, L/(100 km), is created for fuel consumption.)
+Here, the ``SI`` object is a register of units, each associated with the measurement of a kind of quantity and hence to the signature of that quantity in the context. The ``unit`` declaration creates a reference unit within the register; other units of the same kind of quantity can also be registered, but must be related to the reference unit by a conversion factor (see below, where a related unit, L/(100 km), is created for fuel consumption.)
 
 Quantity values may be defined with the function ``qvalue()`` and used in calculations. For instance, 
 
@@ -51,7 +51,7 @@ The output is
     average speed = 0.5 m/s
     displacement = 5.5 m
 
-An interesting implementation detail is apparent here. The function ``qresult()`` is applied to ``d/t`` to resolve the units, but it is not used in the calculation of ``x0 + v0*t``. The reason is that individual multiplications or divisions are often just intermediate steps in a calculation. So, QV will not try to resolve the kind of quantity of an operation until signalled to do so. However, addition and subtraction of different kinds of quantity is forbidden by quantity calculus. So, the sum in ``x0 + v0*t`` must be validated before execution, and this requires QV to resolve the units of ``v0*t``. 
+An interesting implementation detail is apparent here. The function ``qresult()`` is applied to ``d/t`` to resolve the units, but it is not used in the calculation of ``x0 + v0*t``. The reason is that individual multiplications or divisions are often just intermediate steps in a calculation. So, QV will not try to resolve the kind of quantity of an operation until signalled to do so. However, addition and subtraction of different kinds of quantity is forbidden. So, the sum in ``x0 + v0*t`` must be validated before execution, and this requires QV to resolve the units of ``v0*t``. 
 
 Fuel consumption
 ================
@@ -102,7 +102,7 @@ It is interesting that QV can treat distance and volume as quite distinct quanti
 Electrical quantities
 =====================
 
-Electrical measurements involve particular quantities, and associated units. We can use base dimensions :math:`V`, :math:`I` and :math:`T`, for potential difference, current and duration, respectively. Then additional kinds of quantity of interest include: resistance, capacitance, inductance, energy, power and angular frequency. The context can be configured, as follows 
+Electrical measurements involve particular quantities, and associated units. We can use base quantities :math:`V`, :math:`I` and :math:`T`, for potential difference, current and duration, respectively. Then additional quantities of interest include: resistance, capacitance, inductance, energy, power and angular frequency. The context can be configured, as follows 
 
 .. code-block:: python  
 
@@ -164,7 +164,7 @@ Which produces
 Ratios
 ======
 
-Ratios of the same kind of quantities arise frequently in calculations. These ratios are often described as `dimensionless` quantities, but they are not plain numbers and the quantities involved should not be ignored. 
+Ratios of the same quantities arise frequently in calculations. These ratios are often described as `dimensionless`, but they are not plain numbers and the quantities involved should not be ignored. 
 
 Dimensionless ratios can retain quantity information if defined using the function ``qratio``. 
 
@@ -228,7 +228,7 @@ The output is (Note, when no preferred unit is given (the first case), units are
 Angles
 ======
 
-It is well known that some SI quantities cannot be distinguished by dimensional analysis because they have the same dimensions [Brownstein]_. This ambiguity can be removed by introducing a base dimension for angle, and a new dimensional constant :math:`\eta`, but then some of the basic equations of physics also have to be changed [Quincey]_. 
+It is well known that some SI quantities have the same dimensions and so cannot be distinguished by dimensional analysis [Brownstein]_. In the case of angle, this ambiguity can be removed by introducing a new dimensional constant :math:`\eta` but then some of the basic equations of physics also have to be changed [Quincey]_. 
 
 It is not as bad as it sounds. For example, the well-known equation 
 

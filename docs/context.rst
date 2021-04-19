@@ -7,13 +7,13 @@ Context
 .. contents::
    :local:
 
-The :mod:`.context` module provides support for quantity calculus, in combination with the modules :mod:`.dimension` and :mod:`.kind_of_quantity`. 
+The :mod:`.context` module provides support for quantity calculus, in combination with the modules :mod:`.signature` and :mod:`.kind_of_quantity`. 
 
-Kinds of quantity are considered independent entities that become associated with unique dimensions in a context. 
+Kinds of quantity are considered independent entities that become associated with unique signatures in a context. 
 
-A :class:`.Context` is initialised by a set of kinds of quantity, which become the base quantities for that context. Other kinds of quantity can be declared by providing an expression that describes quantity in terms of the base quantities and possibly other quantities already declared. 
+A :class:`.Context` is initialised by a set of kinds of quantity, which become the base quantities in that context. Other kinds of quantity can be declared by providing an expression that describes quantity in terms of the base quantities and possibly other quantities already declared. 
 
-For instance, in the following code block, power is declared in terms of voltage and resistance, and resistance is declared in terms of voltage and current. The  dimensions of power in terms of the base quantities are :math:`I^1V^1T^0`, which is displayed by the print statement as ``(1,1,0)``. 
+For instance, in the following code block, power is declared in terms of voltage and resistance, and resistance is declared in terms of voltage and current. The signature of power in terms of the base quantities are :math:`I^1V^1T^0`, which is displayed by the print statement as ``(1,1,0)``. 
 
 .. code-block:: python 
 
@@ -25,7 +25,7 @@ For instance, in the following code block, power is declared in terms of voltage
     
     context.declare('Resistance','R','Voltage/Current')
     context.declare('Power','P','V*V/R')
-    print( context.dimensions('P') )
+    print( context.signature('P') )
 
 :class:`.KindOfQuantity` objects can be retrieved from a context and used in expressions:
 

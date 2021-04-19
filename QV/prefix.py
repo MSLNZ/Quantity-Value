@@ -1,12 +1,13 @@
 from QV.unit_register import related_unit
-from QV.scale import Unit 
+from QV.unit_register import RegisteredUnit as Unit
+# from QV.scale import Unit 
 
 
 #----------------------------------------------------------------------------
 class Prefix(object):
 
     """
-    Holds the name, short name (term) and scale factor 
+    Holds the name, short name (symbol) and scale factor 
     for a prefix. It can be called to generate a new related unit.
    
     For example::
@@ -20,21 +21,21 @@ class Prefix(object):
         
     """
     
-    def __init__(self,name,term,value):
+    def __init__(self,name,symbol,value):
         self.name = name 
-        self.term = term 
+        self.symbol = symbol 
         self.value = value
         
     def __repr__(self):
         return "{!s}({!r},{!r},{:.0E})".format(
             self.__class__.__name__,
             self.name,
-            self.term,
+            self.symbol,
             self.value
         )
         
     def __str__(self):
-        return str(self.term) 
+        return str(self.symbol) 
         
     def __call__(self,reference_unit):
         """Return a new unit related to reference unit"""
@@ -62,15 +63,15 @@ class Prefix(object):
         if name in unit_dict:
             return unit_dict[name]
         else:
-            term = "{!s}{!s}".format(
-                self.term,
+            symbol = "{!s}{!s}".format(
+                self.symbol,
                 reference_unit.scale
             )
             
             pq = Unit(
                 kind_of_quantity,
                 name,
-                term,
+                symbol,
                 unit_register,
                 self.value
             )
@@ -121,7 +122,7 @@ metric_prefixes = (
         >>> second = SI.reference_unit('Time','second','s')  
         >>> for p_i in prefix.metric_prefixes: 
         ...     related = p_i(second)
-        ...     print( "{0.scale.name} ({0.scale.term}): {0.multiplier:.1E}".format(related) )
+        ...     print( "{0.scale.name} ({0.scale.symbol}): {0.multiplier:.1E}".format(related) )
         ...
         yoctosecond (ys): 1.00E-24
         zeptosecond (zs): 1.00E-21
@@ -151,7 +152,7 @@ def si_mass_units(kg_reference_unit):
     Generate multiples and sub-multiples for mass units in the SI
     
     ``kg_reference_unit`` must be defined as a reference unit, with 
-    name ``kilogram`` and term ``kg``
+    name ``kilogram`` and symbol ``kg``
     
     Example::
     
@@ -168,10 +169,10 @@ def si_mass_units(kg_reference_unit):
     """
     if (
         kg_reference_unit.scale.name != 'kilogram' and 
-        kg_reference_unit.scale.term != 'kg'
+        kg_reference_unit.scale.symbol != 'kg'
     ):
         raise RuntimeError(
-            "conventional name required, got {0.name} and{0.term}".format(
+            "conventional name required, got {0.name} and{0.symbol}".format(
                 kg_reference_unit
             )
         )
@@ -183,7 +184,7 @@ def si_mass_units(kg_reference_unit):
             related_unit(kg_reference_unit,
                 p_i.value / 1000.0,
                 p_i.name+'gram',
-                p_i.term+'g' 
+                p_i.symbol+'g' 
             )
     
 #============================================================================
@@ -212,7 +213,7 @@ binary_prefixes = (
         >>> byte = ureg.reference_unit('Data','byte','b')
         >>> for p_i in prefix.binary_prefixes: 
         ...     related = p_i(byte)
-        ...     print( "{0.scale.name} ({0.scale.term}): {0.multiplier}".format(related) )
+        ...     print( "{0.scale.name} ({0.scale.symbol}): {0.multiplier}".format(related) )
         ...        
         kibibyte (kib): 1048
         mebibyte (Mib): 1098304

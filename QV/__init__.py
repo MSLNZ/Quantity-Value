@@ -23,5 +23,5 @@ __all__ = (
 #----------------------------------------------------------------------------
 
 version = "0.1.0.dev0"
-copyright = """Copyright (c) 2020, \
+copyright = """Copyright (c) 2021, \
 Measurement Standards Laboratory of New Zealand"""

@@ -8,22 +8,22 @@ warnings.filterwarnings(
 from bidict import bidict 
 
 from QV.kind_of_quantity import KindOfQuantity, Number
-from QV.dimension import Dimension
+from QV.signature import Signature
 
 #----------------------------------------------------------------------------
 class Context(object):
 
     """
     A Context keeps a register of :class:`.KindOfQuantity` instances,
-    and associates each with a unique dimension.
+    and associates each with a unique signature.
     
     A Context is initialised by providing a set of :math:`n` 
-    kinds of quantity that become the base quantities. 
+    kinds of quantity as base quantities. 
     Other kinds of quantity can then be declared as products  
     and quotients of base quantities, or of other 
     derived quantities already declared. 
     
-    The dimensions of all declared quantities must be unique
+    The signature of declared quantities must be unique
     in the context.
         
     Example::
@@ -36,40 +36,40 @@ class Context(object):
     
     def __init__(self,*argv):
         assert len(argv) > 0,\
-            "Provide a sequence of name-term tuples"
+            "Provide a sequence of name-symbol tuples"
             
         self._basis = tuple( KindOfQuantity(n,t) for (n,t) in argv )
         
         self._koq = dict()
         for koq_i in self._basis:
-            if self._valid_koq_name_or_term(koq_i._term):
-                self._koq[koq_i._term] = koq_i
-            if self._valid_koq_name_or_term(koq_i._name):
+            if self._valid_koq_name_or_symbol(koq_i._symbol):
+                self._koq[koq_i._symbol] = koq_i
+            if self._valid_koq_name_or_symbol(koq_i._name):
                 self._koq[koq_i._name] = koq_i
         
         # # For conversions between different unit registers
         # self._conversion_factors = dict()
         
-        self._koq_dimension = bidict()
-        # Assign an independent dimension to each base quantity
-        dimension = [0] * len(argv)
+        self._koq_signature = bidict()
+        # Assign an independent exponent to each base quantity
+        exponents = [0] * len(argv)
         
         # Dimensionless case is included by default
-        self._koq_dimension[Number] = Dimension(self,dimension)
+        self._koq_signature[Number] = Signature(self,exponents)
         self._koq.update( {'Number':Number, '1':Number} ) 
         
         for i,koq in enumerate( self._basis ):
-            if koq in self._koq_dimension:
+            if koq in self._koq_signature:
                 raise RuntimeError(
                     "{!r} is allocated to {}".format(
                         koq,
-                        self._koq_dimension[koq]
+                        self._koq_signature[koq]
                     )
                 )
             else:
-                dimension[i] = 1
-                self._koq_dimension[koq] = Dimension(self,dimension)
-                dimension[i] = 0
+                exponents[i] = 1
+                self._koq_signature[koq] = Signature(self,exponents)
+                exponents[i] = 0
         
     def __getitem__(self,name):
         if name in self._koq:
@@ -81,13 +81,13 @@ class Context(object):
         except KeyError:
             raise AttributeError
         
-    def _koq_to_dim(self,koq):
-        return self._koq_dimension[koq]
+    def _kog_to_signature(self,koq):
+        return self._koq_signature[koq]
   
-    def _dim_to_koq(self,dim):
-        return self._koq_dimension.inverse[dim]
+    def _signature_to_koq(self,sig):
+        return self._koq_signature.inverse[sig]
         
-    def _valid_koq_name_or_term(self,koq_id):
+    def _valid_koq_name_or_symbol(self,koq_id):
         if hasattr(self,koq_id):     
             if koq_id in self._koq:
                 raise RuntimeError(
@@ -111,13 +111,13 @@ class Context(object):
     # `expression` is a sequence of binary multiplication
     # and division operations, represented as a tree of 
     # KindOfQuantity objects. 
-    # `self._koq_to_dim()` resolves the dimension of  
+    # `self._kog_to_signature()` resolves the signature of  
     # KindOfQuantity objects at the leaves of this tree. 
     # Executing the expression results in the 
-    # dimension for the resultant KindOfQuantity.
-    def _evaluate_dimension(self,expression):
+    # signature for the resultant KindOfQuantity.
+    def _evaluate_signature(self,expression):
         stack = list()
-        expression.execute(stack,self._koq_to_dim)
+        expression.execute(stack,self._kog_to_signature)
         
         assert len(stack) == 1
         return stack.pop()
@@ -127,22 +127,22 @@ class Context(object):
         """Return the base quantities in this context"""
         return self._basis
         
-    def declare(self,koq_name,koq_term,expression):
+    def declare(self,koq_name,koq_symbol,expression):
         """
         Declare a :class:`.KindOfQuantity` in the context
-        with dimensions defined by the ``expression``
+        with signature defined by the ``expression``
         
         The argument ``expression`` may be an arbitrary number of 
         multiplications and divisions among :obj:`.KindOfQuantity` objects, 
         or a string representing such a sequence of operations.
         
-        A ``RuntimeError`` is raised if the dimensions of the 
+        A ``RuntimeError`` is raised if the signature of the 
         ``expression`` are already associated with a kind 
         of quantity in the context.
         
         """
-        self._valid_koq_name_or_term(koq_name)
-        self._valid_koq_name_or_term(koq_term)
+        self._valid_koq_name_or_symbol(koq_name)
+        self._valid_koq_name_or_symbol(koq_symbol)
             
         # Evaluates the KoQ expression using only those KoQ 
         # objects that have been declared. 
@@ -152,7 +152,7 @@ class Context(object):
             expression = eval(expression,{'__builtins__': None},self._koq)
         
         if isinstance(expression,KindOfQuantity):
-            if expression in self._koq_dimension:
+            if expression in self._koq_signature:
                 raise RuntimeError(
                     "{!r} is already declared".format(expression)
                 )
@@ -161,12 +161,12 @@ class Context(object):
                 # and hence should already be registered 
                 assert False, 'unexpected'
         else:
-            dim = self._evaluate_dimension(expression)
+            sig = self._evaluate_signature(expression)
             
-            koq = KindOfQuantity(koq_name,koq_term)
+            koq = KindOfQuantity(koq_name,koq_symbol)
 
-            self._koq_dimension[koq] = dim
-            self._koq.update( {koq_name:koq, koq_term:koq} )
+            self._koq_signature[koq] = sig
+            self._koq.update( {koq_name:koq, koq_symbol:koq} )
                 
             return koq 
         
@@ -178,7 +178,7 @@ class Context(object):
         multiplications and divisions among :obj:`.KindOfQuantity` objects, 
         or a string representing such a sequence of operations.
         
-        A ``RuntimeError`` is raised if the dimensions of the result 
+        A ``RuntimeError`` is raised if the signature of the result 
         of the expression are not associated with a kind of quantity 
         in the context.
         
@@ -188,25 +188,25 @@ class Context(object):
             # objects that have been declared in this context. 
             expression = eval(expression,{'__builtins__': None},self._koq)
 
-        dim = self._evaluate_dimension(expression)
+        sig = self._evaluate_signature(expression)
         
         try:
-            return self._dim_to_koq(dim)
+            return self._signature_to_koq(sig)
         except KeyError:
             raise RuntimeError(
-                "No quantity is associated with {!r}".format(dim)
+                "No quantity is associated with {!r}".format(sig)
             )
             
-    def dimensions(self,koq):
+    def signature(self,koq):
         """
-        Return the dimensions of ``koq`` 
+        Return the signature of ``koq`` 
         
         """
         # Can be a name
         if isinstance(koq,str):
             koq = self._koq[koq] 
             
-        return self._koq_dimension[koq]    
+        return self._koq_signature[koq]    
         
     # def conversion_from_to(self,ref_unit_1,ref_unit_2,factor):
         # """
