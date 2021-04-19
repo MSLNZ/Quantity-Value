@@ -61,20 +61,21 @@ class UnitRegister(object):
         or a kind-of-quantity object.
         
         """
-        # If `expr` has `kind_of_quantity` then `expr` is 
-        # a unit or a unit expression. In the first case, 
-        # we can obtain a kind-of-quantity directly and 
-        # should immediately look up the unit.
+        # If `expr` has the `kind_of_quantity` attribute then  
+        # it is a unit or a unit expression. 
+        # In the first case, we can obtain a kind-of-quantity  
+        # directly so immediately look up the unit.
         # In the second case, the expression must be evaluated.
-        # If `expr` has `execute` it is a 
+        # If `expr` has the `execute` attribute then it is a 
         # kind-of-quantity expression.
+        
         if hasattr(expr,'kind_of_quantity'):
             koq = expr.kind_of_quantity
         else:
-            # Assume a koq or a koq expression
             koq = expr 
             
         if hasattr(koq,'execute'):
+            # A koq expression
             koq = self.context._signature_to_koq( 
                 self.context._evaluate_signature( koq ) 
             )

@@ -78,6 +78,10 @@ class KindOfQuantity(object):
 #----------------------------------------------------------------------------
 # KindOfQuantity objects can be multiplied and divided. Declaring a ratio 
 # and simplifying a ratio is also supported.   
+#
+# The `execute` method is defined in all classes and is used to resolve 
+# expressions into a result, by executing the nodes of a parse tree.
+# See `context._evaluate_signature`
 #----------------------------------------------------------------------------
 class UnaryOp(object):   
 
@@ -93,7 +97,7 @@ class UnaryOp(object):
 #----------------------------------------------------------------------------
 class BinaryOp(object):   
     """
-    Based class to build a simple parse tree and evaluate it
+    Base class to build a simple parse tree and evaluate it
     """
     def __init__(self,lhs,rhs):
         self.lhs = lhs
@@ -138,9 +142,9 @@ class BinaryOp(object):
         return Simplify(self)
         
     # Execution is a recursive process that reduces a tree 
-    # of Mul and Div objects to a single result.
+    # of Mul and Div objects to a result.
     # The `converter` argument is a `Context` method
-    # that converts a KindOfQuantity object into a Signature.
+    # that converts a `KindOfQuantity` object into a Signature.
     # The `stack` holds signatures. 
     def execute(self,stack,converter):
         if isinstance( self.lhs,(BinaryOp,UnaryOp) ):

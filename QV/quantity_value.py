@@ -8,12 +8,16 @@ __all__ = ('qvalue','value','unit','qresult','qratio')
 
 #----------------------------------------------------------------------------
 #
+# The name comes from the idea that a quantity is fully expressed
+# as a value and a unit (Maxwell).
+
 class ValueUnit(object):
     """
     A number and an associated unit.
     
-    A ``ValueUnit`` class is intended to represent the notion of a
-    quantity value, as that term is used formally in metrology.
+    A ``ValueUnit`` class represents a quantity value, 
+    as that term is used in metrology.
+    
     """
     __slots__ = ("value", "unit")
     
@@ -21,7 +25,7 @@ class ValueUnit(object):
         self.value = value     
         self.unit = unit
         
-    # We want the object to appear to be ``qvalue``,
+    # We want this object to appear to be ``qvalue``,
     # because that is how we would create such an object.
     def __repr__(self):
         return "{!s}({!s},{!s})".format(
@@ -39,20 +43,23 @@ class ValueUnit(object):
     def __add__(self,rhs):  
         lhs = self  
         register = lhs.unit.register
+        
         if not register is rhs.unit.register:
-            raise RuntimeError("Different unit systems: {}, {}".format(
+            raise RuntimeError("Different unit registers: {}, {}".format(
                 register, rhs.unit.register)
             )
             
+        # When an argument is a temporary result, the unit 
+        # may be an expression 
         if not isinstance(lhs.unit,Unit):
-            # Must resolve the unit before proceeding
+            # Resolve the unit before proceeding
             lhs = ValueUnit( 
                 lhs.unit.multiplier*self.value, 
                 register.reference_unit_for( lhs.unit ) 
             ) 
         
         if not isinstance(rhs.unit,Unit):
-            # Must resolve the unit before proceeding
+            # Resolve the unit before proceeding
             rhs = ValueUnit( 
                 rhs.unit.multiplier*rhs.value, 
                 register.reference_unit_for( rhs.unit ) 
@@ -61,13 +68,14 @@ class ValueUnit(object):
         if lhs.unit is rhs.unit:
             return ValueUnit( lhs.value + rhs.value, lhs.unit )
          
-        if lhs.unit.scale.kind_of_quantity is rhs.unit.scale.kind_of_quantity:
+        elif lhs.unit.scale.kind_of_quantity is rhs.unit.scale.kind_of_quantity:
             ml = lhs.unit.multiplier
             mr = rhs.unit.multiplier 
             if ml < mr:
                 return ValueUnit( lhs.value + (mr/ml)*rhs.value, lhs.unit )
             else:
                 return ValueUnit( (ml/mr)*lhs.value + rhs.value, rhs.unit )
+                
         else:
             raise RuntimeError(
                 "Different kinds of quantity: {}, {}".format(
@@ -86,7 +94,7 @@ class ValueUnit(object):
         lhs = self
         register = lhs.unit.register
         if not register is rhs.unit.register:
-            raise RuntimeError("Different unit systems: {}, {}".format(
+            raise RuntimeError("Different unit registers: {}, {}".format(
                 register, rhs.unit.register)
             )
             

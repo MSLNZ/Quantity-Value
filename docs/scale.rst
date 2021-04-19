@@ -4,11 +4,13 @@
 Scale
 *****
 
-The :mod:`.scale` module contains the classes :class:`.Scale` which implements generic scale behaviour. 
+The :mod:`.scale` module contains the class :class:`.Scale` which implements generic scale behaviour. This class represents the conventional notion of a measurement scale (also commonly called a unit).  
 
-The :class:`.Scale` class represents the conventional notion of a measurement scale (commonly called a unit).  
+Different categories of scale are implemented as classes derived from :class:`.Scale`: 
 
-At present, all scales associated with the same kind of quantity are proportional to one another (conversion from one scale to another requires only a multiplicative scale factor). However, this may change in future. We will probably implement support for 'interval' scales (for which a scale factor and an offset are needed to convert from one scale to another).
+    * Instances of :class:`.Ratio` scales have an absolute zero, like the metre scale for length or the kelvin scale for thermodynamic temperature. 
+    
+    * :class:`.Interval` scales are measurement scales with an arbitrary zero, like the Fahrenheit and Celsius temperature scales. 
 
 .. contents::
    :local:

@@ -17,10 +17,9 @@ class Context(object):
     A Context keeps a register of :class:`.KindOfQuantity` instances,
     and associates each with a unique signature.
     
-    A Context is initialised by providing a set of :math:`n` 
-    kinds of quantity as base quantities. 
-    Other kinds of quantity can then be declared as products  
-    and quotients of base quantities, or of other 
+    A Context is initialised by a set of base quantities. 
+    Other quantities can then be declared as products  
+    and quotients of these base quantities, or of other 
     derived quantities already declared. 
     
     The signature of declared quantities must be unique
@@ -108,13 +107,13 @@ class Context(object):
             return True 
              
   
+    # Executing the expression results in the 
+    # signature for the resultant KindOfQuantity.
     # `expression` is a sequence of binary multiplication
     # and division operations, represented as a tree of 
     # KindOfQuantity objects. 
-    # `self._kog_to_signature()` resolves the signature of  
-    # KindOfQuantity objects at the leaves of this tree. 
-    # Executing the expression results in the 
-    # signature for the resultant KindOfQuantity.
+    # `_kog_to_signature` resolves the signature of  
+    # the KindOfQuantity objects at the leaves of this tree. 
     def _evaluate_signature(self,expression):
         stack = list()
         expression.execute(stack,self._kog_to_signature)
@@ -129,15 +128,15 @@ class Context(object):
         
     def declare(self,koq_name,koq_symbol,expression):
         """
-        Declare a :class:`.KindOfQuantity` in the context
-        with signature defined by the ``expression``
+        Declare a :class:`.KindOfQuantity`
+        with signature defined by ``expression``
         
-        The argument ``expression`` may be an arbitrary number of 
-        multiplications and divisions among :obj:`.KindOfQuantity` objects, 
+        The argument ``expression`` may be multiplications 
+        and divisions of :obj:`.KindOfQuantity` objects, 
         or a string representing such a sequence of operations.
         
         A ``RuntimeError`` is raised if the signature of the 
-        ``expression`` are already associated with a kind 
+        ``expression`` is already associated with a kind 
         of quantity in the context.
         
         """
@@ -172,10 +171,10 @@ class Context(object):
         
     def evaluate(self,expression):
         """
-        Evaluate the kind of quantity represented by ``expression``
+        Evaluate the quantity represented by ``expression``
                 
-        The argument ``expression`` may be an arbitrary number of 
-        multiplications and divisions among :obj:`.KindOfQuantity` objects, 
+        The argument ``expression`` may be multiplications 
+        and divisions of :obj:`.KindOfQuantity` objects, 
         or a string representing such a sequence of operations.
         
         A ``RuntimeError`` is raised if the signature of the result 
@@ -199,7 +198,7 @@ class Context(object):
             
     def signature(self,koq):
         """
-        Return the signature of ``koq`` 
+        Return the signature associated with ``koq`` 
         
         """
         # Can be a name

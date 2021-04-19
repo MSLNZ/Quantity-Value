@@ -30,7 +30,7 @@ Units are defined in relation to kinds of quantity. In this case, we might write
     second = SI.reference_unit('Time','second','s') 
     metre_per_second = SI.reference_unit( 'Speed','metre_per_second','m/s' )
 
-Here, the ``SI`` object is a register of units, each associated with the measurement of a kind of quantity and hence to the signature of that quantity in the context. The ``unit`` declaration creates a reference unit within the register; other units of the same kind of quantity can also be registered, but must be related to the reference unit by a conversion factor (see below, where a related unit, L/(100 km), is created for fuel consumption.)
+Here, the ``SI`` object is a register of units, each associated with the measurement of a kind of quantity and hence to the signature of that quantity in the context. The ``reference_unit`` declaration creates a reference unit within the register; other units of the same kind of quantity can also be registered, but they must be related to the reference by a conversion factor (see below, where a related unit, L/(100 km), is created for fuel consumption.)
 
 Quantity values may be defined with the function ``qvalue()`` and used in calculations. For instance, 
 

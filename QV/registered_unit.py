@@ -7,18 +7,18 @@ __all__ = (
 )
 
 #----------------------------------------------------------------------------
-# A Scale (correctly) does not refer to a register, but the implementation 
-# of a unit class would be awkward without such a reference. 
-# RegisteredUnit is therefore really part of the implementation of the UnitRegister. 
+# A Scale does not refer to a register (correctly), but the implementation 
+# of units would be awkward without such a reference.  
 class RegisteredUnit(object):
 
     """
-    A RegisteredUnit class implements the behaviour of a measurement scale. 
+    A RegisteredUnit class implements the general scale behaviour. 
     
     A :class:`.RegisteredUnit` is associated with a :class:`.Scale` 
     and with a :class:`.UnitRegister`. 
     
-    Multiplication and division of units is supported. 
+    Multiplication and division of units is delegated to the scale
+    and will be checked during execution. 
     
     The 'floor' division operator supports retention of 
     information about the signature of 'dimensionless' quantities 
@@ -215,8 +215,7 @@ class BinaryOp(object):
 
 #----------------------------------------------------------------------------
 #
-# Operations implement manipulations of multipliers and kinds
-# of quantity simultaneously. 
+# The operations are performed simultaneously on the kinds of quantity. 
 #       
 #----------------------------------------------------------------------------
 class Simplify(UnaryOp):
@@ -231,6 +230,7 @@ class Simplify(UnaryOp):
         # TODO: need to treat a numeric as a special case
         return "simplify({!s})".format(self.arg)
            
+    # Perform the operation on the quantities involved 
     @property 
     def kind_of_quantity(self):  
         return self.arg.kind_of_quantity._simplify()
@@ -252,6 +252,7 @@ class Ratio(BinaryOp):
         # TODO: need to treat a numeric as a special case
         return "({!s}//{!s})".format(self.lhs,self.rhs)
            
+    # Perform the operation on the quantities involved 
     @property 
     def kind_of_quantity(self):  
         return self.lhs.kind_of_quantity // self.rhs.kind_of_quantity
@@ -277,6 +278,7 @@ class Mul(BinaryOp):
     def kind_of_quantity(self):  
         return self.lhs.kind_of_quantity * self.rhs.kind_of_quantity
         
+    # Perform the operation on the quantities involved 
     @property 
     def multiplier(self):
         return self.lhs.multiplier * self.rhs.multiplier
@@ -294,6 +296,7 @@ class Div(BinaryOp):
         # TODO: need to treat a numeric as a special case
         return "({!s})/({!s})".format(self.lhs,self.rhs)
     
+    # Perform the operation on the quantities involved 
     @property 
     def kind_of_quantity(self):  
         return self.lhs.kind_of_quantity / self.rhs.kind_of_quantity

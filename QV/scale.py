@@ -7,7 +7,7 @@ __all__ = ( 'Scale', )
 class Scale(object):
 
     """
-    Measured values of a quantity are reported on a scale.  
+    Values of a quantity are reported on a scale.  
     For example, the SI scale for length measurement is the metre.   
         
     A Scale object has a name (and a short name, or symbol) 
@@ -48,7 +48,7 @@ class Scale(object):
         
     @property 
     def symbol(self):
-        """Short name for the quantity"""
+        """Short quantity name"""
         return self._symbol
         
     @property 
