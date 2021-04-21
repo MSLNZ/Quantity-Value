@@ -1,21 +1,20 @@
 from __future__ import division 
 
 from QV.scale import * 
+from QV.unit_register import UnitRegister
 
 __all__ = (
-    'RegisteredUnit', 'UnitRegister', 'related_unit'
+    'RegisteredUnit', 
 )
 
 #----------------------------------------------------------------------------
 # A Scale does not refer to a register (correctly), but the implementation 
-# of units would be awkward without such a reference.  
+# of units would be awkward without such a reference, hence we need this class.  
 class RegisteredUnit(object):
 
     """
-    A RegisteredUnit class implements the general scale behaviour. 
-    
     A :class:`.RegisteredUnit` is associated with a :class:`.Scale` 
-    and with a :class:`.UnitRegister`. 
+    and a :class:`.UnitRegister`. 
     
     Multiplication and division of units is delegated to the scale
     and will be checked during execution. 
@@ -26,32 +25,19 @@ class RegisteredUnit(object):
     
     """
 
-    def __init__(self,kind_of_quantity,name,symbol,register,multiplier):
-        self._scale = Scale(kind_of_quantity,name,symbol)
-        self._kind_of_quantity = self._scale.kind_of_quantity
+    def __init__(self,register,scale):
+        self._scale = scale
         self._register = register
-        self._multiplier = multiplier   
-        
-    # Units for the same kind of quantity can have different multipliers. 
-    # A unit with multiplier of unity is the reference unit.
-    # It is perhaps better to hold the multipliers in the unit register?
-    
+            
     @property 
     def scale(self):
-        """The unit scale"""
+        """The scale"""
         return self._scale 
 
-    @property 
-    def kind_of_quantity(self): 
-        """The associated kind of quantity"""
-        return self._kind_of_quantity
-
-    @property 
-    def multiplier(self):
-        try:
-            return self._multiplier
-        except AttributeError:
-            return 1 
+    # @property 
+    # def kind_of_quantity(self): 
+        # """The kind of quantity"""
+        # return self._scale._kind_of_quantity
 
     @property 
     def is_dimensionless(self):
@@ -114,29 +100,18 @@ class RegisteredUnit(object):
     def __floordiv__(self,rhs):
         return Ratio(self,rhs)
 
-    def __pow__(self,rhs):
-        assert isinstance(rhs,numbers.Real),\
-            "A real exponent is required"
+    # def __pow__(self,rhs):
+        # assert isinstance(rhs,numbers.Real),\
+            # "A real exponent is required"
         
-        # work in progress!
-        return NotImplemented
+        # # work in progress!
+        # return NotImplemented
   
     # def ratio(self,rhs):
         # return Ratio(self,rhs)
 
     def simplify(self):
         return Simplify(self)
-
-    # def reference_unit(self):
-        # """
-        # Return the reference unit
-
-        # There can be only one reference unit in a register for each 
-        # kind of quantity, but there can be many other related units,
-        # which are multiples of the reference.
-        
-        # """
-        # return self.register.reference_unit_for( self.kind_of_quantity ) 
 
 #----------------------------------------------------------------------------
 # The following classes support simple manipulation of units by
@@ -174,9 +149,6 @@ class UnaryOp(object):
 
     def simplify(self):
         return Simplify(self)
-
-    # def reference_unit(self):
-        # return self.register.reference_unit_for( self.kind_of_quantity ) 
     
 #----------------------------------------------------------------------------
 class BinaryOp(object):   
@@ -210,9 +182,6 @@ class BinaryOp(object):
     def simplify(self):
         return Simplify(self)
 
-    # def reference_unit(self):
-        # return self.register.reference_unit_for( self.kind_of_quantity ) 
-
 #----------------------------------------------------------------------------
 #
 # The operations are performed simultaneously on the kinds of quantity. 
@@ -235,10 +204,6 @@ class Simplify(UnaryOp):
     def kind_of_quantity(self):  
         return self.arg.kind_of_quantity._simplify()
         
-    @property 
-    def multiplier(self):
-        return self.arg.multiplier
-
 #----------------------------------------------------------------------------
 class Ratio(BinaryOp):   
 
@@ -256,11 +221,12 @@ class Ratio(BinaryOp):
     @property 
     def kind_of_quantity(self):  
         return self.lhs.kind_of_quantity // self.rhs.kind_of_quantity
-        
+ 
+    # Perform the operation on the scales involved 
     @property 
-    def multiplier(self):
-        return self.lhs.multiplier / self.rhs.multiplier
-
+    def scale(self):  
+        self.lhs.scale // self.rhs.scale
+ 
 #----------------------------------------------------------------------------
 class Mul(BinaryOp):   
 
@@ -278,10 +244,10 @@ class Mul(BinaryOp):
     def kind_of_quantity(self):  
         return self.lhs.kind_of_quantity * self.rhs.kind_of_quantity
         
-    # Perform the operation on the quantities involved 
+    # Perform the operation on the scales involved 
     @property 
-    def multiplier(self):
-        return self.lhs.multiplier * self.rhs.multiplier
+    def scale(self):  
+        self.lhs.scale * self.rhs.scale
         
 #----------------------------------------------------------------------------
 class Div(BinaryOp):   
@@ -301,9 +267,10 @@ class Div(BinaryOp):
     def kind_of_quantity(self):  
         return self.lhs.kind_of_quantity / self.rhs.kind_of_quantity
 
+    # Perform the operation on the scales involved 
     @property 
-    def multiplier(self):
-        return self.lhs.multiplier / self.rhs.multiplier 
+    def scale(self):  
+        self.lhs.scale / self.rhs.scale
         
 # ===========================================================================    
 if __name__ == "__main__":

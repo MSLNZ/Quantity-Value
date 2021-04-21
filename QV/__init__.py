@@ -16,12 +16,14 @@ __all__ = (
     'qresult',
     'Context',
     'UnitRegister',
-    'related_unit',
-    'prefix'
+    # 'related_unit',
+    'prefix',
+    'RatioScale',
+    'IntervalScale'
 )
 
 #----------------------------------------------------------------------------
 
-version = "0.1.0.dev0"
+version = "0.2.0.dev0"
 copyright = """Copyright (c) 2021, \
 Measurement Standards Laboratory of New Zealand"""

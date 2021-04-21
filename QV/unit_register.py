@@ -1,5 +1,7 @@
 from __future__ import division 
 
+from functools import partial 
+
 # `UnitRegister` does not represent the concept of a 'system of units'. 
 # Different types of units belong in different systems, like the SI 
 # would have m, cm, km, etc, and Imperial would have the foot, yard,
@@ -10,7 +12,7 @@ from QV.registered_unit import RegisteredUnit
 from QV.units_dict import UnitsDict
 
 __all__ = (
-    'UnitRegister', 'related_unit'
+    'UnitRegister', 
 )
 
 #----------------------------------------------------------------------------
@@ -21,23 +23,26 @@ class UnitRegister(object):
     
     A distinction is made between a reference unit and other related units 
     for the same kind of quantity. There can be only one reference unit 
-    in the register for each kind of quantity.
-    
+    in the register for each kind of quantity.  
     """ 
     
     def __init__(self,name,context):
+        
         self._name = name
         self._context = context
         
-        self._koq_to_ref_unit = dict()          # koq -> unit
-        self._koq_to_units_dict = dict()        # Length.metre -> UnitsDict 
+        self._koq_to_units_dict = UnitsDict({}) 
+        
+        # A mapping of scale-symbol pairs to a 
+        # function that converts between scales 
+        self._conversion_fn = dict()            
                 
-        # There must always be a unit for numbers and it is a 
-        # special case because the name and symbol are blank
-        Number = context['Number']
-        unity = RegisteredUnit(Number,'','',self,1)        
-        self._koq_to_ref_unit[Number] = unity       
-        self._koq_to_units_dict[Number] = UnitsDict({ 'unity': unity })        
+        # # There must always be a unit for numbers and it is a 
+        # # special case because the name and symbol are blank
+        # Number = context['Number']
+        # unity = RegisteredUnit(Number,'','',self,1)        
+        # # self._koq_to_ref_unit[Number] = unity       
+        # self._koq_to_units_dict[Number] = UnitsDict({ 'unity': unity })          
         
     def __str__(self):
         return self._name
@@ -52,7 +57,7 @@ class UnitRegister(object):
     def context(self):        
         return self._context 
         
-    def reference_unit_for(self,expr):
+    def unit_for(self,expr):
         """
         Return the reference unit for `expr`
         
@@ -91,11 +96,12 @@ class UnitRegister(object):
             raise AttributeError
     
     def __getitem__(self,koq):
+        
         if isinstance(koq,str):
             koq = self._context[koq]
             
         return self._koq_to_units_dict[koq]
-        
+                
     def get(self,kind_of_quantity):
         """
         Return a mapping of names and symbols to units for ``kind_of_quantity``
@@ -108,130 +114,93 @@ class UnitRegister(object):
             UnitsDict({})
         )
             
-    def _register_reference_unit(self,unit):
-        # key: koq; value: unit
-        koq = unit.scale.kind_of_quantity
+    def __contains__(self,unit):
         
-        if koq in self._koq_to_ref_unit: 
-            if not self._koq_to_ref_unit[koq] is unit:
-                raise RuntimeError(
-                    "{!r} is already registered".format(koq)
-                )
-        else:
-            self._koq_to_ref_unit[koq] = unit 
-            self._set_units_dict(koq,unit)
-            
-    def _set_units_dict(self,koq,unit):
-        if koq in self._koq_to_units_dict:
-            koq_units = self._koq_to_units_dict[koq]           
-            koq_units.update({ 
-                unit.scale.name: unit, unit.scale.symbol: unit 
-            })
-        else:
-            self._koq_to_units_dict[koq] = UnitsDict({ 
-                unit.scale.name: unit, unit.scale.symbol: unit 
-            })
-            
-    def _register_related_unit(self,unit):
+        units_dict = self._koq_to_units_dict.get(
+            unit.scale.kind_of_quantity,
+            UnitsDict({})
+        )
+
+        return (
+            unit.scale.name in units_dict or 
+            unit.scale.symbol in units_dict
+        )
         
-        # The same unit names can be used with different KoQs,
-        # but the mapping koq -> unit must be unique.
-        koq = unit.scale.kind_of_quantity
-        if koq in self._koq_to_ref_unit:
-            self._set_units_dict(koq,unit)
-        else:
+    def _register_unit(self,unit):
+               
+        if unit in self:
             raise RuntimeError(
-                "No reference unit defined for {!s}".format(koq)
+                "{!r} is already registered: {!r}".format(
+                    unit.scale.name,
+                    self._koq_to_units_dict[unit.scale.name]
+                )
             )
-         
-    def reference_unit(self,koq_name,unit_name,unit_symbol):
+        else:
+            units_dict = self._koq_to_units_dict
+            koq = unit.scale.kind_of_quantity
+            if koq in self._koq_to_units_dict:
+                units_dict = self._koq_to_units_dict[koq]           
+                units_dict.update({ 
+                    unit.scale.name: unit, 
+                    unit.scale.symbol: unit 
+                })
+            else:
+                self._koq_to_units_dict[koq] = UnitsDict({ 
+                    unit.scale.name: unit, 
+                    unit.scale.symbol: unit 
+                })
+                     
+    def unit(self,scale):
         """
-        Create a reference unit for ``koq_name``
         
         """
-        koq = self.context._koq[koq_name]
-        
-        # Reference units all have multiplier = 1
-        u = RegisteredUnit(koq,unit_name,unit_symbol,self,multiplier=1)
-        self._register_reference_unit(u) 
+        u = RegisteredUnit(self,scale)
+        self._register_unit( u ) 
         
         return u
   
-    def from_to(self,source_unit,target_unit):
+    def conversion_function_values(self,A,B,*args):
         """
-        Return the scale factor to convert from `source_unit` to `target_unit`
-        """
-        src_koq = source_unit.scale.kind_of_quantity
-        dst_koq = target_unit.scale.kind_of_quantity
+        Configure a function to convert from scale `A` to `B` 
         
-        if src_koq not in self._koq_to_units_dict:
-            raise RuntimeError(
-                "{!r} is not registered".format(source_unit)
-            )
-        if dst_koq not in self._koq_to_units_dict:
-            raise RuntimeError(
-                "{!r} is not registered".format(target_unit)
-            )
+        """
+        src_koq = A.scale.kind_of_quantity
+        dst_koq = B.scale.kind_of_quantity
         
         if not src_koq is dst_koq:
             raise RuntimeError(
                 "{} and {} are different kinds of quantity".format(
                 src_koq,dst_koq)
             )
-            
-        # ref * k_dst -> unit_dst
-        multiplier = target_unit.multiplier
 
-        # unit_dst / unit_src -> k_dst / k_src
-        multiplier /= source_unit.multiplier    
-        
-        return multiplier 
-       
-#----------------------------------------------------------------------------
-def related_unit(reference_unit,fraction,name,symbol):
-    """
-    Register a unit that is multiple or submultiple of the
-    reference unit for the same kind of quantity.
-    
-    Example::
-        >>> context = Context( ("Distance","L"), ("Volume","V") )
-        >>> FuelConsumption = context.declare('FuelConsumption','FC','Volume/Distance')
-        >>> ureg =  UnitRegister("ureg",context)
-        >>> kilometre = ureg.reference_unit('Distance','kilometre','km') 
-        >>> litre = ureg.reference_unit('Volume','litre','L')
-        >>> litres_per_km = ureg.reference_unit('FuelConsumption','litres_per_km','L/km')
-        >>> litres_per_100_km = related_unit(
-        ...     ureg.FuelConsumption.litres_per_km,
-        ...     1E-2,
-        ...     'litres_per_100_km','L/(100 km)'
-        ... )
-        >>> print( litres_per_100_km )
-        L/(100 km)
-        
-    """
-    koq = reference_unit.scale.kind_of_quantity
-    register = reference_unit._register 
+        # Need to relax this constraint and allow 
+        # conversion between interval and ratio scales
+        # But put the control in the scales module.
+        if not type(A.scale) is type(B.scale):
+            raise RuntimeError(
+                "{} and {} are different scale types".format(
+                A.scale,B.scale)
+            )
 
-    if not reference_unit is register.reference_unit_for(koq):
-        raise RuntimeError(
-            "{!r} is not a reference unit".format(reference_unit.scale.name)  
-        )     
-
-    units_dict = register[koq]
-    if name in units_dict:
-        return units_dict[name]
-    else:
-        unit = RegisteredUnit(
-            koq,
-            name,
-            symbol,
-            register,
-            fraction
-        )
-        register._register_related_unit(unit)
+        full_fn = A.scale.conversion_function
+        partial_fn = partial(full_fn,*args)
+        self._conversion_fn[(A.scale.symbol,B.scale.symbol)] = partial_fn
         
-        return unit
+    def conversion_from_A_to_B(self,A,B):
+        """
+        Return the conversion function from scale `A` to `B` 
         
+        The function takes a single quantity-value argument `x` 
+        and returns a quantity-value result
+        
+        """
+        key = (A.scale.symbol,B.scale.symbol)            
+        if key in self._conversion_fn:
+            return self._conversion_fn[ key ]  
+        else:
+            raise RuntimeError(
+                "no conversion available for {0[0]!r} to {0[1]!r}".format(key)
+            ) 
 
 # ===========================================================================    
 if __name__ == "__main__":

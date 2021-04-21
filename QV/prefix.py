@@ -1,21 +1,19 @@
-from QV.unit_register import related_unit
 from QV.unit_register import RegisteredUnit as Unit
-# from QV.scale import Unit 
-
 
 #----------------------------------------------------------------------------
 class Prefix(object):
 
     """
     Holds the name, short name (symbol) and scale factor 
-    for a prefix. It can be called to generate a new related unit.
+    for a prefix. It can be called to generate a new unit.
    
     For example::
     
         >>> context = Context( ('Length','L') )
         >>> SI =  UnitRegister("SI",context)
-        >>> metre = SI.reference_unit('Length','metre','m')
-        >>> centimetre = prefix.centi(metre)
+        >>> metre = SI.unit( RatioScale('Length','metre','m') )
+        >>> centimetre = SI.unit( prefix.centi(metre) )
+        >>> SI.conversion_function_values(metre,centimetre,prefix.centi.value)
         >>> print( centimetre )
         cm
         
@@ -37,19 +35,18 @@ class Prefix(object):
     def __str__(self):
         return str(self.symbol) 
         
-    def __call__(self,reference_unit):
-        """Return a new unit related to reference unit"""
+    # PROBLEM: things like `centi(centi(metre))` are not permitted.
+    def __call__(self,unit):
+        """Return a new scale related to unit"""
         
-        kind_of_quantity = reference_unit.scale.kind_of_quantity
-        unit_register = reference_unit._register
+        unit_register = unit._register
+        kind_of_quantity = unit.scale.kind_of_quantity
 
-        # Check that `reference_unit` is in the register,
-        # because things like `centi(centi(metre))` are not permitted.
-        if not reference_unit is unit_register.reference_unit_for(
-            reference_unit.scale.kind_of_quantity
+        if not unit is unit_register.reference_unit_for(
+            unit.scale.kind_of_quantity
         ):
             raise RuntimeError(
-                "{!r} is not a reference unit".format(
+                "{!r} is not a unit".format(
                     reference_unit.scale.name
                 )  
             )     

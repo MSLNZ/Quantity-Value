@@ -1,9 +1,11 @@
-from collections import MutableMapping
+from collections.abc import MutableMapping
 
 class UnitsDict(MutableMapping):
 
     """
-    A `dict`-like mapping of names, and short names (symbols), to units.
+    A `dict`-like mapping of names, and short names (symbols), to 
+    objects representing units.
+    
     The names and short names are keys. They are unique and cannot be 
     overwritten once defined (but, they can be deleted).
     """
@@ -44,7 +46,9 @@ class UnitsDict(MutableMapping):
             self._units[key] = value
 
     def __delitem__(self, key):
-        # NB, usually two keys refer to the same unit 
+        # NB, usually two keys refer to the same unit
+        # so we would need to find the other key using
+        # the unit. This has not been implemented yet.
         del self._units[key]
             
     def __iter__(self):
@@ -63,8 +67,9 @@ class UnitsDict(MutableMapping):
 if __name__ == '__main__':
     
     ud = UnitsDict(metre='m',kilogram='kg')
-    ud.update( {'second':'s', 's':'s'} )
+    ud.update( {'second':'s_unit', 's':'s_unit'} )
     print( repr(ud) )
+    print( ud.s )
     del ud['s']
     print( repr(ud) )
     print( ud.second )
