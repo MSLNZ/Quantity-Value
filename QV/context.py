@@ -75,10 +75,12 @@ class Context(object):
             return self._koq[name]
  
     def __getattr__(self,attr):
-        try:
+        if attr in self._koq:
             return self._koq[attr]
-        except KeyError:
-            raise AttributeError
+        else:
+            raise AttributeError(
+                "{!r}".format(attr)
+            )
         
     def _kog_to_signature(self,koq):
         return self._koq_signature[koq]

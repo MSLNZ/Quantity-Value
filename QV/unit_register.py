@@ -19,7 +19,7 @@ __all__ = (
 class UnitRegister(object):
 
     """
-    A UnitRegister holds associations between kinds of quantities and units.
+    A UnitRegister holds associations between a kind-of-quantity and units.
     
     A distinction is made between a reference unit and other related units 
     for the same kind of quantity. There can be only one reference unit 
@@ -31,7 +31,8 @@ class UnitRegister(object):
         self._name = name
         self._context = context
         
-        self._koq_to_units_dict = UnitsDict({}) 
+        # KoQ objects keys, UnitsDict() values
+        self._koq_to_units_dict = dict()
         
         # A mapping of scale-symbol pairs to a 
         # function that converts between scales 
@@ -89,25 +90,29 @@ class UnitRegister(object):
 
     def __getattr__(self,attr):
         # Convert koq name to koq object
-        attr = getattr(self._context,attr)
-        try:  
-            return self._koq_to_units_dict[ attr ]
-        except KeyError:
-            raise AttributeError
+        # attr = getattr(self._context,attr)
+        koq = self._context[attr]
+        
+        print(self._koq_to_units_dict.keys())
+        if koq in self._koq_to_units_dict:  
+            return self._koq_to_units_dict[ koq ]
+        else:
+            raise AttributeError(
+                "{!r} not found".format(koq)
+            )
     
     def __getitem__(self,koq):
-        
         if isinstance(koq,str):
             koq = self._context[koq]
             
         return self._koq_to_units_dict[koq]
                 
-    def get(self,kind_of_quantity):
+    def get(self,koq):
         """
         Return a mapping of names and symbols to units for ``kind_of_quantity``
         """
         if isinstance(kind_of_quantity,str):
-            kind_of_quantity = self._context[kind_of_quantity]
+            kind_of_quantity = self._context[koq]
            
         return self._koq_to_units_dict.get(
             kind_of_quantity,
@@ -136,16 +141,15 @@ class UnitRegister(object):
                 )
             )
         else:
-            units_dict = self._koq_to_units_dict
             koq = unit.scale.kind_of_quantity
-            if koq in self._koq_to_units_dict:
-                units_dict = self._koq_to_units_dict[koq]           
+            if koq.name in self._koq_to_units_dict:
+                units_dict = self._koq_to_units_dict[koq.name]           
                 units_dict.update({ 
                     unit.scale.name: unit, 
                     unit.scale.symbol: unit 
                 })
             else:
-                self._koq_to_units_dict[koq] = UnitsDict({ 
+                self._koq_to_units_dict[koq.name] = UnitsDict({ 
                     unit.scale.name: unit, 
                     unit.scale.symbol: unit 
                 })

@@ -20,12 +20,13 @@ class TestUnit(unittest.TestCase):
         Length = 'Length'
         name = 'metre'
         symbol = 'm' 
-        metre = SI.reference_unit(Length,name,symbol)  
+        metre = SI.unit( RatioScale(Length,name,symbol) )  
 
         self.assertTrue( type(metre) is Unit )
         self.assertEqual( str(metre.scale), symbol )
         self.assertEqual( metre.scale.name, name  )
-        self.assertEqual( metre.kind_of_quantity, context['Length']  )
+        print( repr(metre.scale.kind_of_quantity) )
+        self.assertEqual( metre.scale.kind_of_quantity, context['Length']  )
     
         # related unit
         centimetre = centi( metre )

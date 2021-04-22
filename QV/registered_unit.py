@@ -1,7 +1,6 @@
 from __future__ import division 
 
 from QV.scale import * 
-from QV.unit_register import UnitRegister
 
 __all__ = (
     'RegisteredUnit', 
@@ -82,7 +81,7 @@ class RegisteredUnit(object):
     def __repr__(self):
         return "{!s}({!r},{!r},{!r},{!r})".format(
             self.__class__.__name__,
-            self.kind_of_quantity,
+            self.scale.kind_of_quantity,
             self.scale.name,
             self.scale.symbol,
             self._register

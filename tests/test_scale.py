@@ -19,8 +19,9 @@ class TestScale(unittest.TestCase):
         name = 'metre'
         symbol = 'm' 
         
-        metre = Scale(Length,name,symbol)
-        self.assertTrue( type(metre) is Scale )
+        metre = RatioScale(Length,name,symbol)
+        self.assertTrue( isinstance(metre,RatioScale) )
+        self.assertTrue( isinstance(metre,Scale) )
         self.assertEqual( str(metre), symbol )
         self.assertEqual( metre.name, name  )
         self.assertEqual( metre.kind_of_quantity, Length  )

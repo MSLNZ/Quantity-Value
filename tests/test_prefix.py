@@ -30,21 +30,23 @@ class TestPrefix(unittest.TestCase):
         SI =  UnitRegister("SI",context)
 
         # Create complete sets of prefixed units
-        metre = SI.reference_unit('Length','metre','m') 
-        for p_i in prefix.metric_prefixes: p_i(metre)
+        metre = SI.unit( RatioScale( context['Length'],'metre','m' ) ) 
+        for p_i in prefix.metric_prefixes: 
+            SI.unit( p_i(metre.scale) )
 
-        second = SI.reference_unit('Time','second','s')  
-        for p_i in prefix.metric_prefixes: p_i(second)
+        second = SI.unit( RatioScale( context['Time'],'second','s' ) )  
+        for p_i in prefix.metric_prefixes: 
+            SI.unit( p_i(second.scale) )
 
         # Doesn't matter that this is not the traditional 'base' unit
-        gram = SI.reference_unit('Mass','gram','g')  
-        for p_i in prefix.metric_prefixes: p_i(gram) 
+        gram = SI.unit( RatioScale( context['Mass'],'gram','g' ) )  
+        for p_i in prefix.metric_prefixes: p_i(gram.scale) 
         
         self.assertRaises( AttributeError, getattr,SI,'Inductance')
         
         try:
-            SI.Mass.kilogram
-            SI.Time.microsecond
+            # SI.Mass.kilogram
+            # SI.Time.microsecond
             SI.Time.picosecond
         except AttributeError:
             self.fail('Should not happen')

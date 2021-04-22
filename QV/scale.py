@@ -40,7 +40,7 @@ class Scale(object):
         
     def __str__(self):
         return self._symbol
-        
+       
     @property 
     def conversion_function(self):
         raise NotImplementedError()
@@ -105,9 +105,30 @@ class RatioScale(IntervalScale):
     
     """
     
-    def __init__(self,kind_of_quantity,name,symbol):
+    def __init__(self,kind_of_quantity,name,symbol,prefix=None):
         IntervalScale.__init__(self,kind_of_quantity,name,symbol)
         
+        if prefix is not None: self_prefix = prefix 
+ 
+    # This is to support the SI prefixes,
+    # perhaps a subclass of `RatioScale` will
+    # be more appropriate.
+    @property 
+    def prefix(self):
+        try:
+            return self._prefix
+        except AttributeError:
+            return 1.0 
+            
+    @prefix.setter 
+    def prefix(self,value):
+        if not hasattr(self,'_prefix'):
+            self._prefix = value
+        else:
+            raise RuntimeError(
+                "{!r} already has the prefix: {}".format(self,self._prefix)
+            )
+            
     @property 
     def conversion_function(self):
         """
