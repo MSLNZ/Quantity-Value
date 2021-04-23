@@ -20,35 +20,33 @@ class TestUnit(unittest.TestCase):
         Length = 'Length'
         name = 'metre'
         symbol = 'm' 
-        metre = SI.unit( RatioScale(Length,name,symbol) )  
+        metre = SI.unit( RatioScale(context['Length'],name,symbol) )  
 
         self.assertTrue( type(metre) is Unit )
         self.assertEqual( str(metre.scale), symbol )
         self.assertEqual( metre.scale.name, name  )
-        print( repr(metre.scale.kind_of_quantity) )
-        self.assertEqual( metre.scale.kind_of_quantity, context['Length']  )
+        self.assertTrue( metre.scale.kind_of_quantity is context['Length']  )
     
         # related unit
-        centimetre = centi( metre )
+        centimetre = SI.unit( centi( metre.scale ) )
 
         self.assertTrue( isinstance(centimetre,Unit) )
         self.assertEqual( str(centimetre.scale), 'cm' )
         self.assertEqual( centimetre.scale.name, 'centimetre' )
-        self.assertEqual( centimetre.kind_of_quantity, context['Length']  )
-        self.assertEqual( centimetre.multiplier, 0.01 )
+        self.assertEqual( centimetre.scale.kind_of_quantity, context['Length']  )
+        self.assertEqual( centimetre.scale.prefix, 0.01 )
         self.assertTrue( centimetre.register is SI )
         
-        # Don't create a new object each time you change prefix
-        centimetre_2 = centi( metre )
-        self.assertTrue( centimetre is centimetre_2 )
+        # Don't create two equivalent scales
+        self.assertRaises( RuntimeError, SI.unit, centi( metre.scale ) )
         
         # Cannot apply a prefix to a PrefixedQuantity
-        self.assertRaises( RuntimeError, deci, centimetre )
+        self.assertRaises( RuntimeError, deci, centimetre.scale )
         
         # operations 
         # NB, the resolution of unit expressions is handled 
         # in quantity_value.py 
-        second = SI.reference_unit('Time','second','s')  
+        second = SI.unit( RatioScale(context['Time'],'second','s') ) 
         
         tmp = metre * second
         self.assertTrue( isinstance(tmp,registered_unit.Mul) )

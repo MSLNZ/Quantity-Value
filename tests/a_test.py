@@ -9,9 +9,12 @@ second = SI.unit( RatioScale(context['Time'],'second','s') )
 kilogram = SI.unit( RatioScale(context['Mass'],'kilogram','kg') )
 
 centimetre = SI.unit( prefix.centi(metre.scale) ) 
-SI.conversion_function_values(metre,centimetre,1.0/prefix.centi.value)
+decimetre = SI.unit( prefix.centi(centimetre.scale) )
+print( repr( SI.Length.centimetre ) )
 
-m_2_cm = SI.conversion_from_A_to_B(metre,centimetre)
+# SI.conversion_function_values(metre,centimetre,1.0/prefix.centi.value)
+
+# m_2_cm = SI.conversion_from_A_to_B(metre,centimetre)
 
 # print( m_2_cm(10) )
 
@@ -25,4 +28,3 @@ m_2_cm = SI.conversion_from_A_to_B(metre,centimetre)
     # prefixed_scale = p_i(byte_scale)
     # print( "{0.name} ({0.symbol}): {0.prefix}".format(prefixed_scale) )
     
-print( SI.Length )

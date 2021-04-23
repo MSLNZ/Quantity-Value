@@ -157,6 +157,7 @@ class RatioScale(IntervalScale):
                 "Incompatible scales: {!r} and {!r}".format(self,rhs)
             )
 
+    
 # ===========================================================================    
 if __name__ == "__main__":
     import doctest

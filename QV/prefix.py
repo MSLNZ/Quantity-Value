@@ -9,7 +9,7 @@ class Prefix(object):
     
         >>> context = Context( ('Length','L') )
         >>> SI =  UnitRegister("SI",context)
-        >>> metre = SI.unit( RatioScale('Length','metre','m') )
+        >>> metre = SI.unit( RatioScale(context['Length'],'metre','m') )
         >>> centimetre = SI.unit( prefix.centi(metre.scale) )
         >>> SI.conversion_function_values(metre,centimetre,prefix.centi.value)
         >>> print( centimetre )
@@ -34,7 +34,11 @@ class Prefix(object):
         return str(self.symbol) 
         
     def __call__(self,scale):
-        """Return a new scale object"""
+        # TODO: perhaps only RatioScales can be prefixed?
+        if hasattr(scale,'prefix') and scale.prefix != 1:
+            raise RuntimeError(
+                "Cannot prefix an already prefixed scale: {!r}".format(scale)
+            )
 
         name = "{!s}{!s}".format(
             self.name,
@@ -91,7 +95,7 @@ metric_prefixes = (
     Useful for generating all related units by iteration::
     
         >>> context = Context( ('Time','T') )
-        >>> second = SI.unit( RatioScale('Time','second','s') )  
+        >>> second = SI.unit( RatioScale(context['Time'],'second','s') )  
         >>> for p_i in prefix.metric_prefixes: 
         ...     prefixed_scale = p_i(second.scale)
         ...     print( "{0.name} ({0.symbol}): {0.prefix:.1E}".format(prefixed_scale) )

@@ -58,10 +58,10 @@ class UnitsDict(MutableMapping):
         return len(self._units)
 
     def __getattr__(self, attr):
-        try:
+        if attr in self._units:
             return self._units[attr]
-        except KeyError:
-            raise AttributeError
+        else:
+            raise AttributeError( "{!r} not found".format(attr) )
                        
 #============================================================================
 if __name__ == '__main__':

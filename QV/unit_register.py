@@ -29,9 +29,14 @@ class UnitRegister(object):
     def __init__(self,name,context):
         
         self._name = name
+        
+        # Needed to resolve KoQ objects from names
         self._context = context
         
-        # KoQ objects keys, UnitsDict() values
+        # KoQ objects - keys; UnitsDict() - values
+        # The UnitsDict is a mapping of scale names 
+        # and scale symbols to the corresponding 
+        # RegisteredUnit object.
         self._koq_to_units_dict = dict()
         
         # A mapping of scale-symbol pairs to a 
@@ -88,12 +93,11 @@ class UnitRegister(object):
             
         return self._koq_to_ref_unit[koq]        
 
-    def __getattr__(self,attr):
-        # Convert koq name to koq object
-        # attr = getattr(self._context,attr)
-        koq = self._context[attr]
+    def __getattr__(self,koq_name):
+        # Convert koq_name to koq object
+        koq = getattr(self._context,koq_name)
+        # koq = self._context[koq_name]
         
-        print(self._koq_to_units_dict.keys())
         if koq in self._koq_to_units_dict:  
             return self._koq_to_units_dict[ koq ]
         else:
@@ -132,32 +136,50 @@ class UnitRegister(object):
         )
         
     def _register_unit(self,unit):
-               
-        if unit in self:
-            raise RuntimeError(
-                "{!r} is already registered: {!r}".format(
-                    unit.scale.name,
-                    self._koq_to_units_dict[unit.scale.name]
-                )
-            )
+         
+        # if unit in self:
+            # raise RuntimeError(
+                # "{!r} is already registered: {!r}".format(
+                    # unit.scale.name,
+                    # self._koq_to_units_dict[unit.scale.name]
+                # )
+            # )
+        # else:
+        koq = unit.scale.kind_of_quantity
+
+        # Update or initialise the UnitsDict for koq
+        if koq in self._koq_to_units_dict:
+            units_dict = self._koq_to_units_dict[koq]           
+            units_dict.update({ 
+                unit.scale.name: unit, 
+                unit.scale.symbol: unit 
+            })
         else:
-            koq = unit.scale.kind_of_quantity
-            if koq.name in self._koq_to_units_dict:
-                units_dict = self._koq_to_units_dict[koq.name]           
-                units_dict.update({ 
-                    unit.scale.name: unit, 
-                    unit.scale.symbol: unit 
-                })
-            else:
-                self._koq_to_units_dict[koq.name] = UnitsDict({ 
-                    unit.scale.name: unit, 
-                    unit.scale.symbol: unit 
-                })
+            self._koq_to_units_dict[koq] = UnitsDict({ 
+                unit.scale.name: unit, 
+                unit.scale.symbol: unit 
+            })
                      
     def unit(self,scale):
         """
         
         """
+        units_dict = self._koq_to_units_dict.get(
+            scale.kind_of_quantity,
+            UnitsDict({})
+        )
+
+        if (
+            scale.name in units_dict or 
+            scale.symbol in units_dict
+        ):
+            raise RuntimeError(
+                "{!r} is already a registered unit for {!r}".format(
+                    scale.name,
+                    scale.kind_of_quantity
+                )
+            )
+
         u = RegisteredUnit(self,scale)
         self._register_unit( u ) 
         

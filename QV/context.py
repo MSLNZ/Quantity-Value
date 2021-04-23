@@ -69,17 +69,24 @@ class Context(object):
                 exponents[i] = 1
                 self._koq_signature[koq] = Signature(self,exponents)
                 exponents[i] = 0
-        
-    def __getitem__(self,name):
-        if name in self._koq:
-            return self._koq[name]
- 
-    def __getattr__(self,attr):
-        if attr in self._koq:
-            return self._koq[attr]
+
+    def __contains__(self,koq_name):
+        return koq_name in self._koq
+    
+    def __getitem__(self,koq_name):
+        if koq_name in self:
+            return self._koq[koq_name]
+        else:
+            raise KeyError(
+                "{!r} not found".format(koq_name)
+            )
+          
+    def __getattr__(self,koq_name):
+        if koq_name in self:
+            return self._koq[koq_name]
         else:
             raise AttributeError(
-                "{!r}".format(attr)
+                "{!r} not found".format(koq_name)
             )
         
     def _kog_to_signature(self,koq):

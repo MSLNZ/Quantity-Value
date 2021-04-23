@@ -37,7 +37,7 @@ class ValueUnit(object):
     def __str__(self):
         return "{!s} {!s}".format(
             self.value,
-            self.unit 
+            self.unit.scale.symbol 
         )
         
     def __add__(self,rhs):  
