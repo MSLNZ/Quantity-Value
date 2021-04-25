@@ -94,6 +94,7 @@ class Context(object):
   
     def _signature_to_koq(self,sig):
         return self._koq_signature.inverse[sig]
+            
         
     def _valid_koq_name_or_symbol(self,koq_id):
         if hasattr(self,koq_id):     
@@ -119,8 +120,7 @@ class Context(object):
     # Executing the expression results in the 
     # signature for the resultant KindOfQuantity.
     # `expression` is a sequence of binary multiplication
-    # and division operations, represented as a tree of 
-    # KindOfQuantity objects. 
+    # and division operation objects, linked in a tree. 
     # `_kog_to_signature` resolves the signature of  
     # the KindOfQuantity objects at the leaves of this tree. 
     def _evaluate_signature(self,expression):

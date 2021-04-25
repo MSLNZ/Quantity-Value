@@ -2,7 +2,7 @@ from __future__ import division
 from __future__ import print_function 
 
 from QV.unit_register import RegisteredUnit as Unit
-from QV.kind_of_quantity import Number
+# from QV.kind_of_quantity import Number
 
 __all__ = ('qvalue','value','unit','qresult','qratio')
 
@@ -25,7 +25,7 @@ class ValueUnit(object):
         self.value = value     
         self.unit = unit
         
-    # We want this object to appear to be ``qvalue``,
+    # We want this object to appear to be a ``qvalue``,
     # because that is how we would create such an object.
     def __repr__(self):
         return "{!s}({!s},{!s})".format(
@@ -42,105 +42,95 @@ class ValueUnit(object):
         
     def __add__(self,rhs):  
         lhs = self  
-        register = lhs.unit.register
+        register = lhs.unit.register         
         
-        if not register is rhs.unit.register:
-            raise RuntimeError("Different unit registers: {}, {}".format(
-                register, rhs.unit.register)
+        # The calculation is done in the reference unit 
+        # unless both units are the same 
+        if lhs.unit is rhs.unit:
+            return ValueUnit(   
+                lhs.value + rhs.value, 
+                rhs.unit 
             )
             
-        # When an argument is a temporary result, the unit 
-        # may be an expression 
-        if not isinstance(lhs.unit,Unit):
-            # Resolve the unit before proceeding
-            lhs = ValueUnit( 
-                lhs.unit.multiplier*self.value, 
-                register.reference_unit_for( lhs.unit ) 
-            ) 
-        
-        if not isinstance(rhs.unit,Unit):
-            # Resolve the unit before proceeding
-            rhs = ValueUnit( 
-                rhs.unit.multiplier*rhs.value, 
-                register.reference_unit_for( rhs.unit ) 
-        ) 
+        else:
+            # When an argument is a temporary result, 
+            # the `unit` may be a unit expression, in which 
+            # case we must resolve the unit and convert to 
+            # a reference unit before proceeding
             
-        if lhs.unit is rhs.unit:
-            return ValueUnit( lhs.value + rhs.value, lhs.unit )
-         
-        elif lhs.unit.scale.kind_of_quantity is rhs.unit.scale.kind_of_quantity:
-            ml = lhs.unit.multiplier
-            mr = rhs.unit.multiplier 
-            if ml < mr:
-                return ValueUnit( lhs.value + (mr/ml)*rhs.value, lhs.unit )
-            else:
-                return ValueUnit( (ml/mr)*lhs.value + rhs.value, rhs.unit )
+            ref_u_l = register.reference_unit_for( lhs.unit ) 
+            ref_u_r = register.reference_unit_for( rhs.unit ) 
+            
+            assert ref_u_r is ref_u_l
                 
-        else:
-            raise RuntimeError(
-                "Different kinds of quantity: {}, {}".format(
-                    lhs.unit.scale.kind_of_quantity,rhs.unit.scale.kind_of_quantity)
-            )    
+            l_to_ref_fn = register.conversion_from_A_to_B(lhs.unit,ref_u_l)
+            r_to_ref_fn = register.conversion_from_A_to_B(rhs.unit,ref_u_r)
+            
+            return ValueUnit(   
+                l_to_ref_fn(lhs.value) + r_to_ref_fn(rhs.value), 
+                ref_u_r 
+            )        
+    
 
-    def __radd__(self,lhs):
-        rhs = self
-        # Can add numbers to numeric QVs
-        if rhs.unit.scale.kind_of_quantity is Number:
-            return ValueUnit( lhs + rhs.value, rhs.unit )
-        else:
-            return NotImplemented
+    # def __radd__(self,lhs):
+        # rhs = self
+        # # Can add numbers to numeric QVs
+        # if rhs.unit.scale.kind_of_quantity is Number:
+            # return ValueUnit( lhs + rhs.value, rhs.unit )
+        # else:
+            # return NotImplemented
   
-    def __sub__(self,rhs):
-        lhs = self
-        register = lhs.unit.register
-        if not register is rhs.unit.register:
-            raise RuntimeError("Different unit registers: {}, {}".format(
-                register, rhs.unit.register)
-            )
+    # def __sub__(self,rhs):
+        # lhs = self
+        # register = lhs.unit.register
+        # if not register is rhs.unit.register:
+            # raise RuntimeError("Different unit registers: {}, {}".format(
+                # register, rhs.unit.register)
+            # )
             
-        if not isinstance(lhs.unit,Unit):
-            # Must resolve the unit before proceeding
-            lhs = ValueUnit( 
-                lhs.unit.multiplier*self.value, 
-                register.reference_unit_for( lhs.unit ) 
-            ) 
+        # if not isinstance(lhs.unit,Unit):
+            # # Must resolve the unit before proceeding
+            # lhs = ValueUnit( 
+                # lhs.unit.multiplier*self.value, 
+                # register.reference_unit_for( lhs.unit ) 
+            # ) 
         
-        if not isinstance(rhs.unit,Unit):
-            # Must resolve the unit before proceeding
-            rhs = ValueUnit( 
-                rhs.unit.multiplier*rhs.value, 
-                register.reference_unit_for( rhs.unit ) 
-            ) 
+        # if not isinstance(rhs.unit,Unit):
+            # # Must resolve the unit before proceeding
+            # rhs = ValueUnit( 
+                # rhs.unit.multiplier*rhs.value, 
+                # register.reference_unit_for( rhs.unit ) 
+            # ) 
         
-        if lhs.unit is rhs.unit:
-            return ValueUnit( lhs.value - rhs.value, lhs.unit )
+        # if lhs.unit is rhs.unit:
+            # return ValueUnit( lhs.value - rhs.value, lhs.unit )
             
-        if lhs.unit.scale.kind_of_quantity is rhs.unit.scale.kind_of_quantity:
+        # if lhs.unit.scale.kind_of_quantity is rhs.unit.scale.kind_of_quantity:
         
-            ml = lhs.unit.multiplier
-            mr = rhs.unit.multiplier 
-            if ml < mr:
-                return ValueUnit( lhs.value - (mr/ml)*rhs.value, lhs.unit )
-            else:
-                return ValueUnit( (ml/mr)*lhs.value - rhs.value, rhs.unit )
-        else:
-            raise RuntimeError(
-                "Different kinds of quantity: {}, {}".format(
-                    lhs.unit.scale.kind_of_quantity,rhs.unit.scale.kind_of_quantity)
-            )    
+            # ml = lhs.unit.multiplier
+            # mr = rhs.unit.multiplier 
+            # if ml < mr:
+                # return ValueUnit( lhs.value - (mr/ml)*rhs.value, lhs.unit )
+            # else:
+                # return ValueUnit( (ml/mr)*lhs.value - rhs.value, rhs.unit )
+        # else:
+            # raise RuntimeError(
+                # "Different kinds of quantity: {}, {}".format(
+                    # lhs.unit.scale.kind_of_quantity,rhs.unit.scale.kind_of_quantity)
+            # )    
   
-    def __rsub__(self,lhs):
-        rhs = self
-        # Can subtract numeric QVs from numbers
-        if rhs.unit.scale.kind_of_quantity is Number:
-            return ValueUnit( lhs - rhs.value, rhs.unit )
-        else:
-            return NotImplemented
+    # def __rsub__(self,lhs):
+        # rhs = self
+        # # Can subtract numeric QVs from numbers
+        # if rhs.unit.scale.kind_of_quantity is Number:
+            # return ValueUnit( lhs - rhs.value, rhs.unit )
+        # else:
+            # return NotImplemented
   
-    # Multiplication, division and exponentiation create temporary ValueUnit 
-    # objects that have not been resolved to a unit. 
-    # These temporary objects have an interface that exposes
-    # `multiplier`, `register` and `kind_of_quantity` attributes, 
+    # Multiplication, division and exponentiation 
+    # create temporary ValueUnit objects. 
+    # These expose an interface with 
+    # `register` and `kind_of_quantity_expr` attributes, 
     # which allow a kind_of_quantity and hence a unit to be resolved later.
     def __mul__(self,rhs):
         lhs = self
@@ -149,46 +139,46 @@ class ValueUnit(object):
                 raise RuntimeError("operation requires the same unit register")
 
             return ValueUnit(lhs.value * rhs.value, lhs.unit * rhs.unit)
-        else:
-            # Assume that the `rhs` behaves as a number 
-            return ValueUnit(
-                rhs * lhs.value, 
-                lhs.unit.register.Number.unity * lhs.unit
-            )
+        # else:
+            # # Assume that the `rhs` behaves as a number 
+            # return ValueUnit(
+                # rhs * lhs.value, 
+                # lhs.unit.register.Number.unity * lhs.unit
+            # )
             
-    def __rmul__(self,lhs):
-        rhs = self
-        # Assume that the `lhs` behaves as a number 
-        return ValueUnit(
-            lhs * rhs.value, 
-            rhs.unit.register.Number.unity * rhs.unit
-        )
+    # def __rmul__(self,lhs):
+        # rhs = self
+        # # Assume that the `lhs` behaves as a number 
+        # return ValueUnit(
+            # lhs * rhs.value, 
+            # rhs.unit.register.Number.unity * rhs.unit
+        # )
             
-    def __truediv__(self,rhs):
-        lhs = self 
-        if hasattr(rhs,'unit'):          
-            if not lhs.unit.register is rhs.unit.register:
-                raise RuntimeError("operation requires the same unit register")
+    # def __truediv__(self,rhs):
+        # lhs = self 
+        # if hasattr(rhs,'unit'):          
+            # if not lhs.unit.register is rhs.unit.register:
+                # raise RuntimeError("operation requires the same unit register")
 
-            return ValueUnit(
-                lhs.value / rhs.value,
-                lhs.unit / rhs.unit
-            )
+            # return ValueUnit(
+                # lhs.value / rhs.value,
+                # lhs.unit / rhs.unit
+            # )
             
-        else:
-            # Assume that the `rhs` behaves as a number 
-            return ValueUnit(
-                lhs.value / rhs, 
-                lhs.unit / lhs.unit.register.Number.unity 
-            )
+        # else:
+            # # Assume that the `rhs` behaves as a number 
+            # return ValueUnit(
+                # lhs.value / rhs, 
+                # lhs.unit / lhs.unit.register.Number.unity 
+            # )
         
-    def __rtruediv__(self,lhs):
-        rhs = self
-        # Assume that the `lhs` behaves as a number 
-        return ValueUnit(
-            lhs / rhs.value, 
-            rhs.unit.register.Number.unity / rhs.unit
-        )
+    # def __rtruediv__(self,lhs):
+        # rhs = self
+        # # Assume that the `lhs` behaves as a number 
+        # return ValueUnit(
+            # lhs / rhs.value, 
+            # rhs.unit.register.Number.unity / rhs.unit
+        # )
                 
     # # Python 2.x backward compatibility
     # def __div__(self,rhs):
@@ -319,19 +309,20 @@ def qresult(
             # ref_unit = register.reference_unit_for( value_unit.unit )
                 
             
-        multiplier = value_unit.unit.multiplier/preferred_unit.multiplier
+        fn = register.conversion_from_A_to_B(value_unit.unit,preferred_unit)
         return ValueUnit( 
             value_result(
-                multiplier*value_unit.value, 
+                fn( value_unit.value ), 
                 *arg, 
                 **kwarg
             ), 
             preferred_unit 
         )
     else:       
+        fn = register.conversion_from_A_to_B(value_unit.unit,ref_unit)
         return ValueUnit( 
             value_result(
-                value_unit.unit.multiplier*value_unit.value, 
+                fn( value_unit.value ), 
                 *arg, 
                 **kwarg
             ), 

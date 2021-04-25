@@ -39,6 +39,11 @@ class UnitRegister(object):
         # RegisteredUnit object.
         self._koq_to_units_dict = dict()
         
+        # KoQ objects - keys; RegisteredUnit objects - values
+        # The first registered unit for a koq is the reference 
+        # unit by default, but this may be changed.
+        self._koq_to_ref_unit = dict()
+        
         # A mapping of scale-symbol pairs to a 
         # function that converts between scales 
         self._conversion_fn = dict()            
@@ -63,9 +68,44 @@ class UnitRegister(object):
     def context(self):        
         return self._context 
         
-    def unit_for(self,expr):
+    
+    def reference_unit_for(self,expr):
         """
         Return the reference unit for `expr`
+        
+        `expr` can be a product or quotient of registered-units 
+        or a product or quotient of kind-of-quantity objects
+        or a registered-unit or kind-of-quantity object.
+
+        """
+        if hasattr(expr,'kind_of_quantity'):
+            # a registered-unit or kind-of-quantity object
+            # both have this attribute 
+            koq = expr.kind_of_quantity
+            return self._koq_to_ref_unit[koq] 
+            
+        elif hasattr(expr,'kind_of_quantity_expr'):
+            # A registered-unit expression, so obtain 
+            # the corresponding koq expression
+            expr = expr.kind_of_quantity_expr 
+        
+        # Can get here directly or via the elif above
+        if hasattr(expr,'execute'):
+            # A kind-of-quantity expression has this attribute
+            # so, resolve the expression
+            koq = self.context._signature_to_koq( 
+                self.context._evaluate_signature( expr ) 
+            )
+            return self._koq_to_ref_unit[koq]
+        else:
+            raise RuntimeError(
+                "{!r} unexpected".format(expr)
+            )
+                       
+        
+    def unit_dict_for(self,expr):
+        """
+        Return all units associated with the kind of quantity for `expr`
         
         `expr` can be a product or quotient of units, 
         a product or quotient of kind-of-quantity objects,
@@ -86,12 +126,12 @@ class UnitRegister(object):
             koq = expr 
             
         if hasattr(koq,'execute'):
-            # A koq expression
+            # Resolve a koq expression
             koq = self.context._signature_to_koq( 
                 self.context._evaluate_signature( koq ) 
             )
             
-        return self._koq_to_ref_unit[koq]        
+        return self._koq_to_units_dict[koq]        
 
     def __getattr__(self,koq_name):
         # Convert koq_name to koq object
@@ -146,6 +186,9 @@ class UnitRegister(object):
             # )
         # else:
         koq = unit.scale.kind_of_quantity
+        
+        if koq not in self._koq_to_ref_unit:
+            self._koq_to_ref_unit[koq] = unit
 
         # Update or initialise the UnitsDict for koq
         if koq in self._koq_to_units_dict:
@@ -220,13 +263,17 @@ class UnitRegister(object):
         and returns a quantity-value result
         
         """
-        key = (A.scale.symbol,B.scale.symbol)            
-        if key in self._conversion_fn:
-            return self._conversion_fn[ key ]  
+        if A.scale.symbol == B.scale.symbol:
+            # No need
+            return lambda x: x
         else:
-            raise RuntimeError(
-                "no conversion available for {0[0]!r} to {0[1]!r}".format(key)
-            ) 
+            key = (A.scale.symbol,B.scale.symbol)            
+            if key in self._conversion_fn:
+                return self._conversion_fn[ key ]  
+            else:
+                raise RuntimeError(
+                    "no conversion available for {0[0]!r} to {0[1]!r}".format(key)
+                ) 
 
 # ===========================================================================    
 if __name__ == "__main__":

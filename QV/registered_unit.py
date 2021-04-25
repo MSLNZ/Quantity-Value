@@ -33,10 +33,10 @@ class RegisteredUnit(object):
         """The scale"""
         return self._scale 
 
-    # @property 
-    # def kind_of_quantity(self): 
-        # """The kind of quantity"""
-        # return self._scale._kind_of_quantity
+    @property 
+    def kind_of_quantity(self): 
+        """The kind of quantity"""
+        return self._scale._kind_of_quantity
 
     @property 
     def is_dimensionless(self):
@@ -119,7 +119,6 @@ class RegisteredUnit(object):
 # The base classes  `UnaryOp` and `BinaryOp` establish the interface. 
 # These classes provide a representation for 
 # an equation involving units, but do not resolve into a unit.
-#
 #----------------------------------------------------------------------------
 class UnaryOp(object):   
 
@@ -199,8 +198,9 @@ class Simplify(UnaryOp):
         return "simplify({!s})".format(self.arg)
            
     # Perform the operation on the quantities involved 
+    # and return a koq expression
     @property 
-    def kind_of_quantity(self):  
+    def kind_of_quantity_expr(self):  
         return self.arg.kind_of_quantity._simplify()
         
 #----------------------------------------------------------------------------
@@ -217,8 +217,9 @@ class Ratio(BinaryOp):
         return "({!s}//{!s})".format(self.lhs,self.rhs)
            
     # Perform the operation on the quantities involved 
+    # and return a koq expression
     @property 
-    def kind_of_quantity(self):  
+    def kind_of_quantity_expr(self):  
         return self.lhs.kind_of_quantity // self.rhs.kind_of_quantity
  
     # Perform the operation on the scales involved 
@@ -239,8 +240,10 @@ class Mul(BinaryOp):
         # TODO: need to treat a numeric as a special case
         return "({!s})*({!s})".format(self.lhs,self.rhs)
            
+    # Perform the operation on the quantities involved 
+    # and return a koq expression
     @property 
-    def kind_of_quantity(self):  
+    def kind_of_quantity_expr(self):  
         return self.lhs.kind_of_quantity * self.rhs.kind_of_quantity
         
     # Perform the operation on the scales involved 
@@ -262,8 +265,9 @@ class Div(BinaryOp):
         return "({!s})/({!s})".format(self.lhs,self.rhs)
     
     # Perform the operation on the quantities involved 
+    # and return a koq expression
     @property 
-    def kind_of_quantity(self):  
+    def kind_of_quantity_expr(self):  
         return self.lhs.kind_of_quantity / self.rhs.kind_of_quantity
 
     # Perform the operation on the scales involved 
