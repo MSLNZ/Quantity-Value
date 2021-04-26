@@ -28,20 +28,20 @@ class TestUnit(unittest.TestCase):
         self.assertTrue( metre.scale.kind_of_quantity is context['Length']  )
     
         # related unit
-        centimetre = SI.unit( centi( metre.scale ) )
+        centimetre = SI.unit( centi( metre ) )
 
         self.assertTrue( isinstance(centimetre,Unit) )
         self.assertEqual( str(centimetre.scale), 'cm' )
         self.assertEqual( centimetre.scale.name, 'centimetre' )
         self.assertEqual( centimetre.scale.kind_of_quantity, context['Length']  )
-        self.assertEqual( centimetre.scale.prefix, 0.01 )
+        self.assertEqual( centimetre.scale.conversion_factor, 0.01 )
         self.assertTrue( centimetre.register is SI )
         
         # Don't create two equivalent scales
-        self.assertRaises( RuntimeError, SI.unit, centi( metre.scale ) )
+        self.assertRaises( RuntimeError, SI.unit, centi( metre ) )
         
         # Cannot apply a prefix to a PrefixedQuantity
-        self.assertRaises( RuntimeError, deci, centimetre.scale )
+        self.assertRaises( RuntimeError, deci, centimetre )
         
         # operations 
         # NB, the resolution of unit expressions is handled 

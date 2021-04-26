@@ -16,7 +16,7 @@ __all__ = (
     'qresult',
     'Context',
     'UnitRegister',
-    # 'related_unit',
+    'proportional_unit',
     'prefix',
     'RatioScale',
     'IntervalScale'

@@ -32,15 +32,15 @@ class TestPrefix(unittest.TestCase):
         # Create complete sets of prefixed units
         metre = SI.unit( RatioScale( context['Length'],'metre','m' ) ) 
         for p_i in prefix.metric_prefixes: 
-            SI.unit( p_i(metre.scale) )
+            SI.unit( p_i(metre) )
 
         second = SI.unit( RatioScale( context['Time'],'second','s' ) )  
         for p_i in prefix.metric_prefixes: 
-            SI.unit( p_i(second.scale) )
+            SI.unit( p_i(second) )
 
         # Doesn't matter that this is not the traditional 'base' unit
         gram = SI.unit( RatioScale( context['Mass'],'gram','g' ) )  
-        for p_i in prefix.metric_prefixes: p_i(gram.scale) 
+        for p_i in prefix.metric_prefixes: p_i(gram) 
         
         self.assertRaises( AttributeError, getattr,SI,'Inductance')
         

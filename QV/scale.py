@@ -75,7 +75,9 @@ class OrdinalScale(Scale):
 class IntervalScale(OrdinalScale):
 
     """
-    
+    An :class:`.IntervalScale` has an arbitrary origin.
+    Units associated with an interval scale may not be 
+    multiplied or divided.
     """
     
     def __init__(self,kind_of_quantity,name,symbol):
@@ -84,8 +86,19 @@ class IntervalScale(OrdinalScale):
     @property 
     def conversion_function(self):
         """
-        Return a generic conversion function from one scale to another 
+        The generic conversion function from one interval scale to another 
+  
+        Example::
         
+            >>> quantity = Context( ("Temperature","t") )
+            >>> ureg = UnitRegister("ureg",quantity)
+            >>> kelvin = ureg.unit( RatioScale(quantity.Temperature,'kelvin','K') ) 
+            >>> Celsius = ureg.unit( RatioScale(quantity.Temperature,'Celsius','C') ) 
+            >>> ureg.conversion_function_values(kelvin,Celsius,1,0,-273.15)
+            >>> degrees_C = ureg.conversion_from_A_to_B(kelvin,Celsius)
+            >>> print( degrees_C( 273.15 ), Celsius )
+            0.0 C
+  
         """
         # `k` is a conversion factor, 
         # `o_A` is the offset on the source scale and 
@@ -94,45 +107,49 @@ class IntervalScale(OrdinalScale):
         return lambda k,o_A,o_B,x: k*(x - o_A) + o_B
         
 #----------------------------------------------------------------------------
-
-# TODO: allow a scale to carry a flag that can be prefixed? 
-# By default no, but base SI units could be?
-
-
 class RatioScale(IntervalScale):
 
     """
-    
+    A :class:`.RatioScale` is a metric scale. 
+    Units associated with a ratio scale may be multiplied and divided, 
+    resulting in derived units. 
     """
     
-    def __init__(self,kind_of_quantity,name,symbol,prefix=None):
+    def __init__(self,kind_of_quantity,name,symbol,conversion_factor=None):
         IntervalScale.__init__(self,kind_of_quantity,name,symbol)
         
-        if prefix is not None: self_prefix = prefix 
+        if conversion_factor is not None: 
+            self._conversion_factor = conversion_factor 
  
-    # This is to support the SI prefixes,
-    # perhaps a subclass of `RatioScale` will
-    # be more appropriate.
+    # The conversion factor relates to a designated reference 
+    # scale for the same quantity. It is immutable. 
     @property 
-    def prefix(self):
+    def conversion_factor(self):
+        """
+        Return a conversion factor for a value 
+        on this scale to one on the reference scale 
+        
+        """
         try:
-            return self._prefix
+            return self._conversion_factor
         except AttributeError:
             return 1.0 
             
-    @prefix.setter 
-    def prefix(self,value):
-        if not hasattr(self,'_prefix'):
-            self._prefix = value
+    @conversion_factor.setter 
+    def conversion_factor(self,value):
+        if not hasattr(self,'_conversion_factor'):
+            self._conversion_factor = value
         else:
             raise RuntimeError(
-                "{!r} already has the prefix: {}".format(self,self._prefix)
+                "{!r} already has a conversion factor: {}".format(
+                    self,self._conversion_factor
+                )
             )
             
     @property 
     def conversion_function(self):
         """
-        Return a generic conversion function from one scale to another 
+        The generic conversion function from one ratio scale to another 
         
         """
         # `k` is a conversion factor from the source to target scale, 
@@ -145,18 +162,31 @@ class RatioScale(IntervalScale):
                 "Incompatible scales: {!r} and {!r}".format(self,rhs)
             )
         
-    def __div__(self,rhs):
+        koq = self.kind_of_quantity*rhs.kind_of_quantity
+        name = self.name+"*{!s}".format(rhs.name)
+        symbol = self.symbol+"*{!s}".format(rhs.symbol)
+        factor = self.conversion_factor*rhs.conversion_factor 
+        
+        return RatioScale(koq,name,symbol,factor)
+        
+    def __truediv__(self,rhs):
         if not isinstance(rhs,RatioScale): 
             raise RuntimeError(
                 "Incompatible scales: {!r} and {!r}".format(self,rhs)
             )
 
+        koq = self.kind_of_quantity/rhs.kind_of_quantity
+        name = self.name+"/({!s})".format(rhs.name)
+        symbol = self.symbol+"/({!s})".format(rhs.symbol)
+        factor = self.conversion_factor/rhs.conversion_factor 
+        
+        return RatioScale(koq,name,symbol,factor)
+        
     def __floordiv__(self,rhs):
         if not isinstance(rhs,RatioScale): 
             raise RuntimeError(
                 "Incompatible scales: {!r} and {!r}".format(self,rhs)
             )
-
     
 # ===========================================================================    
 if __name__ == "__main__":

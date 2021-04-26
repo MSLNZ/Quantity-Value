@@ -9,28 +9,28 @@ Simple kinematics
 
 When using the package, the first task is to select a set of base quantities. 
 
-For instance, the basis distance and duration (dimensions, LT) may be used for a straight-line kinematics problems. Other kinds of quantity are then declared in terms of this basis. For example, speed is the time required to cover a distance. 
+For instance, the base quantities distance and duration (dimensions, LT) may be used for a straight-line kinematics problems. Other kinds of quantity are then declared in terms of this basis. For example, speed is the time required to cover a distance. 
 
 .. code-block:: python 
 
     from QV import *
     
-    context = Context( ("Length","L"),("Time","T") )
-    context.declare('Speed','V','Length/Time')
+    quantity = Context( ("Length","L"),("Time","T") )
+    quantity.declare('Speed','V','Length/Time')
 
-Here, the object ``context`` maintains one-to-one relationships between the names, and short symbols, of kinds of quantities and the signatures associated with measurements of them. So, after the declaration of speed, ``context`` will not allow any other quantity with the same signature to be declared. 
+Here, ``context`` maintains one-to-one relationships between the names, and short symbols, of kinds of quantities and the signatures associated with measurements of them. So, after the declaration of speed, ``context`` does not allow any other quantity to be declared with the same signature. 
 
 Units are defined in relation to kinds of quantity. In this case, we might write 
 
 .. code-block:: python 
 
-    SI =  UnitRegister("SI",context)
+    SI =  UnitRegister("SI",quantity)
 
-    metre = SI.reference_unit('Length','metre','m') 
-    second = SI.reference_unit('Time','second','s') 
-    metre_per_second = SI.reference_unit( 'Speed','metre_per_second','m/s' )
+    metre = SI.unit( RatioScale(quantity.Length,'metre','m') )
+    second = SI.unit( RatioScale(quantity.Time,'second','s') )
+    metre_per_second = SI.unit( RatioScale(quantity.Speed,'metre_per_second','m/s') ) 
 
-Here, the ``SI`` object is a register of units, each associated with the measurement of a kind of quantity and hence to the signature of that quantity in the context. The ``reference_unit`` declaration creates a reference unit within the register; other units of the same kind of quantity can also be registered, but they must be related to the reference by a conversion factor (see below, where a related unit, L/(100 km), is created for fuel consumption.)
+Here, the ``SI`` object keeps a register of units, each associated with the measurement of a kind of quantity and hence to the signature of that quantity. The first ``unit`` declaration for a quantity creates a reference unit within the register; other units of the same kind of quantity can also be registered, but they must be related to the reference unit by a conversion factor (see below, where a related unit, L/(100 km), is created for fuel consumption.)
 
 Quantity values may be defined with the function ``qvalue()`` and used in calculations. For instance, 
 
@@ -51,30 +51,32 @@ The output is
     average speed = 0.5 m/s
     displacement = 5.5 m
 
-An interesting implementation detail is apparent here. The function ``qresult()`` is applied to ``d/t`` to resolve the units, but it is not used in the calculation of ``x0 + v0*t``. The reason is that individual multiplications or divisions are often just intermediate steps in a calculation. So, QV will not try to resolve the kind of quantity of an operation until signalled to do so. However, addition and subtraction of different kinds of quantity is forbidden. So, the sum in ``x0 + v0*t`` must be validated before execution, and this requires QV to resolve the units of ``v0*t``. 
+An interesting implementation detail is apparent here. The function ``qresult()`` is applied to ``d/t`` to resolve the units, but it is not used in the calculation of ``x0 + v0*t``. The reason is that individual multiplications or divisions are often just intermediate steps in a calculation. So, QV will not try to resolve the kind of quantity of an operation until signalled to do so. However, addition and subtraction of different kinds of quantity is not allowed. So, the arguments in the sum ``x0 + v0*t`` must be checked, and this requires QV to resolve the units of ``v0*t``. 
 
 Fuel consumption
 ================
-When `ad hoc` units are preferred, this package facilitates their use. For example, fuel consumption is typically stated in units of litres per 100 km. This can be handled as follows [#FN1]_  
+This package facilitates the use of `ad hoc` units. For example, fuel consumption is typically stated in units of litres per 100 km. This can be handled as follows [#FN1]_  
 
 .. code-block:: python 
 
     from fractions import Fraction
     
-    context = Context( ("Distance","L"), ("Volume","V") )
-    FuelConsumption = context.declare( 'FuelConsumption','FC','Volume/Distance' )
+    quantity = Context( ("Distance","L"), ("Volume","V") )
+    FuelConsumption = quantity.declare( 'FuelConsumption','FC','Volume/Distance' )
     
-    ureg =  UnitRegister("ureg",context)
+    ureg =  UnitRegister("ureg",quantity)
 
     # Reference units 
-    kilometre = ureg.reference_unit('Distance','kilometre','km') 
-    litre = ureg.reference_unit('Volume','litre','L')
-    litres_per_km = ureg.reference_unit( 'FuelConsumption','litres_per_km','L/km' )
+    kilometre = ureg.unit( RatioScale(quantity['Distance'],'kilometre','km') )
+    litre = ureg.unit( RatioScale(quantity['Volume'],'litre','L') )
+    litres_per_km = ureg.unit( RatioScale(quantity['FuelConsumption'],'litres_per_km','L/km' ) )
     
-    litres_per_100_km = related_unit(
-         litres_per_km,
-         Fraction(1,100),
-         'litres_per_100_km','L/(100 km)'
+    litres_per_100_km = ureg.unit(
+        proportional_unit(
+            litres_per_km,
+            'litres_per_100_km','L/(100 km)',
+            Fraction(1,100)
+        )
     )
 
 Calculations proceed as might be expected 
@@ -106,29 +108,29 @@ Electrical measurements involve particular quantities, and associated units. We 
 
 .. code-block:: python  
 
-    context = Context( ("Current","I"),("Voltage","V"),("Time","T") )
+    quantity = Context( ("Current","I"),("Voltage","V"),("Time","T") )
     
-    context.declare('Resistance','R','Voltage/Current')
-    context.declare('Capacitance','C','I*T/V')
-    context.declare('Inductance','L','V*T/I')
-    context.declare('Angular_frequency','F','1/T')
-    context.declare('Power','P','V*I')
-    context.declare('Energy','E','P*T')
+    quantity.declare('Resistance','R','Voltage/Current')
+    quantity.declare('Capacitance','C','I*T/V')
+    quantity.declare('Inductance','L','V*T/I')
+    quantity.declare('Angular_frequency','F','1/T')
+    quantity.declare('Power','P','V*I')
+    quantity.declare('Energy','E','P*T')
 
 Suitable units are:
 
 .. code-block:: python 
 
-    ureg =  UnitRegister("Reg",context)
+    ureg =  UnitRegister("Reg",quantity)
     
-    volt = ureg.reference_unit('Voltage','volt','V') 
-    second = ureg.reference_unit('Time','second','s') 
-    ampere = ureg.reference_unit('Current','ampere','A') 
-    ohm = ureg.reference_unit('Resistance','Ohm','Ohm')
-    henry = ureg.reference_unit('Inductance','henry','H')
-    rad_per_s = ureg.reference_unit( 'Angular_frequency','radian_per_second','rad/s' )
-    watt = ureg.reference_unit('Power','watt','W')
-    joule = ureg.reference_unit('Energy','joule','J')
+    volt = ureg.unit( RatioScale(quantity.Voltage,'volt','V') )  
+    second = ureg.unit( RatioScale(quantity.Time,'second','s') )  
+    ampere = ureg.unit( RatioScale(quantity.Current,'ampere','A') )  
+    ohm = ureg.unit( RatioScale(quantity.Resistance,'Ohm','Ohm') ) 
+    henry = ureg.unit( RatioScale(quantity.Inductance,'henry','H') ) 
+    rad_per_s = ureg.unit( RatioScale(quantity.Angular_frequency,'radian_per_second','rad/s') ) 
+    watt = ureg.unit( RatioScale(quantity.Power,'watt','W') ) 
+    joule = ureg.unit( RatioScale(quantity.Energy,'joule','J') )
 
 Calculations are then straightforward. For example, 
 
@@ -172,8 +174,8 @@ For example, continuing the electrical case above (where ``r1`` and ``r2`` were 
 
 .. code-block:: python 
 
-    context.declare( 'Resistance_ratio','R/R', 'Resistance//Resistance' )
-    ureg.reference_unit('Resistance_ratio','ohm_per_ohm','Ohm/Ohm')
+    quantity.declare( 'Resistance_ratio','R/R', 'Resistance//Resistance' )
+    ureg.unit( RatioScale(quantity.Resistance_ratio,'ohm_per_ohm','Ohm/Ohm') )
     
     divider = qratio( r2,(r1+r2) )
     
@@ -201,14 +203,16 @@ Another example is the voltage gain of an amplifying stage
 
     from QV.prefix import micro
     
-    context.declare('Voltage_ratio','V/V','Voltage//Voltage')
-    volt_per_volt= ureg.reference_unit('Voltage_ratio','volt_per_volt','V/V')
+    microvolt = ureg.unit( micro(volt) )
+    
+    quantity.declare('Voltage_ratio','V/V','Voltage//Voltage')
+    volt_per_volt= ureg.unit( RatioScale(quantity.Voltage_ratio,'volt_per_volt','V/V') )
 
-    volt_per_millivolt = related_unit(volt_per_volt,1E3,'volt_per_millivolt','V/mV')
-    volt_per_microvolt = related_unit(volt_per_volt,1E6,'volt_per_micovolt','V/uV')
+    volt_per_millivolt = ureg.unit( proportional_unit(volt_per_volt,'volt_per_millivolt','V/mV',1E3) )
+    volt_per_microvolt = ureg.unit( proportional_unit(volt_per_volt,'volt_per_micovolt','V/uV',1E6) )
         
     v1 = qvalue(0.5,volt)
-    v2 = qvalue(0.5,micro(volt))
+    v2 = qvalue(0.5,microvolt)
     gain = qratio( v1, v2 )    
     
     print( "Gain =", qresult(gain) )
@@ -248,15 +252,15 @@ No one is suggesting that a dimension for angle should be added to the SI, howev
 
 .. code-block:: python 
 
-    context = Context( ("Length","L"), ("Time","T"), ("Angle","A") )
-    InverseAngle = context.declare('InverseAngle','1/A','1/A')
+    quantity = Context( ("Length","L"), ("Time","T"), ("Angle","A") )
+    InverseAngle = quantity.declare('InverseAngle','1/A','1/A')
 
-    xi = UnitRegister("xi",context)
+    xi = UnitRegister("xi",quantity)
 
-    metre = xi.reference_unit('Length','metre','m') 
-    second = xi.reference_unit('Time','second','s') 
-    radian = xi.reference_unit('Angle','radian','rad') 
-    inv_radian = xi.reference_unit('InverseAngle','per radian','1/rad') 
+    metre = xi.unit( RatioScale(quantity['Length'],'metre','m') )
+    second = xi.unit( RatioScale(quantity['Time'],'second','s')  )
+    radian = xi.unit( RatioScale(quantity['Angle'],'radian','rad')  )
+    inv_radian = xi.unit( RatioScale(quantity['InverseAngle'],'per radian','1/rad')  )
 
     from math import pi
 

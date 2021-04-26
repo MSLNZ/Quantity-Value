@@ -32,8 +32,9 @@ class TestQuantityValue(unittest.TestCase):
         SI =  UnitRegister("SI",context)
         
         metre = SI.unit( RatioScale(context['Length'],'metre','m') )
-        centimetre = SI.unit( centi(metre.scale) )
-
+        centimetre = SI.unit( centi(metre) )
+        SI.conversion_function_values(centimetre,metre,centi.value)
+        
         x1 = 1.2 
         x2 = 3.4 
         
@@ -51,22 +52,22 @@ class TestQuantityValue(unittest.TestCase):
         # When units have different prefixes ...
         qv2 = qvalue(x2,centimetre)
         vu = qv1 + qv2 
-        # ... the result will be expressed in the lesser of the units 
-        self.assertAlmostEqual( value(vu), x1*100 + x2, 15 )       
-        self.assertTrue( unit(vu) is centimetre )
+        # ... the result will be expressed in reference units
+        self.assertAlmostEqual( value(vu), x1 + x2/100, 15 )       
+        self.assertTrue( unit(vu) is metre )
 
         vu = qv1 - qv2 
-        self.assertAlmostEqual( vu.value, x1*100 - x2, 15 )       
-        self.assertTrue( vu.unit is centimetre )
+        self.assertAlmostEqual( vu.value, x1 - x2/100, 15 )       
+        self.assertTrue( vu.unit is metre )
         
-        # # QV object on the right
-        # qv4 = 1 + qvalue( 2, SI.Number.unity )
-        # self.assertAlmostEqual(qv4.value,3)
-        # self.assertEqual(qv4.unit,SI.Number.unity)
+        # QV object on the right
+        qv4 = 1 + qvalue( 2, SI.Number.unity )
+        self.assertAlmostEqual(qv4.value,3)
+        self.assertEqual(qv4.unit,SI.Number.unity)
 
-        # qv5 = 1 - qvalue( 2, SI.Number.unity )
-        # self.assertAlmostEqual(qv5.value,-1)
-        # self.assertEqual(qv5.unit,SI.Number.unity)
+        qv5 = 1 - qvalue( 2, SI.Number.unity )
+        self.assertAlmostEqual(qv5.value,-1)
+        self.assertEqual(qv5.unit,SI.Number.unity)
 
         # Illegal case 
         Imperial = UnitRegister("Imperial",context)
@@ -142,17 +143,20 @@ class TestQuantityValue(unittest.TestCase):
         kilometre = ureg.unit( RatioScale(context['Distance'],'kilometre','km') )
         litre = ureg.unit( RatioScale(context['Volume'],'litre','L') )
 
-        litres_per_100_km = ureg.unit( RatioScale(context['FuelConsumption'],'litres_per_km','L/(100 km)') )
-        # litres_per_100_km = related_unit(
-            # ureg.FuelConsumption.litres_per_km,
-            # Fraction(1,100),
-            # 'litres_per_100_km','L/(100 km)'
-        # )
+        litres_per_km = ureg.unit( RatioScale(context['FuelConsumption'],'litres_per_km','L/km)') )
+        
+        litres_per_100_km = ureg.unit( 
+            proportional_unit(
+                ureg.FuelConsumption.litres_per_km,
+                'litres_per_100_km','L/(100 km)',
+                Fraction(1,100)
+            )
+        )
          
         # consumption in ad hoc units 
         distance = qvalue(25.6,kilometre)
         fuel = qvalue(2.2,litre)
-        consumes = qresult(  fuel/distance, 'L/(100 km)' ) 
+        consumes = qresult(  fuel/distance, 'L/(100 km)' )
         self.assertTrue( consumes.unit is litres_per_100_km )
         self.assertAlmostEqual( consumes.value, 2.2/(25.6/100), 15 )
         
@@ -169,6 +173,8 @@ class TestQuantityValue(unittest.TestCase):
         ureg =  UnitRegister("ureg",context)
 
         volt = ureg.unit( RatioScale(context['Voltage'],'volt','V') )
+        microvolt = ureg.unit( micro(volt) )
+
         ampere = ureg.unit( RatioScale(context['Current'],'ampere','A') )
         ohm = ureg.unit( RatioScale(context['Resistance'],'Ohm','Ohm') )
 
@@ -196,11 +202,15 @@ class TestQuantityValue(unittest.TestCase):
         # Voltage divider
         context.declare('Voltage_ratio','V/V','Voltage//Voltage')
         volt_per_volt= ureg.unit( RatioScale(context['Voltage_ratio'],'volt_per_volt','V/V') )
-        volt_per_millivolt = related_unit(volt_per_volt,1E3,'volt_per_millivolt','V/mV')
-        volt_per_microvolt = related_unit(volt_per_volt,1E6,'volt_per_micovolt','V/uV')
+        volt_per_millivolt = ureg.unit(
+            proportional_unit(volt_per_volt,'volt_per_millivolt','V/mV',1E3)
+        )
+        volt_per_microvolt = ureg.unit( 
+            proportional_unit(volt_per_volt,'volt_per_micovolt','V/uV',1E6)
+        )
         
         v1 = qvalue(0.5,volt)
-        v2 = qvalue(0.5,micro(volt))
+        v2 = qvalue(0.5,microvolt)
         gain = qratio( v1, v2 )
         
         self.assertAlmostEqual( 1000000.0, qresult(gain).value )

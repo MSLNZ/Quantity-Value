@@ -1,3 +1,6 @@
+from QV.scale import RatioScale 
+from QV.unit_register import proportional_unit
+
 #----------------------------------------------------------------------------
 class Prefix(object):
 
@@ -10,7 +13,7 @@ class Prefix(object):
         >>> context = Context( ('Length','L') )
         >>> SI =  UnitRegister("SI",context)
         >>> metre = SI.unit( RatioScale(context['Length'],'metre','m') )
-        >>> centimetre = SI.unit( prefix.centi(metre.scale) )
+        >>> centimetre = SI.unit( prefix.centi(metre) )
         >>> SI.conversion_function_values(metre,centimetre,prefix.centi.value)
         >>> print( centimetre )
         cm
@@ -33,11 +36,19 @@ class Prefix(object):
     def __str__(self):
         return str(self.symbol) 
         
-    def __call__(self,scale):
-        # TODO: perhaps only RatioScales can be prefixed?
-        if hasattr(scale,'prefix') and scale.prefix != 1:
+    def __call__(self,unit):
+        register = unit.register 
+        scale = unit.scale
+        
+        if not isinstance(scale,RatioScale):
             raise RuntimeError(
-                "Cannot prefix an already prefixed scale: {!r}".format(scale)
+                "cannot apply a conversion factor to {!r}".format(scale) 
+            )
+            
+        # Must be applied to a reference unit
+        if register.reference_unit_for(unit) is not unit:
+            raise RuntimeError(
+                "{!r} is a derived scale".format(scale)
             )
 
         name = "{!s}{!s}".format(
@@ -49,12 +60,9 @@ class Prefix(object):
             self.symbol,
             scale.symbol
         )
- 
-        # The prefixed scale is of the same type and quantity
-        s = scale.__class__(scale.kind_of_quantity,name,symbol)
-        s.prefix = self.value 
-        
-        return s
+         
+        # Note the scale is returned unregistered         
+        return proportional_unit(unit,name,symbol,self.value)
               
             
 #============================================================================
@@ -122,46 +130,56 @@ metric_prefixes = (
         yottasecond (Ys): 1.00E+24
 """
 
-# # The kilogram is a special case. 
-# def si_mass_units(kg_unit):
-    # """
-    # Generate multiples and sub-multiples for SI mass units
+# The kilogram is a special case. 
+def si_mass_units(kg_unit):
+    """
+    Generate multiples and sub-multiples for SI mass units
     
-    # ``kg_unit`` must be defined, with 
-    # name ``kilogram`` and symbol ``kg``
+    ``kg_unit`` must be defined, with 
+    name ``kilogram`` and symbol ``kg``
     
-    # Example::
+    Example::
     
-        # >>> context = Context( ('Mass','M') )
-        # >>> SI =  UnitRegister("SI",context)        
-        # >>> kilogram = SI.reference_unit('Mass','kilogram','kg')  
-        # >>> prefix.si_mass_units(kilogram)
-        # >>> print( SI.Mass.gram.scale.name )
-        # gram
-        # >>> print( repr(SI.Mass.gram) )
-        # RegisteredUnit(KindOfQuantity('Mass','M'),'gram','g',UnitRegister(SI))        
+        >>> context = Context( ('Mass','M') )
+        >>> SI =  UnitRegister("SI",context)        
+        >>> kilogram = SI.unit( RatioScale(context['Mass'],'kilogram','kg') )  
+        >>> prefix.si_mass_units(kilogram)
+        >>> print( SI.Mass.gram.scale.name )
+        gram
+        >>> print( repr(SI.Mass.gram) )
+        RegisteredUnit(KindOfQuantity('Mass','M'),'gram','g',UnitRegister(SI))        
 
 
-    # """
-    # if (
-        # kg_unit.scale.name != 'kilogram' and 
-        # kg_unit.scale.symbol != 'kg'
-    # ):
-        # raise RuntimeError(
-            # "conventional name required, got {0.name} and{0.symbol}".format(
-                # kg_unit.scale
-            # )
-        # )
+    """
+    if (
+        kg_unit.scale.name != 'kilogram' and 
+        kg_unit.scale.symbol != 'kg'
+    ):
+        raise RuntimeError(
+            "conventional name required, got {0.name} and{0.symbol}".format(
+                kg_unit.scale
+            )
+        )
         
-    # gram_scale = RatioScale('Mass','gram','g',1E-3)
+    register = kg_unit.register
     
-    # for p_i in metric_prefixes:
-        # if p_i.value != 1E3: 
-            # related_unit(kg_reference_unit,
-                # p_i.value / 1000.0,
-                # p_i.name+'gram',
-                # p_i.symbol+'g' 
-            # )
+    gram = register.unit( 
+        proportional_unit(kg_unit,
+                    'gram',
+                    'g', 
+                    1.0 / 1000.0,
+        )
+    )
+      
+    for p_i in metric_prefixes:
+        if p_i.value != 1E3: 
+            register.unit( 
+                proportional_unit(kg_unit,
+                    p_i.name+'gram',
+                    p_i.symbol+'g', 
+                    p_i.value / 1000.0
+                )
+            )
     
 #============================================================================
 # Binary prefixes 

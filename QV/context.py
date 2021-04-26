@@ -45,15 +45,13 @@ class Context(object):
                 self._koq[koq_i._symbol] = koq_i
             if self._valid_koq_name_or_symbol(koq_i._name):
                 self._koq[koq_i._name] = koq_i
-        
-        # # For conversions between different unit registers
-        # self._conversion_factors = dict()
-        
+                
         self._koq_signature = bidict()
+        
         # Assign an independent exponent to each base quantity
         exponents = [0] * len(argv)
         
-        # Dimensionless case is included by default
+        # The class of numbers is included by default
         self._koq_signature[Number] = Signature(self,exponents)
         self._koq.update( {'Number':Number, '1':Number} ) 
         

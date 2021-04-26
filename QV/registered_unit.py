@@ -200,9 +200,14 @@ class Simplify(UnaryOp):
     # Perform the operation on the quantities involved 
     # and return a koq expression
     @property 
-    def kind_of_quantity_expr(self):  
+    def kind_of_quantity(self):  
         return self.arg.kind_of_quantity._simplify()
-        
+  
+    @property 
+    def scale(self): 
+        # TODO: this is not quite right: the names will be wrong 
+        return self.arg.scale
+  
 #----------------------------------------------------------------------------
 class Ratio(BinaryOp):   
 
@@ -219,13 +224,13 @@ class Ratio(BinaryOp):
     # Perform the operation on the quantities involved 
     # and return a koq expression
     @property 
-    def kind_of_quantity_expr(self):  
+    def kind_of_quantity(self):  
         return self.lhs.kind_of_quantity // self.rhs.kind_of_quantity
  
     # Perform the operation on the scales involved 
     @property 
     def scale(self):  
-        self.lhs.scale // self.rhs.scale
+        return self.lhs.scale // self.rhs.scale
  
 #----------------------------------------------------------------------------
 class Mul(BinaryOp):   
@@ -243,13 +248,13 @@ class Mul(BinaryOp):
     # Perform the operation on the quantities involved 
     # and return a koq expression
     @property 
-    def kind_of_quantity_expr(self):  
+    def kind_of_quantity(self):  
         return self.lhs.kind_of_quantity * self.rhs.kind_of_quantity
         
     # Perform the operation on the scales involved 
     @property 
     def scale(self):  
-        self.lhs.scale * self.rhs.scale
+        return self.lhs.scale * self.rhs.scale
         
 #----------------------------------------------------------------------------
 class Div(BinaryOp):   
@@ -267,13 +272,13 @@ class Div(BinaryOp):
     # Perform the operation on the quantities involved 
     # and return a koq expression
     @property 
-    def kind_of_quantity_expr(self):  
+    def kind_of_quantity(self):  
         return self.lhs.kind_of_quantity / self.rhs.kind_of_quantity
 
     # Perform the operation on the scales involved 
     @property 
     def scale(self):  
-        self.lhs.scale / self.rhs.scale
+        return self.lhs.scale / self.rhs.scale
         
 # ===========================================================================    
 if __name__ == "__main__":

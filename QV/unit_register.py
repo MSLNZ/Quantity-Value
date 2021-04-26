@@ -7,12 +7,14 @@ from functools import partial
 # would have m, cm, km, etc, and Imperial would have the foot, yard,
 # etc. However, all those length scales are "self-similar" in the 
 # sense that a scale factor converts from one to the other.
- 
+
+from QV.kind_of_quantity import KindOfQuantity
 from QV.registered_unit import RegisteredUnit 
 from QV.units_dict import UnitsDict
+from QV.scale import RatioScale
 
 __all__ = (
-    'UnitRegister', 
+    'UnitRegister', 'proportional_unit'
 )
 
 #----------------------------------------------------------------------------
@@ -41,19 +43,19 @@ class UnitRegister(object):
         
         # KoQ objects - keys; RegisteredUnit objects - values
         # The first registered unit for a koq is the reference 
-        # unit by default, but this may be changed.
+        # unit: this may NOT be changed!!
         self._koq_to_ref_unit = dict()
         
         # A mapping of scale-symbol pairs to a 
         # function that converts between scales 
         self._conversion_fn = dict()            
                 
-        # # There must always be a unit for numbers and it is a 
-        # # special case because the name and symbol are blank
-        # Number = context['Number']
-        # unity = RegisteredUnit(Number,'','',self,1)        
-        # # self._koq_to_ref_unit[Number] = unity       
-        # self._koq_to_units_dict[Number] = UnitsDict({ 'unity': unity })          
+        # There must always be a unit for numbers and it is a 
+        # special case because the name and symbol are blank
+        Number = context['Number']
+        unity = RegisteredUnit( self, RatioScale(Number,'','') )        
+        self._koq_to_ref_unit[Number] = unity       
+        self._koq_to_units_dict[Number] = UnitsDict({ 'unity': unity })          
         
     def __str__(self):
         return self._name
@@ -75,24 +77,22 @@ class UnitRegister(object):
         
         `expr` can be a product or quotient of registered-units 
         or a product or quotient of kind-of-quantity objects
-        or a registered-unit or kind-of-quantity object.
+        or a registered-unit or a kind-of-quantity object.
 
-        """
-        if hasattr(expr,'kind_of_quantity'):
-            # a registered-unit or kind-of-quantity object
-            # both have this attribute 
-            koq = expr.kind_of_quantity
-            return self._koq_to_ref_unit[koq] 
+        """        
+        if isinstance(expr,KindOfQuantity):
+            return self._koq_to_ref_unit[expr] 
             
-        elif hasattr(expr,'kind_of_quantity_expr'):
-            # A registered-unit expression, so obtain 
+        elif isinstance(expr,RegisteredUnit):
+            return self._koq_to_ref_unit[expr.kind_of_quantity]
+            
+        elif hasattr(expr,'kind_of_quantity'):
+            # A registered-unit expression, so expose 
             # the corresponding koq expression
-            expr = expr.kind_of_quantity_expr 
-        
-        # Can get here directly or via the elif above
+            expr = expr.kind_of_quantity
+            
         if hasattr(expr,'execute'):
-            # A kind-of-quantity expression has this attribute
-            # so, resolve the expression
+            # A kind-of-quantity expression so, resolve the expression
             koq = self.context._signature_to_koq( 
                 self.context._evaluate_signature( expr ) 
             )
@@ -100,8 +100,7 @@ class UnitRegister(object):
         else:
             raise RuntimeError(
                 "{!r} unexpected".format(expr)
-            )
-                       
+            )                      
         
     def unit_dict_for(self,expr):
         """
@@ -250,6 +249,7 @@ class UnitRegister(object):
                 "{} and {} are different scale types".format(
                 A.scale,B.scale)
             )
+        #TODO: find the common base
 
         full_fn = A.scale.conversion_function
         partial_fn = partial(full_fn,*args)
@@ -266,15 +266,63 @@ class UnitRegister(object):
         if A.scale.symbol == B.scale.symbol:
             # No need
             return lambda x: x
+            
+        # For ratio scales we may use the `conversion_factor` information 
+        # in the Scale objects to find the conversion factor 
+        if hasattr(A.scale,'conversion_factor') and hasattr(B.scale,'conversion_factor'):
+            # A -> ref / B -> ref
+            factor = A.scale.conversion_factor / B.scale.conversion_factor
+            return lambda x: factor*x 
+            
+        if not isinstance(A,RegisteredUnit):
+            raise RuntimeError(
+                "unregistered unit: {!r}".format(A)
+            )
+            
+        if not isinstance(B,RegisteredUnit):
+            raise RuntimeError(
+                "unregistered unit: {!r} ".format(B)
+            )          
+         
+        key = (A.scale.symbol,B.scale.symbol)            
+        if key in self._conversion_fn:
+            return self._conversion_fn[ key ]  
         else:
-            key = (A.scale.symbol,B.scale.symbol)            
-            if key in self._conversion_fn:
-                return self._conversion_fn[ key ]  
-            else:
-                raise RuntimeError(
-                    "no conversion available for {0[0]!r} to {0[1]!r}".format(key)
-                ) 
+            raise RuntimeError(
+                "no conversion defined for {0[0]!r} to {0[1]!r}".format(key)
+            ) 
 
+#----------------------------------------------------------------------------
+def proportional_unit(unit,name,symbol,conversion_factor):
+    """
+    Declare a scale proportional to a unit already registered 
+    
+    """
+    register = unit.register 
+    scale = unit.scale
+
+    if not isinstance(scale,RatioScale):
+        raise RuntimeError(
+            "cannot apply a conversion factor to {!r}".format(scale) 
+        )
+        
+    if not hasattr(unit,'register'):
+        raise RuntimeError(
+            "`unit` must be registered"
+        )
+    
+    # The derived scale is the same type and quantity
+    s = scale.__class__(scale.kind_of_quantity,name,symbol)
+
+    if register.reference_unit_for(unit) is unit:
+        # The multiplier converts to the reference scale 
+        s.conversion_factor = conversion_factor 
+        
+    else:
+        s.conversion_factor = conversion_factor / scale.conversion_factor 
+    
+    return s
+        
 # ===========================================================================    
 if __name__ == "__main__":
     import doctest

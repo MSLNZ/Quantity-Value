@@ -17,8 +17,8 @@ Units are declared by providing the name of the kind of quantity, the name of a 
     context = Context(('Length','L'))
 
     SI =  UnitRegister("SI",context)
-    metre = SI.reference_unit('Length','metre','m')   # reference unit
-    centimetre = prefix.centi(metre) # related unit 
+    metre = SI.unit( RatioScale(context['Length'],'metre','m') )   # reference unit
+    centimetre = SI.unit( prefix.centi(metre) ) # related unit 
     
 Units for a given kind of quantity can be looked up in the register by name, term, or by using attributes. For instance, these expressions return the ``metre`` unit 
 
