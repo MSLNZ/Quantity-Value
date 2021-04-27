@@ -44,6 +44,12 @@ class RegisteredUnit(object):
         context = self.register.context 
         return context.signature( self.kind_of_quantity ).is_dimensionless
 
+    @property 
+    def is_simplified(self):
+        """True when the elements in the denominator of the associated kind of quantity are all zero"""
+        context = self.register.context 
+        return context.signature( self.kind_of_quantity ).is_simplified
+
         
     def is_ratio_of(self,other_koq):
         """
@@ -66,25 +72,24 @@ class RegisteredUnit(object):
         """The associated unit register"""
         return self._register
         
-    @register.setter
-    def register(self,register):
-        if self._register is None:
-            self._register = register
-        else:
-            raise RuntimeError(
-                "Unit register is assigned: {}".format(self.register)
-            )
+    # @register.setter
+    # def register(self,register):
+        # if self._register is None:
+            # self._register = register
+        # else:
+            # raise RuntimeError(
+                # "Unit register is assigned: {}".format(self.register)
+            # )
         
     def __str__(self):
         return "{!s}".format(self.scale)
         
     def __repr__(self):
-        return "{!s}({!r},{!r},{!r},{!r})".format(
+        return "{!s}({!r},{!r},{!r})".format(
             self.__class__.__name__,
             self.scale.kind_of_quantity,
             self.scale.name,
-            self.scale.symbol,
-            self._register
+            self.scale.symbol
         )     
 
     def __mul__(self,rhs):
@@ -112,6 +117,29 @@ class RegisteredUnit(object):
     def simplify(self):
         return Simplify(self)
 
+    def conversion_to(self,B):
+        """
+        Return the conversion function from this unit to unit `B` 
+        
+        The conversion function takes a value argument 
+         `x` and returns the converted value on `B`
+        
+        """
+        A = self 
+                    
+        if not isinstance(B,RegisteredUnit):
+            raise RuntimeError(
+                "unregistered unit: {!r} ".format(B)
+            )          
+         
+        key = (A.scale.symbol,B.scale.symbol)            
+        if key in self.register._conversion_fn:
+            return self.register._conversion_fn[ key ]  
+        else:
+            raise RuntimeError(
+                "no conversion defined for {0[0]!r} to {0[1]!r}".format(key)
+            ) 
+            
 #----------------------------------------------------------------------------
 # The following classes support simple manipulation of units by
 # multiplication and division, declaring a ratio of units 
@@ -125,6 +153,9 @@ class UnaryOp(object):
     def __init__(self,arg):
         self.arg = arg
         self._register = arg.register
+
+    @property 
+    def is_simplified(self): return False
 
     @property 
     def register(self):
@@ -158,6 +189,9 @@ class BinaryOp(object):
         assert lhs.register is rhs.register
         self._register = lhs.register
         
+    @property 
+    def is_simplified(self): return False
+
     @property 
     def register(self):
         return self._register
@@ -197,8 +231,6 @@ class Simplify(UnaryOp):
         # TODO: need to treat a numeric as a special case
         return "simplify({!s})".format(self.arg)
            
-    # Perform the operation on the quantities involved 
-    # and return a koq expression
     @property 
     def kind_of_quantity(self):  
         return self.arg.kind_of_quantity._simplify()
@@ -221,17 +253,20 @@ class Ratio(BinaryOp):
         # TODO: need to treat a numeric as a special case
         return "({!s}//{!s})".format(self.lhs,self.rhs)
            
-    # Perform the operation on the quantities involved 
-    # and return a koq expression
     @property 
     def kind_of_quantity(self):  
-        return self.lhs.kind_of_quantity // self.rhs.kind_of_quantity
+        return self.scale.kind_of_quantity
  
     # Perform the operation on the scales involved 
     @property 
     def scale(self):  
-        return self.lhs.scale // self.rhs.scale
+        try:
+            return self._scale 
+        except AttributeError:
+            self._scale = self.lhs.scale // self.rhs.scale
+            return self._scale
  
+
 #----------------------------------------------------------------------------
 class Mul(BinaryOp):   
 
@@ -245,16 +280,18 @@ class Mul(BinaryOp):
         # TODO: need to treat a numeric as a special case
         return "({!s})*({!s})".format(self.lhs,self.rhs)
            
-    # Perform the operation on the quantities involved 
-    # and return a koq expression
     @property 
     def kind_of_quantity(self):  
-        return self.lhs.kind_of_quantity * self.rhs.kind_of_quantity
+        return self.scale.kind_of_quantity
         
     # Perform the operation on the scales involved 
     @property 
     def scale(self):  
-        return self.lhs.scale * self.rhs.scale
+        try:
+            return self._scale 
+        except AttributeError:
+            self._scale = self.lhs.scale * self.rhs.scale
+            return self._scale
         
 #----------------------------------------------------------------------------
 class Div(BinaryOp):   
@@ -269,16 +306,18 @@ class Div(BinaryOp):
         # TODO: need to treat a numeric as a special case
         return "({!s})/({!s})".format(self.lhs,self.rhs)
     
-    # Perform the operation on the quantities involved 
-    # and return a koq expression
     @property 
     def kind_of_quantity(self):  
-        return self.lhs.kind_of_quantity / self.rhs.kind_of_quantity
+        return self.scale.kind_of_quantity
 
     # Perform the operation on the scales involved 
     @property 
-    def scale(self):  
-        return self.lhs.scale / self.rhs.scale
+    def scale(self): 
+        try:
+            return self._scale 
+        except AttributeError:
+            self._scale = self.lhs.scale / self.rhs.scale
+            return self._scale
         
 # ===========================================================================    
 if __name__ == "__main__":

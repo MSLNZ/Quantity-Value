@@ -7,6 +7,9 @@ class KindOfQuantity(object):
 
     """
     A type of quantity like mass, length, etc.
+    
+    KindOfQuantity objects can be multiplied and divided. Declaring a ratio 
+    and simplifying a ratio is also supported.
     """
 
     def __init__(self,name,symbol):
@@ -76,11 +79,8 @@ class KindOfQuantity(object):
         return Simplify(self)
 
 #----------------------------------------------------------------------------
-# KindOfQuantity objects can be multiplied and divided. Declaring a ratio 
-# and simplifying a ratio is also supported.   
-#
-# The `execute` method is defined in all classes and is used to resolve 
-# expressions into a result, by executing the nodes of a parse tree.
+# The `execute` method is defined in all operation classes and is used to  
+# resolve expressions into a result, by executing the nodes of a parse tree.
 # See `context._evaluate_signature`
 #----------------------------------------------------------------------------
 class UnaryOp(object):   

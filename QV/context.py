@@ -17,13 +17,12 @@ class Context(object):
     A Context keeps a register of :class:`.KindOfQuantity` instances,
     and associates each with a unique signature.
     
-    A Context is initialised by a set of base quantities. 
+    A Context is initialised by a set of quantities. 
     Other quantities can then be declared as products  
-    and quotients of these base quantities, or of other 
+    and quotients of these 'base' quantities, or of other 
     derived quantities already declared. 
     
-    The signature of declared quantities must be unique
-    in the context.
+    The signature of declared quantities must be unique.
         
     Example::
 
@@ -87,7 +86,7 @@ class Context(object):
                 "{!r} not found".format(koq_name)
             )
         
-    def _kog_to_signature(self,koq):
+    def _koq_to_signature(self,koq):
         return self._koq_signature[koq]
   
     def _signature_to_koq(self,sig):
@@ -104,8 +103,9 @@ class Context(object):
                     )
                 )
             else:
+                # Must not conflict with class attributes too
                 raise RuntimeError(
-                    "{!r} is an attribute of {!s}".format(
+                    "{!r} is used as an attribute of {!s}".format(
                         koq_id,
                         self.__class__.__name__
                     )
@@ -115,15 +115,15 @@ class Context(object):
             return True 
              
   
-    # Executing the expression results in the 
-    # signature for the resultant KindOfQuantity.
     # `expression` is a sequence of binary multiplication
     # and division operation objects, linked in a tree. 
-    # `_kog_to_signature` resolves the signature of  
-    # the KindOfQuantity objects at the leaves of this tree. 
+    # Executing `expression` results in the 
+    # signature for the resultant KindOfQuantity.
+    # `_koq_to_signature` resolves the KindOfQuantity objects
+    # corresponding to signatures at the leaves of this tree. 
     def _evaluate_signature(self,expression):
         stack = list()
-        expression.execute(stack,self._kog_to_signature)
+        expression.execute(stack,self._koq_to_signature)
         
         assert len(stack) == 1
         return stack.pop()
@@ -135,26 +135,23 @@ class Context(object):
         
     def declare(self,koq_name,koq_symbol,expression):
         """
-        Declare a :class:`.KindOfQuantity`
-        with signature defined by ``expression``
+        Declare a :class:`.KindOfQuantity` defined by ``expression``
         
-        The argument ``expression`` may be multiplications 
-        and divisions of :obj:`.KindOfQuantity` objects, 
-        or a string representing such a sequence of operations.
+        The ``expression`` may be products  
+        and quotients of :obj:`.KindOfQuantity` objects, 
+        or a string representing these operations.
         
-        A ``RuntimeError`` is raised if the signature of the 
-        ``expression`` is already associated with a kind 
-        of quantity in the context.
+        A ``RuntimeError`` is raised if the signature 
+        resulting from ``expression`` is already associated 
+        with a kind of quantity.
         
         """
         self._valid_koq_name_or_symbol(koq_name)
         self._valid_koq_name_or_symbol(koq_symbol)
             
-        # Evaluates the KoQ expression using only those KoQ 
-        # objects that have been declared. 
         if isinstance(expression,str):
-            # Evaluates the KoQ expression using only those KoQ 
-            # objects that have been declared in this context. 
+            # Evaluates the string using KoQ objects 
+            # that have been declared in this context. 
             expression = eval(expression,{'__builtins__': None},self._koq)
         
         if isinstance(expression,KindOfQuantity):
@@ -178,15 +175,14 @@ class Context(object):
         
     def evaluate(self,expression):
         """
-        Evaluate the quantity represented by ``expression``
+        Return the quantity represented by ``expression``
                 
-        The argument ``expression`` may be multiplications 
-        and divisions of :obj:`.KindOfQuantity` objects, 
-        or a string representing such a sequence of operations.
+        The argument ``expression`` may be products 
+        and quotients of :obj:`.KindOfQuantity` objects, 
+        or a string representing these operations.
         
         A ``RuntimeError`` is raised if the signature of the result 
-        of the expression are not associated with a kind of quantity 
-        in the context.
+        is not associated with a kind of quantity in the context.
         
         """
         if isinstance(expression,str):
@@ -213,36 +209,6 @@ class Context(object):
             koq = self._koq[koq] 
             
         return self._koq_signature[koq]    
-        
-    # def conversion_from_to(self,ref_unit_1,ref_unit_2,factor):
-        # """
-        # Register a factor to convert from `ref_unit_1`, in  
-        # one unit register, to `ref_unit_2` in another
-        # """
-        # koq_1 = ref_unit_1._kind_of_quantity
-        # koq_2 = ref_unit_2._kind_of_quantity
-        # assert koq_1 is koq_2,\
-            # "{} and {} are different quantities".format(koq_1,koq_2)
-            
-        # if (ref_unit_1,ref_unit_2) in self._conversion_factors:
-                # raise RuntimeError(
-                    # "There is already an entry for {} and {}".format(
-                        # ref_unit_1,
-                        # ref_unit_2
-                    # )
-                # )
-        # else:
-            # self._conversion_factors[(ref_unit_1,ref_unit_2)] = factor
-
-    # def from_to(self,ref_unit_1,ref_unit_2):
-        # """
-        # """
-        # koq_1 = ref_unit_1._kind_of_quantity
-        # koq_2 = ref_unit_2._kind_of_quantity
-        # assert koq_1 is koq_2,\
-            # "{} and {} are different quantities".format(koq_1,koq_2)
-
-        # return self._conversion_factors[(ref_unit_1,ref_unit_2)]
    
 # ===========================================================================    
 if __name__ == "__main__":

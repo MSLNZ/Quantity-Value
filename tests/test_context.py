@@ -28,10 +28,10 @@ class TestContext(unittest.TestCase):
     
         self.assertEqual( len(context._koq_signature[Length]), 2 )
         
-        d1 = context._kog_to_signature(Length)
+        d1 = context._koq_to_signature(Length)
         self.assertEqual( d1, Signature( context, (1,0) ) )
         
-        d2 = context._kog_to_signature(Time)
+        d2 = context._koq_to_signature(Time)
         self.assertEqual( d2, Signature( context, (0,1) ) )
 
         self.assertTrue( Length is context._signature_to_koq( d1 ) ) 
@@ -51,7 +51,7 @@ class TestContext(unittest.TestCase):
         
         self.assertTrue( Speed is context['Speed'] )
         self.assertTrue( Speed is context['V'] )
-        self.assertTrue( context._kog_to_signature(Speed) == Signature( context, (1,-1), () ) )
+        self.assertTrue( context._koq_to_signature(Speed) == Signature( context, (1,-1), () ) )
         
         # Multiplication by a number of the left is OK
         self.assertTrue( Speed is context.evaluate('1*Length/Time') )
@@ -63,11 +63,11 @@ class TestContext(unittest.TestCase):
         self.assertRaises( KeyError, context.evaluate,'Length/Time/1' )
  
         self.assertTrue( Speed is context._signature_to_koq( Signature( context, (1,-1) ) ) ) 
-        self.assertEqual( context._kog_to_signature(Speed), Signature( context, (1,-1) ) )
+        self.assertEqual( context._koq_to_signature(Speed), Signature( context, (1,-1) ) )
 
         SpeedRatio = context.declare('SpeedRatio','V/V','Speed//Speed')
 
-        self.assertEqual( context._kog_to_signature(SpeedRatio), Signature( context, (1,-1), (1,-1)) )
+        self.assertEqual( context._koq_to_signature(SpeedRatio), Signature( context, (1,-1), (1,-1)) )
         self.assertTrue( SpeedRatio is context._signature_to_koq( Signature( context, (1,-1), (1,-1)) ) )
         
         self.assertTrue( context.signature('SpeedRatio').is_dimensionless )

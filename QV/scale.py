@@ -1,15 +1,14 @@
 from __future__ import division 
-import numbers 
  
-__all__ = ( 'Scale', 'OrdinalScale', 'IntervalScale', 'RatioScale',)
+__all__ = ( 'Scale', 'OrdinalScale', 'IntervalScale', 'RatioScale', )
 
 #----------------------------------------------------------------------------
-# In Stevens' classification 'Scale' is the nominal scale 
+# 'Scale' is a nominal scale 
 #
 class Scale(object):
 
     """
-    A Scale object has a name (and a short name, or symbol) 
+    A Scale has a name (and a short name, or symbol) 
     and contains a reference to the associated kind of quantity.
     """
     
@@ -29,22 +28,25 @@ class Scale(object):
     # __hash__ and __eq__ are required for mapping keys
     # __eq__ also needed as a nominal scale property 
     def __hash__(self):
-        return hash( ( self._name, self._symbol ) )
+        return hash( 
+            ( self._name, self._symbol, id(self.__class__) ) 
+        )
         
+    # Equality of scales means their names and types agree
+    # So, Celsius on a ratio scale is different from 
+    # an interval scale.
     def __eq__(self,other):
         return (
             self._name == other.name 
         and 
             self._symbol == other.symbol 
+        and
+            self.__class__ is other.__class__
         ) 
         
     def __str__(self):
         return self._symbol
        
-    @property 
-    def conversion_function(self):
-        raise NotImplementedError()
-
     @property 
     def name(self):
         return self._name
@@ -66,10 +68,6 @@ class OrdinalScale(Scale):
     
     def __init__(self,kind_of_quantity,name,symbol):
         Scale.__init__(self,kind_of_quantity,name,symbol)
-
-    @property 
-    def conversion_function(self):
-        raise NotImplementedError()
         
 #----------------------------------------------------------------------------
 class IntervalScale(OrdinalScale):
@@ -83,36 +81,31 @@ class IntervalScale(OrdinalScale):
     def __init__(self,kind_of_quantity,name,symbol):
         OrdinalScale.__init__(self,kind_of_quantity,name,symbol)
 
-    @property 
-    def conversion_function(self):
+    @staticmethod
+    def value_conversion_function():
         """
-        The generic conversion function from one interval scale to another 
-  
-        Example::
+        Generic conversion function from one interval scale to another 
         
-            >>> quantity = Context( ("Temperature","t") )
-            >>> ureg = UnitRegister("ureg",quantity)
-            >>> kelvin = ureg.unit( RatioScale(quantity.Temperature,'kelvin','K') ) 
-            >>> Celsius = ureg.unit( RatioScale(quantity.Temperature,'Celsius','C') ) 
-            >>> ureg.conversion_function_values(kelvin,Celsius,1,0,-273.15)
-            >>> degrees_C = ureg.conversion_from_A_to_B(kelvin,Celsius)
-            >>> print( degrees_C( 273.15 ), Celsius )
-            0.0 C
-  
-        """
-        # `k` is a conversion factor, 
-        # `o_A` is the offset on the source scale and 
-        # `o_B` is the offset on the target scale,  
-        # `x` is a value on the source scale 
-        return lambda k,o_A,o_B,x: k*(x - o_A) + o_B
+        """     
+        return lambda factor,offset,x: factor*x + offset
         
 #----------------------------------------------------------------------------
+# Quantity calculus applies to entities measured on ratio scales, so we 
+# may arbitrarily generate products and quotients, which are derived scales.
+# The mechanics of KindOfQuantity and Signature are used to resolve 
+# the derived quantity; no attempt is made to keep track of the 
+# corresponding unit. Instead, values are re-scaled to a reference unit 
+# for each term and the scale factor for the final conversion is built up
+# as the calculation proceeds, using `conversion_factor`. At the same time, 
+# a string of the unit  names and symbols is assembled, so that it will be 
+# possible to read  how a temporary object has been constructed, 
+# before being converted to a registered unit of the appropriate kind.
+#
 class RatioScale(IntervalScale):
 
     """
     A :class:`.RatioScale` is a metric scale. 
-    Units associated with a ratio scale may be multiplied and divided, 
-    resulting in derived units. 
+    Units may be multiplied and divided. 
     """
     
     def __init__(self,kind_of_quantity,name,symbol,conversion_factor=None):
@@ -121,7 +114,7 @@ class RatioScale(IntervalScale):
         if conversion_factor is not None: 
             self._conversion_factor = conversion_factor 
  
-    # The conversion factor relates to a designated reference 
+    # The conversion factor converts to the reference 
     # scale for the same quantity. It is immutable. 
     @property 
     def conversion_factor(self):
@@ -145,17 +138,15 @@ class RatioScale(IntervalScale):
                     self,self._conversion_factor
                 )
             )
-            
-    @property 
-    def conversion_function(self):
+ 
+    @staticmethod
+    def value_conversion_function():
         """
-        The generic conversion function from one ratio scale to another 
+        Generic conversion function from one ratio scale to another 
         
         """
-        # `k` is a conversion factor from the source to target scale, 
-        # `x` is a value on the scale 
-        return lambda k,x: k*x 
-        
+        return lambda factor,x: factor*x
+                    
     def __mul__(self,rhs):
         if not isinstance(rhs,RatioScale): 
             raise RuntimeError(
@@ -187,7 +178,14 @@ class RatioScale(IntervalScale):
             raise RuntimeError(
                 "Incompatible scales: {!r} and {!r}".format(self,rhs)
             )
-    
+ 
+        koq = self.kind_of_quantity//rhs.kind_of_quantity
+        name = self.name+"//({!s})".format(rhs.name)
+        symbol = self.symbol+"//({!s})".format(rhs.symbol)
+        factor = self.conversion_factor/rhs.conversion_factor 
+ 
+        return RatioScale(koq,name,symbol,factor)
+
 # ===========================================================================    
 if __name__ == "__main__":
     import doctest

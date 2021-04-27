@@ -2,16 +2,10 @@ from __future__ import division
 
 from functools import partial 
 
-# `UnitRegister` does not represent the concept of a 'system of units'. 
-# Different types of units belong in different systems, like the SI 
-# would have m, cm, km, etc, and Imperial would have the foot, yard,
-# etc. However, all those length scales are "self-similar" in the 
-# sense that a scale factor converts from one to the other.
-
 from QV.kind_of_quantity import KindOfQuantity
 from QV.registered_unit import RegisteredUnit 
 from QV.units_dict import UnitsDict
-from QV.scale import RatioScale
+from QV.scale import RatioScale, IntervalScale
 
 __all__ = (
     'UnitRegister', 'proportional_unit'
@@ -21,7 +15,8 @@ __all__ = (
 class UnitRegister(object):
 
     """
-    A UnitRegister holds associations between a kind-of-quantity and units.
+    A UnitRegister holds mappings between a kind-of-quantity and a
+    collection of units.
     
     A distinction is made between a reference unit and other related units 
     for the same kind of quantity. There can be only one reference unit 
@@ -46,8 +41,8 @@ class UnitRegister(object):
         # unit: this may NOT be changed!!
         self._koq_to_ref_unit = dict()
         
-        # A mapping of scale-symbol pairs to a 
-        # function that converts between scales 
+        # A mapping of symbols for pairs of scales to a 
+        # function that converts between those scales 
         self._conversion_fn = dict()            
                 
         # There must always be a unit for numbers and it is a 
@@ -55,7 +50,10 @@ class UnitRegister(object):
         Number = context['Number']
         unity = RegisteredUnit( self, RatioScale(Number,'','') )        
         self._koq_to_ref_unit[Number] = unity       
-        self._koq_to_units_dict[Number] = UnitsDict({ 'unity': unity })          
+        self._koq_to_units_dict[Number] = UnitsDict({ 'unity': unity })   
+
+        # Need to know if a unit has been registered 
+        self._registered_units = set()
         
     def __str__(self):
         return self._name
@@ -66,10 +64,12 @@ class UnitRegister(object):
             self._name
         )
 
+    def __contains__(self,u):
+        return u in self._registered_units 
+        
     @property
     def context(self):        
-        return self._context 
-        
+        return self._context     
     
     def reference_unit_for(self,expr):
         """
@@ -87,16 +87,17 @@ class UnitRegister(object):
             return self._koq_to_ref_unit[expr.kind_of_quantity]
             
         elif hasattr(expr,'kind_of_quantity'):
-            # A registered-unit expression, so expose 
+            # A registered-unit expression, so here we expose 
             # the corresponding koq expression
             expr = expr.kind_of_quantity
             
         if hasattr(expr,'execute'):
-            # A kind-of-quantity expression so, resolve the expression
+            # A kind-of-quantity expression so, we resolve the expression
             koq = self.context._signature_to_koq( 
                 self.context._evaluate_signature( expr ) 
             )
             return self._koq_to_ref_unit[koq]
+            
         else:
             raise RuntimeError(
                 "{!r} unexpected".format(expr)
@@ -104,38 +105,43 @@ class UnitRegister(object):
         
     def unit_dict_for(self,expr):
         """
-        Return all units associated with the kind of quantity for `expr`
+        Return the units associated with the kind of quantity of `expr`
         
-        `expr` can be a product or quotient of units, 
+        `expr` can be a product or quotient of registered-units, 
         a product or quotient of kind-of-quantity objects,
-        or a kind-of-quantity object.
+        or a registered-unit or a kind-of-quantity object.
         
         """
         # If `expr` has the `kind_of_quantity` attribute then  
-        # it is a unit or a unit expression. 
+        # it is a registered unit or a unit expression. 
         # In the first case, we can obtain a kind-of-quantity  
         # directly so immediately look up the unit.
         # In the second case, the expression must be evaluated.
         # If `expr` has the `execute` attribute then it is a 
         # kind-of-quantity expression.
-        
-        if hasattr(expr,'kind_of_quantity'):
-            koq = expr.kind_of_quantity
-        else:
-            koq = expr 
+        if isinstance(expr,KindOfQuantity):
+            return self._koq_to_units_dict[expr] 
             
-        if hasattr(koq,'execute'):
-            # Resolve a koq expression
+        elif isinstance(expr,RegisteredUnit):
+            return self._koq_to_units_dict[expr.kind_of_quantity]
+                  
+        elif hasattr(expr,'kind_of_quantity'):
+            expr = expr.kind_of_quantity
+            
+        if hasattr(expr,'execute'):
+            # A kind-of-quantity expression so, we resolve the expression
             koq = self.context._signature_to_koq( 
-                self.context._evaluate_signature( koq ) 
+                self.context._evaluate_signature( expr ) 
             )
+            return self._koq_to_units_dict[koq]
             
-        return self._koq_to_units_dict[koq]        
+        else:
+            raise RuntimeError(
+                "{!r} unexpected".format(expr)
+            )        
 
     def __getattr__(self,koq_name):
-        # Convert koq_name to koq object
         koq = getattr(self._context,koq_name)
-        # koq = self._context[koq_name]
         
         if koq in self._koq_to_units_dict:  
             return self._koq_to_units_dict[ koq ]
@@ -161,29 +167,9 @@ class UnitRegister(object):
             kind_of_quantity,
             UnitsDict({})
         )
-            
-    def __contains__(self,unit):
-        
-        units_dict = self._koq_to_units_dict.get(
-            unit.scale.kind_of_quantity,
-            UnitsDict({})
-        )
-
-        return (
-            unit.scale.name in units_dict or 
-            unit.scale.symbol in units_dict
-        )
-        
+                    
     def _register_unit(self,unit):
          
-        # if unit in self:
-            # raise RuntimeError(
-                # "{!r} is already registered: {!r}".format(
-                    # unit.scale.name,
-                    # self._koq_to_units_dict[unit.scale.name]
-                # )
-            # )
-        # else:
         koq = unit.scale.kind_of_quantity
         
         if koq not in self._koq_to_ref_unit:
@@ -202,8 +188,14 @@ class UnitRegister(object):
                 unit.scale.symbol: unit 
             })
                      
+        self._registered_units.add(unit)
+        
     def unit(self,scale):
         """
+        Register a new scale as a unit 
+        
+        The associated kind of quantity must not 
+        already have a scale with the same name or symbol 
         
         """
         units_dict = self._koq_to_units_dict.get(
@@ -229,7 +221,7 @@ class UnitRegister(object):
   
     def conversion_function_values(self,A,B,*args):
         """
-        Configure a function to convert from scale `A` to `B` 
+        Register a function to convert from scale `A` to `B` 
         
         """
         src_koq = A.scale.kind_of_quantity
@@ -240,37 +232,44 @@ class UnitRegister(object):
                 "{} and {} are different kinds of quantity".format(
                 src_koq,dst_koq)
             )
-
-        # Need to relax this constraint and allow 
-        # conversion between interval and ratio scales
-        # But put the control in the scales module.
-        if not type(A.scale) is type(B.scale):
+            
+        # If A and B are both ratio scales then a single value is needed.
+        # If A or B two is an interval scale the offset values and a 
+        # scale factor are needed.
+        
+        type_A = type(A.scale)
+        type_B = type(B.scale)
+        if type_A is RatioScale and type_B is RatioScale:
+            full_fn = RatioScale.value_conversion_function()
+            
+        elif type_A is IntervalScale or type_B is IntervalScale:
+            full_fn = IntervalScale.value_conversion_function()
+            
+        else:
+            # Ordinal and nominal scales are not yet covered.
             raise RuntimeError(
-                "{} and {} are different scale types".format(
-                A.scale,B.scale)
+                "{!r} or {!r} are not supported".format(A.scale,B.scale)
             )
-        #TODO: find the common base
 
-        full_fn = A.scale.conversion_function
+        # This applies the conversion parameter values but leaves `x`
         partial_fn = partial(full_fn,*args)
         self._conversion_fn[(A.scale.symbol,B.scale.symbol)] = partial_fn
         
     def conversion_from_A_to_B(self,A,B):
         """
-        Return the conversion function from scale `A` to `B` 
+        Return a conversion function for scale `A` to `B` 
         
         The function takes a single quantity-value argument `x` 
-        and returns a quantity-value result
+        on `A` and returns a quantity-value result on `B`
         
         """
         if A.scale.symbol == B.scale.symbol:
-            # No need
             return lambda x: x
             
         # For ratio scales we may use the `conversion_factor` information 
-        # in the Scale objects to find the conversion factor 
-        if hasattr(A.scale,'conversion_factor') and hasattr(B.scale,'conversion_factor'):
-            # A -> ref / B -> ref
+        # in the Scale objects to find the conversion factor.
+        # This avoids the need to register lots of functions.
+        if type(A.scale) is RatioScale and type(B.scale) is RatioScale:            
             factor = A.scale.conversion_factor / B.scale.conversion_factor
             return lambda x: factor*x 
             
@@ -279,18 +278,7 @@ class UnitRegister(object):
                 "unregistered unit: {!r}".format(A)
             )
             
-        if not isinstance(B,RegisteredUnit):
-            raise RuntimeError(
-                "unregistered unit: {!r} ".format(B)
-            )          
-         
-        key = (A.scale.symbol,B.scale.symbol)            
-        if key in self._conversion_fn:
-            return self._conversion_fn[ key ]  
-        else:
-            raise RuntimeError(
-                "no conversion defined for {0[0]!r} to {0[1]!r}".format(key)
-            ) 
+        return A.conversion_to(B)
 
 #----------------------------------------------------------------------------
 def proportional_unit(unit,name,symbol,conversion_factor):

@@ -3,7 +3,7 @@ from collections.abc import MutableMapping
 class UnitsDict(MutableMapping):
 
     """
-    A `dict`-like mapping of names, and short names (symbols), to 
+    A dictionary-like mapping of names, and short names (symbols), to 
     objects representing units.
     
     The names and short names are keys. They are unique and cannot be 

@@ -7,25 +7,24 @@ except ImportError:
 class Signature(object):
 
     """
-    A Signature holds a ratio of tuples that identify a kind of quantity. 
+    A Signature has a pair of tuples that identify a kind of quantity. 
     
     Multiplication and division of signatures adds and subtracts the 
     tuple elements, respectively. 
     
     The numerator and denominator of a Signature object 
-    are tuples. This allows the signature of a 'dimensionless' 
+    are the tuples. This allows the signature of a 'dimensionless' 
     quantity to be retained. 
     
     A Signature object is in 'simplified' form when the 
-    denominator is empty (or contains only zeros). 
-    A Signature object may be converted
-    to 'simplified' form by setting the numerator to the 
-    difference between the numerator and the denominator and setting the 
-    exponents in the denominator to zero.
+    denominator is empty (or contains only zeros).
     
-    A Signature holds a reference to a :class:`.Context`. That
-    Context object contains a 1-to-1 mapping between 
-    signatures and kinds of quantity.
+    A Signature object may be converted to 'simplified' form by setting 
+    the numerator to the difference between the numerator and the  
+    denominator and setting the exponents in the denominator to zero.
+    
+    A Signature refers to a :class:`.Context`, which contains 
+    a 1-to-1 mapping between signatures and kinds of quantity.
     """
     
     def __init__(self,context,numerator,denominator=()):
@@ -79,12 +78,12 @@ class Signature(object):
         
     @property
     def is_simplified(self):
-        """True when elements in the denominator are all zero"""
+        """When elements in the denominator are all zero"""
         return not self.denominator
         
     @property
     def is_dimensionless(self):
-        """True when elements in simplified form are all zero"""
+        """When elements in simplified form are all zero"""
         return sum( self.simplify().numerator ) == 0
 
     # @property
@@ -185,10 +184,9 @@ class Signature(object):
         """
         Return the signature in simplified form.
         
-        The numerator in the Signature object returned is the 
-        difference between the numerator and the denominator
-        of this object, the elements in the 
-        denominator of the object returned are all zero.
+        The numerator returned is the difference between 
+        the numerator and the denominator of this object, 
+        the elements in the denominator returned are all zero.
         
         """
         return Signature(

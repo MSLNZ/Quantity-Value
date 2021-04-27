@@ -3,6 +3,7 @@ from __future__ import print_function
 
 from QV.unit_register import RegisteredUnit as Unit
 from QV.kind_of_quantity import Number
+from QV.scale import RatioScale, IntervalScale
 
 __all__ = ('qvalue','value','unit','qresult','qratio')
 
@@ -96,9 +97,9 @@ class ValueUnit(object):
                 "different unit registers"
             )
             
-        # The calculation is done in the reference unit 
-        # unless both units are the same 
         if lhs.unit is rhs.unit:
+            # The case of interval scales is different
+            # if type(lhs.unit.scale) is IntervalScale:
             return ValueUnit(   
                 lhs.value - rhs.value, 
                 rhs.unit 
@@ -241,7 +242,7 @@ def unit(quantity_value):
 #----------------------------------------------------------------------------
 def qresult(
     value_unit, 
-    preferred_unit=None, 
+    unit=None, 
     simplify=True, 
     value_result = lambda x, *arg, **kwarg: x, 
     *arg,
@@ -255,7 +256,7 @@ def qresult(
     If a ``unit`` is supplied, it is used to report the measure. If  
     not, the measure is reported in the reference unit for that quantity.
     
-    If ``simplify`` is ``True``, unit signatures are simplified.
+    If ``simplify`` is ``True``, unit signatures will be simplified.
     
     The function ``value_result`` is applied to the value as a final processing step.
     
@@ -279,29 +280,29 @@ def qresult(
     """
     register = value_unit.unit.register 
     
-    if simplify:
-        unit = value_unit.unit.simplify()
+    if simplify and not value_unit.unit.is_simplified:
+        u = value_unit.unit.simplify()
     else:
-        unit = value_unit.unit
+        u = value_unit.unit
         
     # This can find the ref unit, but if we are dealing 
     # with a unit expression, we don't know how to 
     # convert to that ref unit! The same applies to 
     # a preferred unit. 
-    ref_unit = register.reference_unit_for( unit )
+    ref_unit = register.reference_unit_for( u )
     
-    if preferred_unit:
+    if unit:
     
         koq = ref_unit.scale.kind_of_quantity
         units_dict = register[koq]
         
-        if isinstance(preferred_unit,str):
-            if preferred_unit in units_dict:
-                preferred_unit = units_dict[preferred_unit]
+        if isinstance(unit,str):
+            if unit in units_dict:
+                unit = units_dict[unit]
             else:
                 raise RuntimeError(
                     "{} is not a unit for {!r}".format(
-                        preferred_unit,
+                        unit,
                         koq
                     )
                 )
@@ -316,17 +317,18 @@ def qresult(
         # else:
             # ref_unit = register.reference_unit_for( value_unit.unit )
                 
-        fn = register.conversion_from_A_to_B(unit,preferred_unit)
+        # Note `unit` may be a temporary RatioScale object and hence unregistered
+        fn = register.conversion_from_A_to_B(u,unit)
         return ValueUnit( 
             value_result(
                 fn( value_unit.value ), 
                 *arg, 
                 **kwarg
             ), 
-            preferred_unit 
+            unit 
         )
     else:       
-        fn = register.conversion_from_A_to_B(unit,ref_unit)
+        fn = register.conversion_from_A_to_B(u,ref_unit)
         return ValueUnit( 
             value_result(
                 fn( value_unit.value ), 
@@ -391,7 +393,7 @@ def qratio(value_unit_1, value_unit_2, unit=None ):
         )
 
         return ValueUnit( value, ref_unit )
-    
+        
 # ===========================================================================    
 if __name__ == "__main__":
     import doctest

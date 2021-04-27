@@ -64,23 +64,23 @@ class TestSignature(unittest.TestCase):
     
         Speed = context.declare('Speed','V','Length/Time')
 
-        self.assertEqual( context._kog_to_signature(Length), Signature( context, (1,0) ) )
-        self.assertEqual( context._kog_to_signature(Time), Signature( context, (0,1) ) )
-        self.assertEqual( context._kog_to_signature(Speed), Signature( context, (1,-1) ) )
+        self.assertEqual( context._koq_to_signature(Length), Signature( context, (1,0) ) )
+        self.assertEqual( context._koq_to_signature(Time), Signature( context, (0,1) ) )
+        self.assertEqual( context._koq_to_signature(Speed), Signature( context, (1,-1) ) )
 
         self.assertTrue( context._signature_to_koq( Signature( context, (1,-1) ) ) is Speed)
         self.assertTrue( context._signature_to_koq( Signature( context, (1,0) ) ) is Length)
 
         LengthRatio = context.declare( 'LengthRatio','L//L','L//L' )
         self.assertEqual( 
-            str(context._kog_to_signature(LengthRatio)), 
+            str(context._koq_to_signature(LengthRatio)), 
             "{}//{}".format( (1,0), (1,0) )  
         )
 
-        self.assertTrue( not context._kog_to_signature(LengthRatio).is_simplified )
-        self.assertTrue( context._kog_to_signature(LengthRatio).is_dimensionless )
+        self.assertTrue( not context._koq_to_signature(LengthRatio).is_simplified )
+        self.assertTrue( context._koq_to_signature(LengthRatio).is_dimensionless )
         self.assertTrue( 
-            context._kog_to_signature(LengthRatio).is_ratio_of(context._kog_to_signature(Length)) 
+            context._koq_to_signature(LengthRatio).is_ratio_of(context._koq_to_signature(Length)) 
         ) 
 
         self.assertTrue( context.signature('LengthRatio').is_dimensionless )
