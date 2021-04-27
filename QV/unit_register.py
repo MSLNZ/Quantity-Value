@@ -39,18 +39,24 @@ class UnitRegister(object):
         # KoQ objects - keys; RegisteredUnit objects - values
         # The first registered unit for a koq is the reference 
         # unit: this may NOT be changed!!
+        # Only ratio scales can be reference units 
         self._koq_to_ref_unit = dict()
         
         # A mapping of symbols for pairs of scales to a 
         # function that converts between those scales 
-        self._conversion_fn = dict()            
+        self._conversion_fn = {
+            RatioScale: dict(),
+            IntervalScale: dict()
+        }            
                 
         # There must always be a unit for numbers and it is a 
         # special case because the name and symbol are blank
         Number = context['Number']
         unity = RegisteredUnit( self, RatioScale(Number,'','') )        
         self._koq_to_ref_unit[Number] = unity       
-        self._koq_to_units_dict[Number] = UnitsDict({ 'unity': unity })   
+        self._koq_to_units_dict[Number] = {
+            RatioScale: UnitsDict({ 'unity': unity }) 
+        }
 
         # Need to know if a unit has been registered 
         self._registered_units = set()
@@ -80,7 +86,7 @@ class UnitRegister(object):
         or a registered-unit or a kind-of-quantity object.
 
         """  
-        print(type(expr.scale)) 
+        assert type(expr.scale) is RatioScale 
         
         if isinstance(expr,KindOfQuantity):
             return self._koq_to_ref_unit[expr] 
@@ -114,7 +120,7 @@ class UnitRegister(object):
         or a registered-unit or a kind-of-quantity object.
         
         """
-        print(type(expr.scale)) 
+        scale_type = type(expr.scale) 
 
         # If `expr` has the `kind_of_quantity` attribute then  
         # it is a registered unit or a unit expression. 
@@ -144,54 +150,69 @@ class UnitRegister(object):
                 "{!r} unexpected".format(expr)
             )        
 
+    # Only for RatioScales
     def __getattr__(self,koq_name):
         koq = getattr(self._context,koq_name)
         
         if koq in self._koq_to_units_dict:  
-            return self._koq_to_units_dict[ koq ]
+            return self._koq_to_units_dict[ koq ][RatioScale]
         else:
             raise AttributeError(
                 "{!r} not found".format(koq)
             )
     
+    # Returns a dict, indexed by scale type, of UnitsDicts
     def __getitem__(self,koq):
         if isinstance(koq,str):
             koq = self._context[koq]
             
         return self._koq_to_units_dict[koq]
                 
+    # This could return a dict, indexed by scale type, of UnitsDicts
     def get(self,koq):
         """
-        Return a mapping of names and symbols to units for ``kind_of_quantity``
         """
         if isinstance(kind_of_quantity,str):
             kind_of_quantity = self._context[koq]
-           
+          
+        default = {
+            RatioScale: UnitsDict({}),
+            IntervalScale: UnitsDict({})
+        }
+        
         return self._koq_to_units_dict.get(
             kind_of_quantity,
-            UnitsDict({})
+            default
         )
                     
     def _register_unit(self,unit):
          
         koq = unit.scale.kind_of_quantity
+        scale_type = type(unit.scale)
         
-        if koq not in self._koq_to_ref_unit:
+        if koq not in self._koq_to_ref_unit and scale_type is RatioScale:
             self._koq_to_ref_unit[koq] = unit
 
-        # Update or initialise the UnitsDict for koq
-        if koq in self._koq_to_units_dict:
-            units_dict = self._koq_to_units_dict[koq]           
-            units_dict.update({ 
-                unit.scale.name: unit, 
-                unit.scale.symbol: unit 
-            })
+        # Update or initialise the dict for koq
+        if koq in self._koq_to_units_dict:           
+            if scale_type in self._koq_to_units_dict[koq]:
+                units_dict = self._koq_to_units_dict[koq][scale_type]
+                units_dict.update({ 
+                    unit.scale.name: unit, 
+                    unit.scale.symbol: unit 
+                })
+            else:
+                self._koq_to_units_dict[koq][scale_type] = UnitsDict({ 
+                    unit.scale.name: unit, 
+                    unit.scale.symbol: unit 
+                })
         else:
-            self._koq_to_units_dict[koq] = UnitsDict({ 
-                unit.scale.name: unit, 
-                unit.scale.symbol: unit 
-            })
-                     
+            self._koq_to_units_dict[koq] = {
+                scale_type: UnitsDict({ 
+                    unit.scale.name: unit, 
+                    unit.scale.symbol: unit 
+                })
+            }         
         self._registered_units.add(unit)
         
     def unit(self,scale):
@@ -202,14 +223,16 @@ class UnitRegister(object):
         already have a scale with the same name or symbol 
         
         """
+        scale_type = type(scale)
+        
         units_dict = self._koq_to_units_dict.get(
             scale.kind_of_quantity,
             UnitsDict({})
         )
 
         if (
-            scale.name in units_dict or 
-            scale.symbol in units_dict
+            scale.name in units_dict  
+        or  scale.symbol in units_dict
         ):
             raise RuntimeError(
                 "{!r} is already a registered unit for {!r}".format(
