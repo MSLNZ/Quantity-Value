@@ -1,4 +1,7 @@
 from collections.abc import MutableMapping
+    
+# Perhaps UnitsDict can be modified to hold a scale type as the first of two indices?
+    
 
 class UnitsDict(MutableMapping):
 

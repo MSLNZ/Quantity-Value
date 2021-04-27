@@ -1,6 +1,3 @@
-from __future__ import division 
-from __future__ import print_function 
-
 from QV.registered_unit import RegisteredUnit as Unit
 from QV.registered_unit import RegisteredUnitExpression
 from QV.kind_of_quantity import Number
@@ -217,14 +214,7 @@ class ValueUnit(object):
             lhs / rhs.value, 
             rhs.unit.register.Number.unity / rhs.unit
         )
-                
-    # # Python 2.x backward compatibility
-    # def __div__(self,rhs):
-        # return ValueUnit.__truediv__(self,rhs)
-            
-    # def __rdiv__(self,lhs):
-        # return ValueUnit.__rtruediv__(self,lhs)
-                        
+                                        
     def __pow__(self,rhs):
         # work in progress!
         return NotImplemented
@@ -327,7 +317,9 @@ def qresult(
     if unit:
     
         koq = ref_unit.scale.kind_of_quantity
-        units_dict = register[koq]
+        scale_type = type(ref_unit.scale)
+        
+        units_dict = register.get(koq,scale_type)
         
         if isinstance(unit,str):
             if unit in units_dict:

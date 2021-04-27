@@ -1,10 +1,3 @@
-from __future__ import division     # eval() needs this
-
-import warnings
-warnings.filterwarnings(
-    "ignore", 
-    message="Python 2 support will be dropped in a future release."
-)
 from bidict import bidict 
 
 from QV.kind_of_quantity import KindOfQuantity, Number

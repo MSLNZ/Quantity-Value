@@ -1,5 +1,3 @@
-from __future__ import division 
-
 from QV.scale import * 
 
 __all__ = (

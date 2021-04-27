@@ -1,7 +1,4 @@
-try:
-    from itertools import zip_longest                   # Python 3
-except ImportError:
-    from itertools import izip_longest as zip_longest   # Python 2
+from itertools import zip_longest                   
 
 #----------------------------------------------------------------------------
 class Signature(object):
@@ -128,9 +125,6 @@ class Signature(object):
             tuple(i*rhs for i in self.denominator)
         )
             
-    # def __div__(self,rhs):
-        # return self.__truediv__(rhs)
-    
     def __truediv__(self,rhs):
         return Signature(
             self.context,

@@ -15,7 +15,8 @@ Version 0.2.0 (?? April 2021)
     The :class:`.RatioScale` represents the behaviour of the units that were represented in the previous release (metric units). 
 
     * Both :class:`.IntervalScale` and :class:`.RatioScale` have `conversion_function` methods that return a generic function for conversion between different scales for the same quantities. A new method :method:`UnitRegister.conversion_function_values` can be used to register the specific parameters required for value conversion between two scales using the `conversion_function`.
-
+    
+    * Support for Python 2 has been dropped.
 
 Version 0.1.0 (24 Feb 2020)
 ===========================

@@ -1,5 +1,3 @@
-from __future__ import division 
-
 from functools import partial 
 
 from QV.kind_of_quantity import KindOfQuantity
@@ -150,6 +148,11 @@ class UnitRegister(object):
                 "{!r} unexpected".format(expr)
             )        
 
+    # These handy access methods have become problematic 
+    # with the introduction of different types of scale. 
+    # For now, get and getattr use RatioScale
+    # and getitem is not available.
+    
     # Only for RatioScales
     def __getattr__(self,koq_name):
         koq = getattr(self._context,koq_name)
@@ -161,19 +164,18 @@ class UnitRegister(object):
                 "{!r} not found".format(koq)
             )
     
-    # Returns a dict, indexed by scale type, of UnitsDicts
-    def __getitem__(self,koq):
+    # # Returns a dict, indexed by scale type, of UnitsDicts
+    # def __getitem__(self,koq):
+        # if isinstance(koq,str):
+            # koq = self._context[koq]
+            
+        # return self._koq_to_units_dict[koq]
+                
+    def get(self,koq,scale_type=RatioScale):
+        """
+        """
         if isinstance(koq,str):
             koq = self._context[koq]
-            
-        return self._koq_to_units_dict[koq]
-                
-    # This could return a dict, indexed by scale type, of UnitsDicts
-    def get(self,koq):
-        """
-        """
-        if isinstance(kind_of_quantity,str):
-            kind_of_quantity = self._context[koq]
           
         default = {
             RatioScale: UnitsDict({}),
@@ -181,9 +183,9 @@ class UnitRegister(object):
         }
         
         return self._koq_to_units_dict.get(
-            kind_of_quantity,
+            koq,
             default
-        )
+        )[scale_type]
                     
     def _register_unit(self,unit):
          

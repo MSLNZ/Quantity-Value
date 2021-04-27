@@ -1,5 +1,3 @@
-from __future__ import division 
-
 __all__ = ( 'KindOfQuantity', 'Number' )
 
 #----------------------------------------------------------------------------
@@ -60,13 +58,7 @@ class KindOfQuantity(object):
     def __rtruediv__(self,lhs):
         # Assume that lhs behaves like a number
         return Div(Number,self)
-        
-    # def __div__(self,rhs):
-        # return KindOfQuantity.__truediv__(self,rhs)
-        
-    # def __rdiv__(self,rhs):
-        # return KindOfQuantity.__rtruediv__(self,rhs)
-        
+                
     def __floordiv__(self,rhs):
         # NB deliberately don't allow `rhs` to be numeric
         return Ratio(self,rhs)
@@ -125,12 +117,6 @@ class BinaryOp(object):
     def __rtruediv__(self,lhs):
         return Div(lhs,self)
 
-    # def __div__(self,rhs):
-        # return BinaryOp.__truediv__(self,rhs)
-
-    # def __rdiv__(self,lhs):
-        # return BinaryOp.__rtruediv__(self,lhs)
-            
     def __floordiv__(self,rhs):
         return Ratio(self,rhs)
 
