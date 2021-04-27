@@ -1,6 +1,3 @@
-from __future__ import print_function
-from __future__ import division 
-
 import unittest
 
 from QV import * 
@@ -40,13 +37,14 @@ class TestPrefix(unittest.TestCase):
 
         # Doesn't matter that this is not the traditional 'base' unit
         gram = SI.unit( RatioScale( context['Mass'],'gram','g' ) )  
-        for p_i in prefix.metric_prefixes: p_i(gram) 
+        for p_i in prefix.metric_prefixes: 
+            SI.unit( p_i(gram) ) 
         
         self.assertRaises( AttributeError, getattr,SI,'Inductance')
         
         try:
-            # SI.Mass.kilogram
-            # SI.Time.microsecond
+            SI.Mass.kilogram
+            SI.Time.microsecond
             SI.Time.picosecond
         except AttributeError:
             self.fail('Should not happen')

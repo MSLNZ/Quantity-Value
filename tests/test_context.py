@@ -1,11 +1,3 @@
-from __future__ import print_function
-from __future__ import division 
-
-import warnings
-warnings.filterwarnings(
-    "ignore", 
-    message="Python 2 support will be dropped in a future release."
-)
 from bidict import ValueDuplicationError
 
 import unittest
