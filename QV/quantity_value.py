@@ -1,7 +1,8 @@
 from __future__ import division 
 from __future__ import print_function 
 
-from QV.unit_register import RegisteredUnit as Unit
+from QV.registered_unit import RegisteredUnit as Unit
+from QV.registered_unit import RegisteredUnitExpression
 from QV.kind_of_quantity import Number
 from QV.scale import RatioScale, IntervalScale
 
@@ -44,41 +45,55 @@ class ValueUnit(object):
     def __add__(self,rhs):  
         lhs = self  
         register = lhs.unit.register  
-
-        if register is not rhs.unit.register:
-            raise RuntimeError(
-                "different unit registers"
-            )
         
-        # The calculation is done in the reference unit 
-        # unless both units are the same 
-        if lhs.unit is rhs.unit:
-            return ValueUnit(   
-                lhs.value + rhs.value, 
-                rhs.unit 
-            )
-            
-        else:
-            # When an argument is a temporary result, 
-            # the `unit` may be a unit expression, in which 
-            # case we must resolve the unit and convert to 
-            # a reference unit before proceeding.
-            # For ratio scales there could be a conversion 
-            # factor to get from the resolved unit to the 
-            # reference unit.
-            
-            ref_u_l = register.reference_unit_for( lhs.unit ) 
-            ref_u_r = register.reference_unit_for( rhs.unit ) 
-            
-            assert ref_u_r is ref_u_l
+        assert register is rhs.unit.register, "different unit registers"
+        
+        if (
+            type(lhs.unit.scale) is RatioScale
+        and type(rhs.unit.scale) is RatioScale  
+        ): 
+        
+            # The calculation is done in the reference unit 
+            # unless both units are the same 
+            if lhs.unit is rhs.unit:
+                return ValueUnit(   
+                    lhs.value + rhs.value, 
+                    rhs.unit 
+                )
                 
-            l_to_ref_fn = register.conversion_from_A_to_B(lhs.unit,ref_u_l)
-            r_to_ref_fn = register.conversion_from_A_to_B(rhs.unit,ref_u_r)
-            
-            return ValueUnit(   
-                l_to_ref_fn(lhs.value) + r_to_ref_fn(rhs.value), 
-                ref_u_r 
-            )            
+            elif (
+                isinstance(lhs.unit,RegisteredUnitExpression) 
+            or  isinstance(rhs.unit,RegisteredUnitExpression) 
+            or  lhs.unit in register and rhs.unit in register
+            ):
+
+                # `unit` may be a unit expression, or the units 
+                # may not be the same but both are registered, 
+                # in either case we must resolve the unit   
+                # and convert before proceeding.
+                ref_u_l = register.reference_unit_for( lhs.unit ) 
+                ref_u_r = register.reference_unit_for( rhs.unit ) 
+                
+                # For ratio scales there could be a conversion 
+                # factor to get from the resolved unit to the 
+                # reference unit.
+                
+                l_to_ref_fn = register.conversion_from_A_to_B(lhs.unit,ref_u_l)
+                r_to_ref_fn = register.conversion_from_A_to_B(rhs.unit,ref_u_r)
+                
+                assert ref_u_r is ref_u_l, "different units"
+                    
+                return ValueUnit(   
+                    l_to_ref_fn(lhs.value) + r_to_ref_fn(rhs.value), 
+                    ref_u_r 
+                ) 
+            else:
+                assert False, "unexpected"
+                
+        else:
+            raise RuntimeError(
+                "cannot add {!r} and {!r}".format(lhs.unit.scale,rhs.unit.scale)
+            )
 
     def __radd__(self,lhs):
         rhs = self
@@ -92,37 +107,56 @@ class ValueUnit(object):
         lhs = self  
         register = lhs.unit.register         
         
-        if register is not rhs.unit.register:
-            raise RuntimeError(
-                "different unit registers"
-            )
+        assert register is rhs.unit.register, "different unit registers"
             
-        if lhs.unit is rhs.unit:
-            # The case of interval scales is different
-            # if type(lhs.unit.scale) is IntervalScale:
-            return ValueUnit(   
-                lhs.value - rhs.value, 
-                rhs.unit 
-            )
-            
-        else:
-            # When an argument is a temporary result, 
-            # the `unit` may be a unit expression, in which 
-            # case we must resolve the unit and convert it to 
-            # a reference unit before proceeding
-            
-            ref_u_l = register.reference_unit_for( lhs.unit ) 
-            ref_u_r = register.reference_unit_for( rhs.unit ) 
-            
-            assert ref_u_r is ref_u_l
+        if (
+            type(lhs.unit.scale) is RatioScale
+        and type(rhs.unit.scale) is RatioScale  
+        ): 
+                     
+            if lhs.unit is rhs.unit:
+                # The case of interval scales is different
+                # if type(lhs.unit.scale) is IntervalScale:
+                return ValueUnit(   
+                    lhs.value - rhs.value, 
+                    rhs.unit 
+                )
                 
-            l_to_ref_fn = register.conversion_from_A_to_B(lhs.unit,ref_u_l)
-            r_to_ref_fn = register.conversion_from_A_to_B(rhs.unit,ref_u_r)
-            
-            return ValueUnit(   
-                l_to_ref_fn(lhs.value) - r_to_ref_fn(rhs.value), 
-                ref_u_r 
-            )    
+            elif (
+                isinstance(lhs.unit,RegisteredUnitExpression) 
+            or  isinstance(rhs.unit,RegisteredUnitExpression) 
+            or  lhs.unit in register and rhs.unit in register
+            ):
+
+                # `unit` may be a unit expression, or the units 
+                # may not be the same but both are registered, 
+                # in either case we must resolve the unit   
+                # and convert before proceeding.
+
+                ref_u_l = register.reference_unit_for( lhs.unit ) 
+                ref_u_r = register.reference_unit_for( rhs.unit ) 
+                
+                # For ratio scales there could be a conversion 
+                # factor to get from the resolved unit to the 
+                # reference unit.
+
+                l_to_ref_fn = register.conversion_from_A_to_B(lhs.unit,ref_u_l)
+                r_to_ref_fn = register.conversion_from_A_to_B(rhs.unit,ref_u_r)
+                
+                assert ref_u_r is ref_u_l, "different units"
+                    
+                return ValueUnit(   
+                    l_to_ref_fn(lhs.value) - r_to_ref_fn(rhs.value), 
+                    ref_u_r 
+                )   
+                
+            else:
+                assert False, "unexpected"
+        else:
+            raise RuntimeError(
+                "cannot subtract {!r} and {!r}".format(lhs.unit.scale,rhs.unit.scale)
+            )
+
   
     def __rsub__(self,lhs):
         rhs = self
@@ -136,13 +170,13 @@ class ValueUnit(object):
     # create temporary ValueUnit objects. 
     # These expose an interface with 
     # `register` and `kind_of_quantity` attributes, 
-    # which allow a kind_of_quantity and hence a unit to be resolved later.
+    # which allow a kind_of_quantity and hence a unit to be resolved.
+    
     def __mul__(self,rhs):
         lhs = self
         if hasattr(rhs,'unit'):                      
-            if not lhs.unit.register is rhs.unit.register:
-                raise RuntimeError("different unit registers")
-
+            assert lhs.unit.register is rhs.unit.register, "different unit registers"
+            
             return ValueUnit(lhs.value * rhs.value, lhs.unit * rhs.unit)
         else:
             # Assume that the `rhs` behaves as a number 
@@ -162,8 +196,7 @@ class ValueUnit(object):
     def __truediv__(self,rhs):
         lhs = self 
         if hasattr(rhs,'unit'):          
-            if not lhs.unit.register is rhs.unit.register:
-                raise RuntimeError("different unit registers")
+            assert lhs.unit.register is rhs.unit.register, "different unit registers"
 
             return ValueUnit(
                 lhs.value / rhs.value,

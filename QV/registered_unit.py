@@ -3,7 +3,7 @@ from __future__ import division
 from QV.scale import * 
 
 __all__ = (
-    'RegisteredUnit', 
+    'RegisteredUnit', 'RegisteredUnitExpression',
 )
 
 #----------------------------------------------------------------------------
@@ -92,6 +92,21 @@ class RegisteredUnit(object):
             self.scale.symbol
         )     
 
+    def addition(self,rhs):
+        # Addition is only permitted with some scales 
+        return (
+            self.scale == rhs.scale and 
+            type(self.scale) is RatioScale
+        )
+        
+
+    def subtraction(self,rhs):
+        # Subtraction is only permitted with some scales 
+        return (
+            self.scale == rhs.scale and 
+            type(self.scale) is RatioScale
+        )
+
     def __mul__(self,rhs):
         return Mul(self,rhs)
             
@@ -148,7 +163,10 @@ class RegisteredUnit(object):
 # These classes provide a representation for 
 # an equation involving units, but do not resolve into a unit.
 #----------------------------------------------------------------------------
-class UnaryOp(object):   
+class RegisteredUnitExpression(object):
+    __slots__ = ()
+    
+class UnaryOp(RegisteredUnitExpression):   
 
     def __init__(self,arg):
         self.arg = arg
@@ -180,7 +198,7 @@ class UnaryOp(object):
         return Simplify(self)
     
 #----------------------------------------------------------------------------
-class BinaryOp(object):   
+class BinaryOp(RegisteredUnitExpression):   
 
     def __init__(self,lhs,rhs):
         self.lhs = lhs
@@ -245,13 +263,14 @@ class Ratio(BinaryOp):
 
     def __init__(self,lhs,rhs):
         BinaryOp.__init__(self,lhs,rhs) 
+        self._scale = self.lhs.scale // self.rhs.scale
 
     def __repr__(self):
         return "({!r}//{!r})".format(self.lhs,self.rhs)
 
     def __str__(self):
         # TODO: need to treat a numeric as a special case
-        return "({!s}//{!s})".format(self.lhs,self.rhs)
+        return str(self.scale)
            
     @property 
     def kind_of_quantity(self):  
@@ -260,11 +279,7 @@ class Ratio(BinaryOp):
     # Perform the operation on the scales involved 
     @property 
     def scale(self):  
-        try:
-            return self._scale 
-        except AttributeError:
-            self._scale = self.lhs.scale // self.rhs.scale
-            return self._scale
+        return self._scale 
  
 
 #----------------------------------------------------------------------------
@@ -272,13 +287,14 @@ class Mul(BinaryOp):
 
     def __init__(self,lhs,rhs):
         super(Mul,self).__init__(lhs,rhs) 
+        self._scale = self.lhs.scale * self.rhs.scale
 
     def __repr__(self):
         return "({!r})*({!r})".format(self.lhs,self.rhs)
 
     def __str__(self):
         # TODO: need to treat a numeric as a special case
-        return "({!s})*({!s})".format(self.lhs,self.rhs)
+        return str(self.scale)
            
     @property 
     def kind_of_quantity(self):  
@@ -287,24 +303,21 @@ class Mul(BinaryOp):
     # Perform the operation on the scales involved 
     @property 
     def scale(self):  
-        try:
-            return self._scale 
-        except AttributeError:
-            self._scale = self.lhs.scale * self.rhs.scale
-            return self._scale
+        return self._scale 
         
 #----------------------------------------------------------------------------
 class Div(BinaryOp):   
 
     def __init__(self,lhs,rhs):
         super(Div,self).__init__(lhs,rhs) 
+        self._scale = self.lhs.scale / self.rhs.scale
 
     def __repr__(self):
         return "({!r})/({!r})".format(self.lhs,self.rhs)
 
     def __str__(self):
         # TODO: need to treat a numeric as a special case
-        return "({!s})/({!s})".format(self.lhs,self.rhs)
+        return str(self.scale)
     
     @property 
     def kind_of_quantity(self):  
@@ -313,11 +326,7 @@ class Div(BinaryOp):
     # Perform the operation on the scales involved 
     @property 
     def scale(self): 
-        try:
-            return self._scale 
-        except AttributeError:
-            self._scale = self.lhs.scale / self.rhs.scale
-            return self._scale
+        return self._scale 
         
 # ===========================================================================    
 if __name__ == "__main__":

@@ -16,5 +16,6 @@ degrees_C = ureg.conversion_from_A_to_B(kelvin,Celsius)
 degrees_F = ureg.conversion_from_A_to_B(kelvin,Fahrenheit)
 
 x = qvalue( 65, Fahrenheit ) 
-print( x )
+y = (x + x)
+print( x, repr(x.unit.scale) )
 print( qresult(x,preferred_unit=kelvin) )

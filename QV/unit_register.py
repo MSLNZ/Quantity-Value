@@ -15,8 +15,8 @@ __all__ = (
 class UnitRegister(object):
 
     """
-    A UnitRegister holds mappings between a kind-of-quantity and a
-    collection of units.
+    A UnitRegister holds mappings between a kind-of-quantity,
+    a type of scale and a collection of units.
     
     A distinction is made between a reference unit and other related units 
     for the same kind of quantity. There can be only one reference unit 
@@ -79,7 +79,9 @@ class UnitRegister(object):
         or a product or quotient of kind-of-quantity objects
         or a registered-unit or a kind-of-quantity object.
 
-        """        
+        """  
+        print(type(expr.scale)) 
+        
         if isinstance(expr,KindOfQuantity):
             return self._koq_to_ref_unit[expr] 
             
@@ -112,6 +114,8 @@ class UnitRegister(object):
         or a registered-unit or a kind-of-quantity object.
         
         """
+        print(type(expr.scale)) 
+
         # If `expr` has the `kind_of_quantity` attribute then  
         # it is a registered unit or a unit expression. 
         # In the first case, we can obtain a kind-of-quantity  

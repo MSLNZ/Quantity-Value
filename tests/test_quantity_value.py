@@ -76,14 +76,14 @@ class TestQuantityValue(unittest.TestCase):
         
         # When QVs use different unit registers, they cannot be combined
         self.assertRaises(
-            RuntimeError,
+            AssertionError,
             ValueUnit.__add__,
             qv1,
             qv3
         ) 
   
         self.assertRaises(
-            RuntimeError,
+            AssertionError,
             ValueUnit.__sub__,
             qv1,
             qv3

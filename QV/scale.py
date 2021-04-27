@@ -146,7 +146,7 @@ class RatioScale(IntervalScale):
         
         """
         return lambda factor,x: factor*x
-                    
+   
     def __mul__(self,rhs):
         if not isinstance(rhs,RatioScale): 
             raise RuntimeError(
@@ -154,8 +154,8 @@ class RatioScale(IntervalScale):
             )
         
         koq = self.kind_of_quantity*rhs.kind_of_quantity
-        name = self.name+"*{!s}".format(rhs.name)
-        symbol = self.symbol+"*{!s}".format(rhs.symbol)
+        name = "({!s}*{!s})".format(self.name,rhs.name)
+        symbol = "({!s}*{!s})".format(self.symbol,rhs.symbol)
         factor = self.conversion_factor*rhs.conversion_factor 
         
         return RatioScale(koq,name,symbol,factor)
@@ -167,8 +167,8 @@ class RatioScale(IntervalScale):
             )
 
         koq = self.kind_of_quantity/rhs.kind_of_quantity
-        name = self.name+"/({!s})".format(rhs.name)
-        symbol = self.symbol+"/({!s})".format(rhs.symbol)
+        name = "({!s}/{!s})".format(self.name,rhs.name)
+        symbol = "({!s}/{!s})".format(self.symbol,rhs.symbol)
         factor = self.conversion_factor/rhs.conversion_factor 
         
         return RatioScale(koq,name,symbol,factor)
@@ -180,8 +180,8 @@ class RatioScale(IntervalScale):
             )
  
         koq = self.kind_of_quantity//rhs.kind_of_quantity
-        name = self.name+"//({!s})".format(rhs.name)
-        symbol = self.symbol+"//({!s})".format(rhs.symbol)
+        name = "({!s}//{!s})".format(self.name,rhs.name)
+        symbol = "({!s}//{!s})".format(self.symbol,rhs.symbol)
         factor = self.conversion_factor/rhs.conversion_factor 
  
         return RatioScale(koq,name,symbol,factor)
