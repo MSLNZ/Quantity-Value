@@ -308,18 +308,21 @@ def qresult(
     else:
         u = value_unit.unit
         
+    u_scale_type = type(u.scale)
+
     # This can find the ref unit, but if we are dealing 
     # with a unit expression, we don't know how to 
     # convert to that ref unit! The same applies to 
     # a preferred unit. 
     ref_unit = register.reference_unit_for( u )
     
+    # ``unit`` may be a string.
     if unit:
     
         koq = ref_unit.scale.kind_of_quantity
-        scale_type = type(ref_unit.scale)
+        ref_scale_type = type(ref_unit.scale)
         
-        units_dict = register.get(koq,scale_type)
+        units_dict = register.get(koq,ref_scale_type)
         
         if isinstance(unit,str):
             if unit in units_dict:

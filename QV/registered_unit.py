@@ -145,7 +145,7 @@ class RegisteredUnit(object):
                 "unregistered unit: {!r} ".format(B)
             )          
          
-        key = (A.scale.symbol,B.scale.symbol)            
+        key = (A.scale.symbol,B.scale.symbol)  
         if key in self.register._conversion_fn:
             return self.register._conversion_fn[ key ]  
         else:

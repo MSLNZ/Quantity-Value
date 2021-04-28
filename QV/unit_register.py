@@ -42,10 +42,7 @@ class UnitRegister(object):
         
         # A mapping of symbols for pairs of scales to a 
         # function that converts between those scales 
-        self._conversion_fn = {
-            RatioScale: dict(),
-            IntervalScale: dict()
-        }            
+        self._conversion_fn = dict()            
                 
         # There must always be a unit for numbers and it is a 
         # special case because the name and symbol are blank
@@ -84,7 +81,7 @@ class UnitRegister(object):
         or a registered-unit or a kind-of-quantity object.
 
         """  
-        assert type(expr.scale) is RatioScale 
+        assert type(expr.scale) is RatioScale, repr(expr.scale) 
         
         if isinstance(expr,KindOfQuantity):
             return self._koq_to_ref_unit[expr] 
@@ -282,7 +279,7 @@ class UnitRegister(object):
 
         # This applies the conversion parameter values but leaves `x`
         partial_fn = partial(full_fn,*args)
-        self._conversion_fn[(A.scale.symbol,B.scale.symbol)] = partial_fn
+        self._conversion_fn[(A.scale.symbol,B.scale.symbol)] = partial_fn        
         
     def conversion_from_A_to_B(self,A,B):
         """
