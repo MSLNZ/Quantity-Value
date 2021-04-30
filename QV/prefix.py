@@ -1,84 +1,69 @@
-from QV.unit_register import related_unit
-from QV.scale import Unit 
-
+from QV.scale import RatioScale 
+from QV.unit_register import proportional_unit
 
 #----------------------------------------------------------------------------
 class Prefix(object):
 
     """
-    Holds the name, short name (term) and scale factor 
-    for a prefix. It can be called to generate a new related unit.
+    Holds the name, short name (symbol) and scale factor 
+    for a prefix. It can be called to generate a new unit.
    
     For example::
     
         >>> context = Context( ('Length','L') )
         >>> SI =  UnitRegister("SI",context)
-        >>> metre = SI.reference_unit('Length','metre','m')
-        >>> centimetre = prefix.centi(metre)
+        >>> metre = SI.unit( RatioScale(context['Length'],'metre','m') )
+        >>> centimetre = SI.unit( prefix.centi(metre) )
+        >>> SI.conversion_function_values(metre,centimetre,prefix.centi.value)
         >>> print( centimetre )
         cm
         
     """
     
-    def __init__(self,name,term,value):
+    def __init__(self,name,symbol,value):
         self.name = name 
-        self.term = term 
+        self.symbol = symbol 
         self.value = value
         
     def __repr__(self):
         return "{!s}({!r},{!r},{:.0E})".format(
             self.__class__.__name__,
             self.name,
-            self.term,
+            self.symbol,
             self.value
         )
         
     def __str__(self):
-        return str(self.term) 
+        return str(self.symbol) 
         
-    def __call__(self,reference_unit):
-        """Return a new unit related to reference unit"""
+    def __call__(self,unit):
+        register = unit.register 
+        scale = unit.scale
         
-        kind_of_quantity = reference_unit.scale.kind_of_quantity
-        unit_register = reference_unit._register
-
-        # Check that `reference_unit` is in the register,
-        # because things like `centi(centi(metre))` are not permitted.
-        if not reference_unit is unit_register.reference_unit_for(
-            reference_unit.scale.kind_of_quantity
-        ):
+        if not isinstance(scale,RatioScale):
             raise RuntimeError(
-                "{!r} is not a reference unit".format(
-                    reference_unit.scale.name
-                )  
-            )     
+                "cannot apply a conversion factor to {!r}".format(scale) 
+            )
+            
+        # Must be applied to a reference unit
+        if register.reference_unit_for(unit) is not unit:
+            raise RuntimeError(
+                "{!r} is a derived scale".format(scale)
+            )
 
         name = "{!s}{!s}".format(
             self.name,
-            reference_unit.scale.name
+            scale.name
         )
-        
-        unit_dict = unit_register[kind_of_quantity]
-        if name in unit_dict:
-            return unit_dict[name]
-        else:
-            term = "{!s}{!s}".format(
-                self.term,
-                reference_unit.scale
-            )
-            
-            pq = Unit(
-                kind_of_quantity,
-                name,
-                term,
-                unit_register,
-                self.value
-            )
-            
-            # Buffer related quantities        
-            unit_register._register_related_unit(pq)
-            
-            return pq         
+ 
+        symbol = "{!s}{!s}".format(
+            self.symbol,
+            scale.symbol
+        )
+         
+        # Note the scale is returned unregistered         
+        return proportional_unit(unit,name,symbol,self.value)
+              
             
 #============================================================================
 # Metric prefixes (multiples and sub-multiples of 10) 
@@ -118,10 +103,10 @@ metric_prefixes = (
     Useful for generating all related units by iteration::
     
         >>> context = Context( ('Time','T') )
-        >>> second = SI.reference_unit('Time','second','s')  
+        >>> second = SI.unit( RatioScale(context['Time'],'second','s') )  
         >>> for p_i in prefix.metric_prefixes: 
-        ...     related = p_i(second)
-        ...     print( "{0.scale.name} ({0.scale.term}): {0.multiplier:.1E}".format(related) )
+        ...     prefixed_scale = p_i(second.scale)
+        ...     print( "{0.name} ({0.symbol}): {0.prefix:.1E}".format(prefixed_scale) )
         ...
         yoctosecond (ys): 1.00E-24
         zeptosecond (zs): 1.00E-21
@@ -146,44 +131,54 @@ metric_prefixes = (
 """
 
 # The kilogram is a special case. 
-def si_mass_units(kg_reference_unit):
+def si_mass_units(kg_unit):
     """
-    Generate multiples and sub-multiples for mass units in the SI
+    Generate multiples and sub-multiples for SI mass units
     
-    ``kg_reference_unit`` must be defined as a reference unit, with 
-    name ``kilogram`` and term ``kg``
+    ``kg_unit`` must be defined, with 
+    name ``kilogram`` and symbol ``kg``
     
     Example::
     
         >>> context = Context( ('Mass','M') )
         >>> SI =  UnitRegister("SI",context)        
-        >>> kilogram = SI.reference_unit('Mass','kilogram','kg')  
+        >>> kilogram = SI.unit( RatioScale(context['Mass'],'kilogram','kg') )  
         >>> prefix.si_mass_units(kilogram)
         >>> print( SI.Mass.gram.scale.name )
         gram
         >>> print( repr(SI.Mass.gram) )
-        Unit(KindOfQuantity('Mass','M'),'gram','g',UnitRegister(SI))        
+        RegisteredUnit(KindOfQuantity('Mass','M'),'gram','g')        
 
 
     """
     if (
-        kg_reference_unit.scale.name != 'kilogram' and 
-        kg_reference_unit.scale.term != 'kg'
+        kg_unit.scale.name != 'kilogram' and 
+        kg_unit.scale.symbol != 'kg'
     ):
         raise RuntimeError(
-            "conventional name required, got {0.name} and{0.term}".format(
-                kg_reference_unit
+            "conventional name required, got {0.name} and{0.symbol}".format(
+                kg_unit.scale
             )
         )
         
-    related_unit(kg_reference_unit,1E-3,'gram','g')
+    register = kg_unit.register
     
+    gram = register.unit( 
+        proportional_unit(kg_unit,
+                    'gram',
+                    'g', 
+                    1.0 / 1000.0,
+        )
+    )
+      
     for p_i in metric_prefixes:
         if p_i.value != 1E3: 
-            related_unit(kg_reference_unit,
-                p_i.value / 1000.0,
-                p_i.name+'gram',
-                p_i.term+'g' 
+            register.unit( 
+                proportional_unit(kg_unit,
+                    p_i.name+'gram',
+                    p_i.symbol+'g', 
+                    p_i.value / 1000.0
+                )
             )
     
 #============================================================================
@@ -207,12 +202,10 @@ binary_prefixes = (
 
     Useful for generating all related units by iteration::
     
-        >>> context = Context( ('Data','D') )
-        >>> ureg =  UnitRegister("Reg",context)
-        >>> byte = ureg.reference_unit('Data','byte','b')
+        >>> byte_scale = RatioScale('Data','byte','b')
         >>> for p_i in prefix.binary_prefixes: 
-        ...     related = p_i(byte)
-        ...     print( "{0.scale.name} ({0.scale.term}): {0.multiplier}".format(related) )
+        ...     prefixed_scale = p_i(byte_scale)
+        ...     print( "{0.name} ({0.symbol}): {0.prefix}".format(prefixed_scale) )
         ...        
         kibibyte (kib): 1048
         mebibyte (Mib): 1098304

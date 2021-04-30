@@ -1,10 +1,15 @@
-from collections import MutableMapping
+from collections.abc import MutableMapping
+    
+# Perhaps UnitsDict can be modified to hold a scale type as the first of two indices?
+    
 
 class UnitsDict(MutableMapping):
 
     """
-    Holds a mapping of names and short names (terms) to units.
-    The names and short names are unique and cannot be 
+    A dictionary-like mapping of names, and short names (symbols), to 
+    objects representing units.
+    
+    The names and short names are keys. They are unique and cannot be 
     overwritten once defined (but, they can be deleted).
     """
     
@@ -44,7 +49,9 @@ class UnitsDict(MutableMapping):
             self._units[key] = value
 
     def __delitem__(self, key):
-        # NB, usually two keys refer to the same unit 
+        # NB, usually two keys refer to the same unit
+        # so we would need to find the other key using
+        # the unit. This has not been implemented yet.
         del self._units[key]
             
     def __iter__(self):
@@ -54,17 +61,18 @@ class UnitsDict(MutableMapping):
         return len(self._units)
 
     def __getattr__(self, attr):
-        try:
+        if attr in self._units:
             return self._units[attr]
-        except KeyError:
-            raise AttributeError
+        else:
+            raise AttributeError( "{!r} not found".format(attr) )
                        
 #============================================================================
 if __name__ == '__main__':
     
     ud = UnitsDict(metre='m',kilogram='kg')
-    ud.update( {'second':'s', 's':'s'} )
+    ud.update( {'second':'s_unit', 's':'s_unit'} )
     print( repr(ud) )
+    print( ud.s )
     del ud['s']
     print( repr(ud) )
     print( ud.second )

@@ -1,11 +1,3 @@
-from __future__ import print_function
-from __future__ import division 
-
-import warnings
-warnings.filterwarnings(
-    "ignore", 
-    message="Python 2 support will be dropped in a future release."
-)
 from bidict import ValueDuplicationError
 
 import unittest
@@ -19,13 +11,13 @@ class TestKindOfQuantity(unittest.TestCase):
     def tests(self):
         # Construction
         name = 'Length'
-        term = 'L'
+        symbol = 'L'
         
-        Length = KindOfQuantity(name,term) 
+        Length = KindOfQuantity(name,symbol) 
         
         self.assertTrue( type(Length) is KindOfQuantity )
         self.assertEqual( Length.name, name )
-        self.assertEqual( str(Length), term )
+        self.assertEqual( str(Length), symbol )
         
         Time = KindOfQuantity('Time','T') 
 

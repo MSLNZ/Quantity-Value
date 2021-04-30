@@ -1,31 +1,27 @@
-try:
-    from itertools import zip_longest                   # Python 3
-except ImportError:
-    from itertools import izip_longest as zip_longest   # Python 2
+from itertools import zip_longest                   
 
 #----------------------------------------------------------------------------
-class Dimension(object):
+class Signature(object):
 
     """
-    A Dimension holds dimensional exponents. 
+    A Signature has a pair of tuples that identify a kind of quantity. 
     
-    Multiplication and division of dimensions adds and subtracts the 
-    dimensional exponents, respectively. 
+    Multiplication and division of signatures adds and subtracts the 
+    tuple elements, respectively. 
     
-    The numerator and denominator of a Dimension object 
-    are tuples of dimensional exponents. This   
-    allows the dimensions of a 'dimensionless' 
+    The numerator and denominator of a Signature object 
+    are the tuples. This allows the signature of a 'dimensionless' 
     quantity to be retained. 
     
-    A Dimension object is in 'simplified' form when the 
-    denominator is empty (or contains only zeros). 
-    A Dimension object may be converted
-    to 'simplified' form by setting the numerator to the 
-    difference between the numerator and the denominator and setting the 
-    exponents in the denominator to zero.
+    A Signature object is in 'simplified' form when the 
+    denominator is empty (or contains only zeros).
     
-    A Dimension holds a reference to a :class:`.Context`, which has 
-    a 1-to-1 mapping between dimensions and kinds of quantity.
+    A Signature object may be converted to 'simplified' form by setting 
+    the numerator to the difference between the numerator and the  
+    denominator and setting the exponents in the denominator to zero.
+    
+    A Signature refers to a :class:`.Context`, which contains 
+    a 1-to-1 mapping between signatures and kinds of quantity.
     """
     
     def __init__(self,context,numerator,denominator=()):
@@ -56,7 +52,7 @@ class Dimension(object):
             )
         
     # __hash__ and __eq__ are required for mapping keys
-    # Dimensions are used as keys in Python dictionaries.
+    # Signatures are used as keys in Python dictionaries.
     def __hash__(self):
         return hash(
             ( self.numerator, self.denominator )
@@ -79,12 +75,12 @@ class Dimension(object):
         
     @property
     def is_simplified(self):
-        """True when dimensional exponents in the denominator are all zero"""
+        """When elements in the denominator are all zero"""
         return not self.denominator
         
     @property
     def is_dimensionless(self):
-        """True when the dimensional exponents in simplified form are all zero"""
+        """When elements in simplified form are all zero"""
         return sum( self.simplify().numerator ) == 0
 
     # @property
@@ -95,7 +91,7 @@ class Dimension(object):
     def is_ratio_of(self,other):
         """
         True when the object is a dimensionless ratio and the
-        numerator has the same dimensions as the``other`` object.
+        numerator has the same signature as the``other`` object.
         
         """
         if self.numerator == self.denominator and other.is_simplified:
@@ -103,9 +99,9 @@ class Dimension(object):
             
         return False
         
-    # Dimensions can be multiplied and divided
+    # Signatures can be multiplied and divided
     def __mul__(self,rhs):
-        return Dimension(
+        return Signature(
             self.context,
             tuple( 
                 i+j for i,j in zip(
@@ -123,17 +119,14 @@ class Dimension(object):
         )
 
     def __pow__(self,rhs):
-        return Dimension(
+        return Signature(
             self.context,
             tuple(i*rhs for i in self.numerator),
             tuple(i*rhs for i in self.denominator)
         )
             
-    # def __div__(self,rhs):
-        # return self.__truediv__(rhs)
-    
     def __truediv__(self,rhs):
-        return Dimension(
+        return Signature(
             self.context,
             tuple( 
                 i-j for i,j in zip(
@@ -150,11 +143,11 @@ class Dimension(object):
 
     def __floordiv__(self,rhs):
         """
-        Divide the dimensions of `self` by `rhs`,
-        but retain the result as a ratio of dimensions.
+        Divide the elements of `self` by `rhs`,
+        but retain the result as a ratio of tuples.
 
-        The numerator will contain the dimensions of `self` 
-        and the denominator the dimensions of `rhs` 
+        The numerator will contain the signature of `self` 
+        and the denominator the signature of `rhs` 
         if both arguments are in simplified form.
                 
         If the arguments are not simplified, the 
@@ -179,19 +172,18 @@ class Dimension(object):
                     rhs.numerator)
             )
             
-        return Dimension(self.context,num,den)
+        return Signature(self.context,num,den)
 
     def simplify(self):
         """
-        Return the dimensions in simplified form.
+        Return the signature in simplified form.
         
-        The numerator in the Dimension object returned is the 
-        difference between the numerator and the denominator
-        of this object, the dimensional exponents in the 
-        denominator of the object returned are all zero.
+        The numerator returned is the difference between 
+        the numerator and the denominator of this object, 
+        the elements in the denominator returned are all zero.
         
         """
-        return Dimension(
+        return Signature(
             self.context,
             tuple( 
                 i-j for i,j in zip_longest(

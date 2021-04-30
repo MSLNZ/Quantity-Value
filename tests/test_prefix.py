@@ -1,6 +1,3 @@
-from __future__ import print_function
-from __future__ import division 
-
 import unittest
 
 from QV import * 
@@ -30,15 +27,18 @@ class TestPrefix(unittest.TestCase):
         SI =  UnitRegister("SI",context)
 
         # Create complete sets of prefixed units
-        metre = SI.reference_unit('Length','metre','m') 
-        for p_i in prefix.metric_prefixes: p_i(metre)
+        metre = SI.unit( RatioScale( context['Length'],'metre','m' ) ) 
+        for p_i in prefix.metric_prefixes: 
+            SI.unit( p_i(metre) )
 
-        second = SI.reference_unit('Time','second','s')  
-        for p_i in prefix.metric_prefixes: p_i(second)
+        second = SI.unit( RatioScale( context['Time'],'second','s' ) )  
+        for p_i in prefix.metric_prefixes: 
+            SI.unit( p_i(second) )
 
         # Doesn't matter that this is not the traditional 'base' unit
-        gram = SI.reference_unit('Mass','gram','g')  
-        for p_i in prefix.metric_prefixes: p_i(gram) 
+        gram = SI.unit( RatioScale( context['Mass'],'gram','g' ) )  
+        for p_i in prefix.metric_prefixes: 
+            SI.unit( p_i(gram) ) 
         
         self.assertRaises( AttributeError, getattr,SI,'Inductance')
         

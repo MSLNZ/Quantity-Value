@@ -1,19 +1,22 @@
-from __future__ import division 
-from __future__ import print_function 
-
-from QV.scale import Unit
+from QV.registered_unit import RegisteredUnit as Unit
+from QV.registered_unit import RegisteredUnitExpression
 from QV.kind_of_quantity import Number
+from QV.scale import RatioScale, IntervalScale
 
 __all__ = ('qvalue','value','unit','qresult','qratio')
 
 #----------------------------------------------------------------------------
 #
+# The name comes from the idea that a quantity is fully expressed
+# as a value and a unit (Maxwell).
+
 class ValueUnit(object):
     """
     A number and an associated unit.
     
-    A ``ValueUnit`` class is intended to represent the notion of a
-    quantity value, as that term is used formally in metrology.
+    A ``ValueUnit`` class represents a quantity value, 
+    as that term is used in metrology.
+    
     """
     __slots__ = ("value", "unit")
     
@@ -21,7 +24,7 @@ class ValueUnit(object):
         self.value = value     
         self.unit = unit
         
-    # We want the object to appear to be ``qvalue``,
+    # We want this object to appear to be a ``qvalue``,
     # because that is how we would create such an object.
     def __repr__(self):
         return "{!s}({!s},{!s})".format(
@@ -33,46 +36,61 @@ class ValueUnit(object):
     def __str__(self):
         return "{!s} {!s}".format(
             self.value,
-            self.unit 
+            self.unit.scale.symbol 
         )
         
     def __add__(self,rhs):  
         lhs = self  
-        register = lhs.unit.register
-        if not register is rhs.unit.register:
-            raise RuntimeError("Different unit systems: {}, {}".format(
-                register, rhs.unit.register)
-            )
-            
-        if not isinstance(lhs.unit,Unit):
-            # Must resolve the unit before proceeding
-            lhs = ValueUnit( 
-                lhs.unit.multiplier*self.value, 
-                register.reference_unit_for( lhs.unit ) 
-            ) 
+        register = lhs.unit.register  
         
-        if not isinstance(rhs.unit,Unit):
-            # Must resolve the unit before proceeding
-            rhs = ValueUnit( 
-                rhs.unit.multiplier*rhs.value, 
-                register.reference_unit_for( rhs.unit ) 
-        ) 
-            
-        if lhs.unit is rhs.unit:
-            return ValueUnit( lhs.value + rhs.value, lhs.unit )
-         
-        if lhs.unit.scale.kind_of_quantity is rhs.unit.scale.kind_of_quantity:
-            ml = lhs.unit.multiplier
-            mr = rhs.unit.multiplier 
-            if ml < mr:
-                return ValueUnit( lhs.value + (mr/ml)*rhs.value, lhs.unit )
+        assert register is rhs.unit.register, "different unit registers"
+        
+        if (
+            type(lhs.unit.scale) is RatioScale
+        and type(rhs.unit.scale) is RatioScale  
+        ): 
+        
+            # The calculation is done in the reference unit 
+            # unless both units are the same 
+            if lhs.unit is rhs.unit:
+                return ValueUnit(   
+                    lhs.value + rhs.value, 
+                    rhs.unit 
+                )
+                
+            elif (
+                isinstance(lhs.unit,RegisteredUnitExpression) 
+            or  isinstance(rhs.unit,RegisteredUnitExpression) 
+            or  lhs.unit in register and rhs.unit in register
+            ):
+
+                # `unit` may be a unit expression, or the units 
+                # may not be the same but both are registered, 
+                # in either case we must resolve the unit   
+                # and convert before proceeding.
+                ref_u_l = register.reference_unit_for( lhs.unit ) 
+                ref_u_r = register.reference_unit_for( rhs.unit ) 
+                
+                # For ratio scales there could be a conversion 
+                # factor to get from the resolved unit to the 
+                # reference unit.
+                
+                l_to_ref_fn = register.conversion_from_A_to_B(lhs.unit,ref_u_l)
+                r_to_ref_fn = register.conversion_from_A_to_B(rhs.unit,ref_u_r)
+                
+                assert ref_u_r is ref_u_l, "different units"
+                    
+                return ValueUnit(   
+                    l_to_ref_fn(lhs.value) + r_to_ref_fn(rhs.value), 
+                    ref_u_r 
+                ) 
             else:
-                return ValueUnit( (ml/mr)*lhs.value + rhs.value, rhs.unit )
+                assert False, "unexpected"
+                
         else:
             raise RuntimeError(
-                "Different kinds of quantity: {}, {}".format(
-                    lhs.unit.scale.kind_of_quantity,rhs.unit.scale.kind_of_quantity)
-            )    
+                "cannot add {!r} and {!r}".format(lhs.unit.scale,rhs.unit.scale)
+            )
 
     def __radd__(self,lhs):
         rhs = self
@@ -83,43 +101,59 @@ class ValueUnit(object):
             return NotImplemented
   
     def __sub__(self,rhs):
-        lhs = self
-        register = lhs.unit.register
-        if not register is rhs.unit.register:
-            raise RuntimeError("Different unit systems: {}, {}".format(
-                register, rhs.unit.register)
-            )
+        lhs = self  
+        register = lhs.unit.register         
+        
+        assert register is rhs.unit.register, "different unit registers"
             
-        if not isinstance(lhs.unit,Unit):
-            # Must resolve the unit before proceeding
-            lhs = ValueUnit( 
-                lhs.unit.multiplier*self.value, 
-                register.reference_unit_for( lhs.unit ) 
-            ) 
-        
-        if not isinstance(rhs.unit,Unit):
-            # Must resolve the unit before proceeding
-            rhs = ValueUnit( 
-                rhs.unit.multiplier*rhs.value, 
-                register.reference_unit_for( rhs.unit ) 
-            ) 
-        
-        if lhs.unit is rhs.unit:
-            return ValueUnit( lhs.value - rhs.value, lhs.unit )
-            
-        if lhs.unit.scale.kind_of_quantity is rhs.unit.scale.kind_of_quantity:
-        
-            ml = lhs.unit.multiplier
-            mr = rhs.unit.multiplier 
-            if ml < mr:
-                return ValueUnit( lhs.value - (mr/ml)*rhs.value, lhs.unit )
+        if (
+            type(lhs.unit.scale) is RatioScale
+        and type(rhs.unit.scale) is RatioScale  
+        ): 
+                     
+            if lhs.unit is rhs.unit:
+                # The case of interval scales is different
+                # if type(lhs.unit.scale) is IntervalScale:
+                return ValueUnit(   
+                    lhs.value - rhs.value, 
+                    rhs.unit 
+                )
+                
+            elif (
+                isinstance(lhs.unit,RegisteredUnitExpression) 
+            or  isinstance(rhs.unit,RegisteredUnitExpression) 
+            or  lhs.unit in register and rhs.unit in register
+            ):
+
+                # `unit` may be a unit expression, or the units 
+                # may not be the same but both are registered, 
+                # in either case we must resolve the unit   
+                # and convert before proceeding.
+
+                ref_u_l = register.reference_unit_for( lhs.unit ) 
+                ref_u_r = register.reference_unit_for( rhs.unit ) 
+                
+                # For ratio scales there could be a conversion 
+                # factor to get from the resolved unit to the 
+                # reference unit.
+
+                l_to_ref_fn = register.conversion_from_A_to_B(lhs.unit,ref_u_l)
+                r_to_ref_fn = register.conversion_from_A_to_B(rhs.unit,ref_u_r)
+                
+                assert ref_u_r is ref_u_l, "different units"
+                    
+                return ValueUnit(   
+                    l_to_ref_fn(lhs.value) - r_to_ref_fn(rhs.value), 
+                    ref_u_r 
+                )   
+                
             else:
-                return ValueUnit( (ml/mr)*lhs.value - rhs.value, rhs.unit )
+                assert False, "unexpected"
         else:
             raise RuntimeError(
-                "Different kinds of quantity: {}, {}".format(
-                    lhs.unit.scale.kind_of_quantity,rhs.unit.scale.kind_of_quantity)
-            )    
+                "cannot subtract {!r} and {!r}".format(lhs.unit.scale,rhs.unit.scale)
+            )
+
   
     def __rsub__(self,lhs):
         rhs = self
@@ -129,17 +163,17 @@ class ValueUnit(object):
         else:
             return NotImplemented
   
-    # Multiplication, division and exponentiation create temporary ValueUnit 
-    # objects that have not been resolved to a unit. 
-    # These temporary objects have an interface that exposes
-    # `multiplier`, `register` and `kind_of_quantity` attributes, 
-    # which allow a kind_of_quantity and hence a unit to be resolved later.
+    # Multiplication, division and exponentiation 
+    # create temporary ValueUnit objects. 
+    # These expose an interface with 
+    # `register` and `kind_of_quantity` attributes, 
+    # which allow a kind_of_quantity and hence a unit to be resolved.
+    
     def __mul__(self,rhs):
         lhs = self
         if hasattr(rhs,'unit'):                      
-            if not lhs.unit.register is rhs.unit.register:
-                raise RuntimeError("operation requires the same unit register")
-
+            assert lhs.unit.register is rhs.unit.register, "different unit registers"
+            
             return ValueUnit(lhs.value * rhs.value, lhs.unit * rhs.unit)
         else:
             # Assume that the `rhs` behaves as a number 
@@ -159,8 +193,7 @@ class ValueUnit(object):
     def __truediv__(self,rhs):
         lhs = self 
         if hasattr(rhs,'unit'):          
-            if not lhs.unit.register is rhs.unit.register:
-                raise RuntimeError("operation requires the same unit register")
+            assert lhs.unit.register is rhs.unit.register, "different unit registers"
 
             return ValueUnit(
                 lhs.value / rhs.value,
@@ -181,14 +214,7 @@ class ValueUnit(object):
             lhs / rhs.value, 
             rhs.unit.register.Number.unity / rhs.unit
         )
-                
-    # # Python 2.x backward compatibility
-    # def __div__(self,rhs):
-        # return ValueUnit.__truediv__(self,rhs)
-            
-    # def __rdiv__(self,lhs):
-        # return ValueUnit.__rtruediv__(self,lhs)
-                        
+                                        
     def __pow__(self,rhs):
         # work in progress!
         return NotImplemented
@@ -205,7 +231,7 @@ def qvalue(value,unit):
     
         >>> context = Context( ("Length","L"), ("Time","T") )
         >>> si = UnitRegister("si",context)
-        >>> metre = si.reference_unit('Length','metre','m') 
+        >>> metre = si.unit( RatioScale(context['Length'],'metre','m') ) 
         >>> qvalue( 1.84, metre )
         qvalue(1.84,metre)
         
@@ -239,7 +265,7 @@ def unit(quantity_value):
 #----------------------------------------------------------------------------
 def qresult(
     value_unit, 
-    preferred_unit=None, 
+    unit=None, 
     simplify=True, 
     value_result = lambda x, *arg, **kwarg: x, 
     *arg,
@@ -253,7 +279,7 @@ def qresult(
     If a ``unit`` is supplied, it is used to report the measure. If  
     not, the measure is reported in the reference unit for that quantity.
     
-    If ``simplify`` is ``True``, unit dimensions are simplified.
+    If ``simplify`` is ``True``, unit signatures will be simplified.
     
     The function ``value_result`` is applied to the value as a final processing step.
     
@@ -262,9 +288,9 @@ def qresult(
         >>> context = Context( ("Length","L"), ("Time","T") )
         >>> Speed = context.declare('Speed','V','Length/Time')
         >>> si =  UnitRegister("si",context)
-        >>> metre = si.reference_unit('Length','metre','m') 
-        >>> second = si.reference_unit('Time','second','s') 
-        >>> metre_per_second = si.reference_unit('Speed','metre_per_second','m*s-1')
+        >>> metre = si.unit( RatioScale(context['Length'],'metre','m') )
+        >>> second = si.unit( RatioScale(context['Time'],'second','s') )
+        >>> metre_per_second = si.unit( RatioScale(context['Speed'],'metre_per_second','m*s-1') )
         >>> d = qvalue(0.5,metre)
         >>> t = qvalue(1.0,second)
         >>> v0 = qresult(d/t)
@@ -277,25 +303,34 @@ def qresult(
     """
     register = value_unit.unit.register 
     
-    if simplify:
-        unit = value_unit.unit.simplify()
+    if simplify and not value_unit.unit.is_simplified:
+        u = value_unit.unit.simplify()
     else:
-        unit = value_unit.unit
+        u = value_unit.unit
         
-    ref_unit = register.reference_unit_for( unit )
+    u_scale_type = type(u.scale)
+
+    # This can find the ref unit, but if we are dealing 
+    # with a unit expression, we don't know how to 
+    # convert to that ref unit! The same applies to 
+    # a preferred unit. 
+    ref_unit = register.reference_unit_for( u )
     
-    if preferred_unit:
+    # ``unit`` may be a string.
+    if unit:
     
         koq = ref_unit.scale.kind_of_quantity
-        units_dict = register[koq]
+        ref_scale_type = type(ref_unit.scale)
         
-        if isinstance(preferred_unit,str):
-            if preferred_unit in units_dict:
-                preferred_unit = units_dict[preferred_unit]
+        units_dict = register.get(koq,ref_scale_type)
+        
+        if isinstance(unit,str):
+            if unit in units_dict:
+                unit = units_dict[unit]
             else:
                 raise RuntimeError(
                     "{} is not a unit for {!r}".format(
-                        preferred_unit,
+                        unit,
                         koq
                     )
                 )
@@ -310,20 +345,21 @@ def qresult(
         # else:
             # ref_unit = register.reference_unit_for( value_unit.unit )
                 
-            
-        multiplier = value_unit.unit.multiplier/preferred_unit.multiplier
+        # Note `unit` may be a temporary RatioScale object and hence unregistered
+        fn = register.conversion_from_A_to_B(u,unit)
         return ValueUnit( 
             value_result(
-                multiplier*value_unit.value, 
+                fn( value_unit.value ), 
                 *arg, 
                 **kwarg
             ), 
-            preferred_unit 
+            unit 
         )
     else:       
+        fn = register.conversion_from_A_to_B(u,ref_unit)
         return ValueUnit( 
             value_result(
-                value_unit.unit.multiplier*value_unit.value, 
+                fn( value_unit.value ), 
                 *arg, 
                 **kwarg
             ), 
@@ -334,18 +370,18 @@ def qresult(
 def qratio(value_unit_1, value_unit_2, unit=None ):
     """
     Return a quantity value for ``value_unit_1/value_unit_2``.
-    If the dimensions of the associated units are in simplified form,
-    dimensional information will be retained in the quotient.
+    If the signature of the associated units are in simplified form,
+    signature information is retained in the quotient.
 
-    If no ``unit`` is supplied the reference unit is used. 
+    When ``unit`` is None, the reference unit is used. 
 
     Example ::
     
         >>> context = Context( ("Current","I"),("Voltage","V") )
         >>> ureg = UnitRegister("ureg",context)
-        >>> volt = ureg.reference_unit('Voltage','volt','V') 
+        >>> volt = ureg.unit( RatioScale(context['Voltage'],'volt','V') ) 
         >>> voltage_ratio = context.declare('voltage_ratio','V/V','Voltage//Voltage')
-        >>> volt_per_volt = ureg.reference_unit('voltage_ratio','volt_per_volt','V/V')
+        >>> volt_per_volt = ureg.unit( RatioScale(context['voltage_ratio'],'volt_per_volt','V/V') )
         >>> v1 = qvalue(1.23, volt)
         >>> v2 = qvalue(9.51, volt)
         >>> qratio( v2,v1 )
@@ -354,14 +390,15 @@ def qratio(value_unit_1, value_unit_2, unit=None ):
     """
     register = value_unit_1.unit.register 
     if not register is value_unit_1.unit.register :
-        raise RuntimeError("Different unit registers: {}, {}".format(
-            register, value_unit_1.unit.register)
-        )
+        raise RuntimeError("different unit registers")
     
-    default_unit = register.reference_unit_for(value_unit_1.unit//value_unit_2.unit)
-    # Check that the user-supplied unit is compatible wit the quantity 
+    ref_unit = register.reference_unit_for(
+        value_unit_1.unit//value_unit_2.unit
+    )
+    
     if unit:
-        koq_1 = default_unit.scale.kind_of_quantity 
+        # Check that the user-supplied unit is compatible 
+        koq_1 = ref_unit.scale.kind_of_quantity 
         koq_2 = unit.scale.kind_of_quantity 
         
         if koq_1 != koq_2:
@@ -372,19 +409,19 @@ def qratio(value_unit_1, value_unit_2, unit=None ):
             )
 
         value = (
-            value_unit_1.unit.multiplier*value_unit_1.value /
-            (value_unit_2.unit.multiplier*value_unit_2.value) 
-        )/unit.multiplier
+            value_unit_1.unit.scale.conversion_factor*value_unit_1.value /
+            (value_unit_2.unit.scale.conversion_factor*value_unit_2.value) 
+        )/unit.scale.conversion_factor
         
         return ValueUnit( value, unit )    
     else:
         value = (
-            value_unit_1.unit.multiplier*value_unit_1.value /
-            (value_unit_2.unit.multiplier*value_unit_2.value) 
+            value_unit_1.unit.scale.conversion_factor*value_unit_1.value /
+            (value_unit_2.unit.scale.conversion_factor*value_unit_2.value) 
         )
 
-        return ValueUnit( value, default_unit )
-    
+        return ValueUnit( value, ref_unit )
+        
 # ===========================================================================    
 if __name__ == "__main__":
     import doctest

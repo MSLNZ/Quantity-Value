@@ -29,11 +29,11 @@ class TestUnitDict(unittest.TestCase):
         self.assertEqual( len(ud) , 0 )
  
         name = 'metre'
-        term = 'm' 
+        symbol = 'm' 
         metre = object()
         
         ud[name] = metre
-        ud[term] = metre
+        ud[symbol] = metre
         
         self.assertEqual( len(ud) , 2 )
         self.assertTrue( ud.metre is metre )
@@ -49,7 +49,7 @@ class TestUnitDict(unittest.TestCase):
         self.assertTrue( ud.m is metre  )
         self.assertTrue( ud['m'] is metre  )
  
-        del ud[term] 
+        del ud[symbol] 
  
         self.assertEqual( len(ud) , 0 )
 

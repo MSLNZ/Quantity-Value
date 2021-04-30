@@ -31,10 +31,10 @@ Units can be declared in terms of these quantities
 
     >>> ureg = UnitRegister("ureg",context)
     >>>
-    >>> volt = ureg.reference_unit('Voltage','volt','V') 
-    >>> amp = ureg.reference_unit('Current','amp','A') 
-    >>> milliamp = prefix.milli(amp)
-    >>> ohm = ureg.reference_unit('Resistance','Ohm','Ohm')
+    >>> volt = ureg.unit( RatioScale(context['Voltage'],'volt','V') ) 
+    >>> amp = ureg.unit( RatioScale(context['Current'],'amp','A') )
+    >>> milliamp = ureg.unit( prefix.milli(amp) )
+    >>> ohm = ureg.unit( RatioScale(context['Resistance'],'Ohm','Ohm') )
     
 and then quantity-values can be created and manipulated
 
@@ -60,15 +60,15 @@ Documentation
 The documentation for **Quantity-Value** can be found `here <https://quantity-value.readthedocs.io/en/stable/>`_.
 
 
-.. |docs| image:: https://readthedocs.org/projects/quantity-value/badge/?version=latest
-    :target: https://quantity-value.readthedocs.io/en/latest/?badge=latest
+.. |docs| image:: https://readthedocs.org/projects/quantity-value/badge/?version=stable
+    :target: https://quantity-value.readthedocs.io/en/stable/
     :alt: Documentation Status
 
-.. |travis| image:: https://img.shields.io/travis/MSLNZ/Quantity-Value/master.svg?label=Travis-CI
+.. |travis| image:: https://img.shields.io/travis/MSLNZ/Quantity-Value/main.svg?label=Travis-CI
     :target: https://travis-ci.org/MSLNZ/Quantity-Value
 
-.. |appveyor| image:: https://img.shields.io/appveyor/ci/jborbely/Quantity-Value/master.svg?label=AppVeyor
-    :target: https://ci.appveyor.com/project/jborbely/Quantity-Value/branch/master
+.. |appveyor| image:: https://img.shields.io/appveyor/ci/jborbely/Quantity-Value/main.svg?label=AppVeyor
+    :target: https://ci.appveyor.com/project/jborbely/Quantity-Value/branch/main
 
 .. |pypi| image:: https://badge.fury.io/py/Quantity-Value.svg
     :target: https://badge.fury.io/py/Quantity-Value

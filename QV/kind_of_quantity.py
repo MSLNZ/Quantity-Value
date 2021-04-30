@@ -1,5 +1,3 @@
-from __future__ import division 
-
 __all__ = ( 'KindOfQuantity', 'Number' )
 
 #----------------------------------------------------------------------------
@@ -7,31 +5,34 @@ class KindOfQuantity(object):
 
     """
     A type of quantity like mass, length, etc.
+    
+    KindOfQuantity objects can be multiplied and divided. Declaring a ratio 
+    and simplifying a ratio is also supported.
     """
 
-    def __init__(self,name,term):
+    def __init__(self,name,symbol):
         self._name = str(name) 
-        self._term = str(term) 
+        self._symbol = str(symbol) 
      
     def __repr__(self):
         return "{!s}({!r},{!r})".format(
             self.__class__.__name__,
             self._name,
-            self._term
+            self._symbol
         )
 
     def __str__(self):
-        return self._term
+        return self._symbol
 
     # __hash__ and __eq__ are required for mapping keys
     def __hash__(self):
-        return hash( ( self._name, self._term ) )
+        return hash( ( self._name, self._symbol ) )
         
     def __eq__(self,other):
         return (
             self._name == other.name 
         and 
-            self._term == other.term 
+            self._symbol == other.symbol 
         ) 
         
     @property 
@@ -39,8 +40,8 @@ class KindOfQuantity(object):
         return self._name
         
     @property 
-    def term(self):
-        return self._term
+    def symbol(self):
+        return self._symbol
 
     def __mul__(self,rhs):
         # NB deliberately don't allow `rhs` to be numeric
@@ -57,13 +58,7 @@ class KindOfQuantity(object):
     def __rtruediv__(self,lhs):
         # Assume that lhs behaves like a number
         return Div(Number,self)
-        
-    # def __div__(self,rhs):
-        # return KindOfQuantity.__truediv__(self,rhs)
-        
-    # def __rdiv__(self,rhs):
-        # return KindOfQuantity.__rtruediv__(self,rhs)
-        
+                
     def __floordiv__(self,rhs):
         # NB deliberately don't allow `rhs` to be numeric
         return Ratio(self,rhs)
@@ -76,8 +71,9 @@ class KindOfQuantity(object):
         return Simplify(self)
 
 #----------------------------------------------------------------------------
-# KindOfQuantity objects can be multiplied and divided. Declaring a ratio 
-# and simplifying a ratio is also supported.   
+# The `execute` method is defined in all operation classes and is used to  
+# resolve expressions into a result, by executing the nodes of a parse tree.
+# See `context._evaluate_signature`
 #----------------------------------------------------------------------------
 class UnaryOp(object):   
 
@@ -93,7 +89,7 @@ class UnaryOp(object):
 #----------------------------------------------------------------------------
 class BinaryOp(object):   
     """
-    Based class to build a simple parse tree and evaluate it
+    Base class to build a simple parse tree and evaluate it
     """
     def __init__(self,lhs,rhs):
         self.lhs = lhs
@@ -121,12 +117,6 @@ class BinaryOp(object):
     def __rtruediv__(self,lhs):
         return Div(lhs,self)
 
-    # def __div__(self,rhs):
-        # return BinaryOp.__truediv__(self,rhs)
-
-    # def __rdiv__(self,lhs):
-        # return BinaryOp.__rtruediv__(self,lhs)
-            
     def __floordiv__(self,rhs):
         return Ratio(self,rhs)
 
@@ -138,10 +128,10 @@ class BinaryOp(object):
         return Simplify(self)
         
     # Execution is a recursive process that reduces a tree 
-    # of Mul and Div objects to a single result.
+    # of Mul and Div objects to a result.
     # The `converter` argument is a `Context` method
-    # that converts a KindOfQuantity object into a Dimension.
-    # The `stack` holds dimensions. 
+    # that converts a `KindOfQuantity` object into a Signature.
+    # The `stack` holds signatures. 
     def execute(self,stack,converter):
         if isinstance( self.lhs,(BinaryOp,UnaryOp) ):
             self.lhs.execute(stack,converter)
@@ -161,7 +151,7 @@ class Simplify(UnaryOp):
 
     def execute(self,stack,converter):
         super(Simplify,self).execute(stack,converter)    
-        # The stack holds Dimension objects
+        # The stack holds Signature objects
         x = stack.pop()
         stack.append( x.simplify() )
 
@@ -173,7 +163,7 @@ class Pow(BinaryOp):
 
     def execute(self,stack,converter):
         super(Pow,self).execute(stack,converter)    
-        # The stack holds Dimension objects
+        # The stack holds Signature objects
         r = stack.pop()
         l = stack.pop()
         stack.append( l ** r )
@@ -186,7 +176,7 @@ class Mul(BinaryOp):
 
     def execute(self,stack,converter):
         super(Mul,self).execute(stack,converter)    
-        # The stack holds Dimension objects
+        # The stack holds Signature objects
         r = stack.pop()
         l = stack.pop()
         stack.append( l * r )
@@ -199,7 +189,7 @@ class Div(BinaryOp):
     
     def execute(self,stack,converter):
         super(Div,self).execute(stack,converter)    
-        # The stack holds Dimension objects
+        # The stack holds Signature objects
         r = stack.pop()
         l = stack.pop()
         stack.append( l / r )
@@ -212,7 +202,7 @@ class Ratio(BinaryOp):
 
     def execute(self,stack,converter):
         super(Ratio,self).execute(stack,converter)    
-        # The stack holds Dimension objects
+        # The stack holds Signature objects
         r = stack.pop()
         l = stack.pop()
         stack.append( l // r )

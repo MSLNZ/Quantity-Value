@@ -1,355 +1,188 @@
-from __future__ import division 
-import numbers 
- 
-__all__ = ( 'Scale', 'Unit', )
+__all__ = ( 'Scale', 'OrdinalScale', 'IntervalScale', 'RatioScale', )
 
 #----------------------------------------------------------------------------
+# 'Scale' is a nominal scale 
+#
 class Scale(object):
 
     """
-    Measured values of a quantity are reported on a scale.  
-    For example, the SI scale for length measurement is the metre.   
-        
-    A Scale object has a name (and a short name, or term) 
+    A Scale has a name (and a short name, or symbol) 
     and contains a reference to the associated kind of quantity.
     """
     
-    def __init__(self,kind_of_quantity,name,term):
+    def __init__(self,kind_of_quantity,name,symbol):
         self._kind_of_quantity = kind_of_quantity
         self._name = str(name)
-        self._term = str(term)
+        self._symbol = str(symbol)
 
     def __repr__(self):
         return "{!s}({!r},{!r},{!r})".format(
             self.__class__.__name__,
             self.kind_of_quantity,
             self._name,
-            self._term
+            self._symbol
         )
         
     # __hash__ and __eq__ are required for mapping keys
+    # __eq__ also needed as a nominal scale property 
     def __hash__(self):
-        return hash( ( self._name, self._term ) )
+        return hash( 
+            ( self._name, self._symbol, id(self.__class__) ) 
+        )
         
+    # Equality of scales means their names and types agree
+    # So, Celsius on a ratio scale is different from 
+    # an interval scale.
     def __eq__(self,other):
         return (
             self._name == other.name 
         and 
-            self._term == other.term 
+            self._symbol == other.symbol 
+        and
+            self.__class__ is other.__class__
         ) 
         
     def __str__(self):
-        return self._term
-        
+        return self._symbol
+       
     @property 
     def name(self):
-        """The quantity name"""
         return self._name
         
     @property 
-    def term(self):
-        """Short name for the quantity"""
-        return self._term
+    def symbol(self):
+        return self._symbol
         
     @property 
     def kind_of_quantity(self):
-        """The associated kind of quantity"""
         return self._kind_of_quantity
   
 #----------------------------------------------------------------------------
-# A Scale (correctly) does not refer to a register, but the implementation 
-# of Unit would be awkward without such a reference. Unit is therefore 
-# really part of the implementation of the UnitRegister. 
-class Unit(object):
+class OrdinalScale(Scale):
 
     """
-    A Unit class implements the behaviour of a measurement scale. 
-    
-    A :class:`Unit` is associated with a :class:`Scale` and with a :class:`.UnitRegister`. 
-    
-    Multiplication and division of units is supported. 
-    
-    The 'floor' division operator supports retention of 
-    information about the dimensions of 'dimensionless' quantities 
-    (ratios of the same kind of quantity). 
     
     """
-
-    def __init__(self,kind_of_quantity,name,term,register,multiplier):
-        self._scale = Scale(kind_of_quantity,name,term)
-        self._kind_of_quantity = self._scale.kind_of_quantity
-        self._register = register
-        self._multiplier = multiplier   
+    
+    def __init__(self,kind_of_quantity,name,symbol):
+        Scale.__init__(self,kind_of_quantity,name,symbol)
         
-    # Units for the same kind of quantity can have different multipliers. 
-    # A unit with multiplier of unity is the reference unit.
-    # It is perhaps better to hold the multipliers in the unit register?
+#----------------------------------------------------------------------------
+class IntervalScale(OrdinalScale):
+
+    """
+    An :class:`.IntervalScale` has an arbitrary origin.
+    Units associated with an interval scale may not be 
+    multiplied or divided.
+    """
     
-    @property 
-    def scale(self):
-        """The unit scale"""
-        return self._scale 
+    def __init__(self,kind_of_quantity,name,symbol):
+        OrdinalScale.__init__(self,kind_of_quantity,name,symbol)
 
-    @property 
-    def kind_of_quantity(self): 
-        """The associated kind of quantity"""
-        return self._kind_of_quantity
+    @staticmethod
+    def value_conversion_function():
+        """
+        Generic conversion function from one interval scale to another 
+        
+        """     
+        return lambda factor,offset,x: factor*x + offset
+        
+#----------------------------------------------------------------------------
+# Quantity calculus applies to entities measured on ratio scales, so we 
+# may arbitrarily generate products and quotients, which are derived scales.
+# The mechanics of KindOfQuantity and Signature are used to resolve 
+# the derived quantity; no attempt is made to keep track of the 
+# corresponding unit. Instead, values are re-scaled to a reference unit 
+# for each term and the scale factor for the final conversion is built up
+# as the calculation proceeds, using `conversion_factor`. At the same time, 
+# a string of the unit  names and symbols is assembled, so that it will be 
+# possible to read  how a temporary object has been constructed, 
+# before being converted to a registered unit of the appropriate kind.
+#
+class RatioScale(IntervalScale):
 
+    """
+    A :class:`.RatioScale` is a metric scale. 
+    Units may be multiplied and divided. 
+    """
+    
+    def __init__(self,kind_of_quantity,name,symbol,conversion_factor=None):
+        IntervalScale.__init__(self,kind_of_quantity,name,symbol)
+        
+        if conversion_factor is not None: 
+            self._conversion_factor = conversion_factor 
+ 
+    # The conversion factor converts to the reference 
+    # scale for the same quantity. It is immutable. 
     @property 
-    def multiplier(self):
+    def conversion_factor(self):
+        """
+        Return a conversion factor for a value 
+        on this scale to one on the reference scale 
+        
+        """
         try:
-            return self._multiplier
+            return self._conversion_factor
         except AttributeError:
-            return 1 
-
-    @property 
-    def is_dimensionless(self):
-        """True when the associated kind of quantity is dimensionless in the current context"""
-        context = self.register.context 
-        return context.dimensions( self.kind_of_quantity ).is_dimensionless
-
-        
-    def is_ratio_of(self,other_koq):
-        """
-        True when the kind of quantity of ``self`` is a dimensionless 
-        ratio and the dimensions of the kind of quantity of ``other_koq``
-        match the numerator dimensions of the kind of quantity of ``self``.
-        
-        """
-        context = self.register.context 
-        lhs = context.dimensions( self.kind_of_quantity )
-        rhs = context.dimensions( other_koq )
-        
-        if lhs.numerator == lhs.denominator and rhs.is_simplified:
-            return lhs.numerator == rhs.numerator
-        else:
-            return False
-
-    @property 
-    def register(self):
-        """The associated unit register"""
-        return self._register
-        
-    @register.setter
-    def register(self,register):
-        if self._register is None:
-            self._register = register
+            return 1.0 
+            
+    @conversion_factor.setter 
+    def conversion_factor(self,value):
+        if not hasattr(self,'_conversion_factor'):
+            self._conversion_factor = value
         else:
             raise RuntimeError(
-                "Unit register is assigned: {}".format(self.register)
+                "{!r} already has a conversion factor: {}".format(
+                    self,self._conversion_factor
+                )
+            )
+ 
+    @staticmethod
+    def value_conversion_function():
+        """
+        Generic conversion function from one ratio scale to another 
+        
+        """
+        return lambda factor,x: factor*x
+   
+    def __mul__(self,rhs):
+        if not isinstance(rhs,RatioScale): 
+            raise RuntimeError(
+                "Incompatible scales: {!r} and {!r}".format(self,rhs)
             )
         
-    def __str__(self):
-        return "{!s}".format(self.scale)
+        koq = self.kind_of_quantity*rhs.kind_of_quantity
+        name = "({!s}*{!s})".format(self.name,rhs.name)
+        symbol = "({!s}*{!s})".format(self.symbol,rhs.symbol)
+        factor = self.conversion_factor*rhs.conversion_factor 
         
-    def __repr__(self):
-        return "{!s}({!r},{!r},{!r},{!r})".format(
-            self.__class__.__name__,
-            self.kind_of_quantity,
-            self.scale.name,
-            self.scale.term,
-            self._register
-        )     
-
-    def __mul__(self,rhs):
-        return Mul(self,rhs)
-            
+        return RatioScale(koq,name,symbol,factor)
+        
     def __truediv__(self,rhs):
-        return Div(self,rhs)
+        if not isinstance(rhs,RatioScale): 
+            raise RuntimeError(
+                "Incompatible scales: {!r} and {!r}".format(self,rhs)
+            )
 
-    # def __div__(self,rhs):
-        # return self.__truediv__(rhs)
+        koq = self.kind_of_quantity/rhs.kind_of_quantity
+        name = "({!s}/{!s})".format(self.name,rhs.name)
+        symbol = "({!s}/{!s})".format(self.symbol,rhs.symbol)
+        factor = self.conversion_factor/rhs.conversion_factor 
+        
+        return RatioScale(koq,name,symbol,factor)
         
     def __floordiv__(self,rhs):
-        return Ratio(self,rhs)
-
-    def __pow__(self,rhs):
-        assert isinstance(rhs,numbers.Real),\
-            "A real exponent is required"
-        
-        # work in progress!
-        return NotImplemented
-  
-    # def ratio(self,rhs):
-        # return Ratio(self,rhs)
-
-    def simplify(self):
-        return Simplify(self)
-
-    # def reference_unit(self):
-        # """
-        # Return the reference unit
-
-        # There can be only one reference unit in a register for each 
-        # kind of quantity, but there can be many other related units,
-        # which are multiples of the reference.
-        
-        # """
-        # return self.register.reference_unit_for( self.kind_of_quantity ) 
-
-#----------------------------------------------------------------------------
-# The following classes support simple manipulation of units by
-# multiplication and division, declaring a ratio of units 
-# and of simplifying a ratio of units is also supported. 
-# The base classes  `UnaryOp` and `BinaryOp` establish the interface. 
-# These classes provide a representation for 
-# an equation involving units, but do not resolve into a unit.
-#
-#----------------------------------------------------------------------------
-class UnaryOp(object):   
-
-    def __init__(self,arg):
-        self.arg = arg
-        self._register = arg.register
-
-    @property 
-    def register(self):
-        return self._register
-
-    def __mul__(self,rhs):
-        return Mul(self,rhs)
-            
-    def __truediv__(self,rhs):
-        return Div(self,rhs)
-
-    # def __div__(self,rhs):
-        # return self.__truediv__(rhs)
-        
-    def __floordiv__(self,rhs):
-        return Ratio(self,rhs)
-
-    # def ratio(self,rhs):
-        # return Ratio(self,rhs)
-
-    def simplify(self):
-        return Simplify(self)
-
-    # def reference_unit(self):
-        # return self.register.reference_unit_for( self.kind_of_quantity ) 
-    
-#----------------------------------------------------------------------------
-class BinaryOp(object):   
-
-    def __init__(self,lhs,rhs):
-        self.lhs = lhs
-        self.rhs = rhs
-        
-        assert lhs.register is rhs.register
-        self._register = lhs.register
-        
-    @property 
-    def register(self):
-        return self._register
-
-    def __mul__(self,rhs):
-        return Mul(self,rhs)
-            
-    def __truediv__(self,rhs):
-        return Div(self,rhs)
-
-    # def __div__(self,rhs):
-        # return self.__truediv__(rhs)
-        
-    def __floordiv__(self,rhs):
-        return Ratio(self,rhs)
-
-    # def ratio(self,rhs):
-        # return Ratio(self,rhs)
-
-    def simplify(self):
-        return Simplify(self)
-
-    # def reference_unit(self):
-        # return self.register.reference_unit_for( self.kind_of_quantity ) 
-
-#----------------------------------------------------------------------------
-#
-# Operations implement manipulations of multipliers and kinds
-# of quantity simultaneously. 
-#       
-#----------------------------------------------------------------------------
-class Simplify(UnaryOp):
-
-    def __init__(self,arg):
-        UnaryOp.__init__(self,arg) 
-        
-    def __repr__(self):
-        return "simplify({!r})".format(self.arg)
-
-    def __str__(self):
-        # TODO: need to treat a numeric as a special case
-        return "simplify({!s})".format(self.arg)
-           
-    @property 
-    def kind_of_quantity(self):  
-        return self.arg.kind_of_quantity._simplify()
-        
-    @property 
-    def multiplier(self):
-        return self.arg.multiplier
-
-#----------------------------------------------------------------------------
-class Ratio(BinaryOp):   
-
-    def __init__(self,lhs,rhs):
-        BinaryOp.__init__(self,lhs,rhs) 
-
-    def __repr__(self):
-        return "({!r}//{!r})".format(self.lhs,self.rhs)
-
-    def __str__(self):
-        # TODO: need to treat a numeric as a special case
-        return "({!s}//{!s})".format(self.lhs,self.rhs)
-           
-    @property 
-    def kind_of_quantity(self):  
-        return self.lhs.kind_of_quantity // self.rhs.kind_of_quantity
-        
-    @property 
-    def multiplier(self):
-        return self.lhs.multiplier / self.rhs.multiplier
-
-#----------------------------------------------------------------------------
-class Mul(BinaryOp):   
-
-    def __init__(self,lhs,rhs):
-        super(Mul,self).__init__(lhs,rhs) 
-
-    def __repr__(self):
-        return "({!r})*({!r})".format(self.lhs,self.rhs)
-
-    def __str__(self):
-        # TODO: need to treat a numeric as a special case
-        return "({!s})*({!s})".format(self.lhs,self.rhs)
-           
-    @property 
-    def kind_of_quantity(self):  
-        return self.lhs.kind_of_quantity * self.rhs.kind_of_quantity
-        
-    @property 
-    def multiplier(self):
-        return self.lhs.multiplier * self.rhs.multiplier
-        
-#----------------------------------------------------------------------------
-class Div(BinaryOp):   
-
-    def __init__(self,lhs,rhs):
-        super(Div,self).__init__(lhs,rhs) 
-
-    def __repr__(self):
-        return "({!r})/({!r})".format(self.lhs,self.rhs)
-
-    def __str__(self):
-        # TODO: need to treat a numeric as a special case
-        return "({!s})/({!s})".format(self.lhs,self.rhs)
-    
-    @property 
-    def kind_of_quantity(self):  
-        return self.lhs.kind_of_quantity / self.rhs.kind_of_quantity
-
-    @property 
-    def multiplier(self):
-        return self.lhs.multiplier / self.rhs.multiplier
+        if not isinstance(rhs,RatioScale): 
+            raise RuntimeError(
+                "Incompatible scales: {!r} and {!r}".format(self,rhs)
+            )
+ 
+        koq = self.kind_of_quantity//rhs.kind_of_quantity
+        name = "({!s}//{!s})".format(self.name,rhs.name)
+        symbol = "({!s}//{!s})".format(self.symbol,rhs.symbol)
+        factor = self.conversion_factor/rhs.conversion_factor 
+ 
+        return RatioScale(koq,name,symbol,factor)
 
 # ===========================================================================    
 if __name__ == "__main__":
