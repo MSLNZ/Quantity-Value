@@ -60,8 +60,8 @@ Documentation
 The documentation for **Quantity-Value** can be found `here <https://quantity-value.readthedocs.io/en/stable/>`_.
 
 
-.. |docs| image:: https://readthedocs.org/projects/quantity-value/badge/?version=latest
-    :target: https://quantity-value.readthedocs.io/en/latest/?badge=latest
+.. |docs| image:: https://readthedocs.org/projects/quantity-value/badge/?version=stable
+    :target: https://quantity-value.readthedocs.io/en/stable/
     :alt: Documentation Status
 
 .. |travis| image:: https://img.shields.io/travis/MSLNZ/Quantity-Value/main.svg?label=Travis-CI
