@@ -14,4 +14,3 @@ The :mod:`.units_dict` module defines :class:`.UnitsDict`, which implements a ma
 
 .. automodule:: QV.units_dict
     :members: 
-    :inherited-members:

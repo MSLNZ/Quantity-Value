@@ -8,9 +8,9 @@ The :mod:`.scale` module contains the class :class:`.Scale` which implements gen
 
 Different categories of scale are implemented as classes derived from :class:`.Scale`: 
 
-    * Instances of :class:`.Ratio` scales have an absolute zero, like the metre scale for length or the kelvin scale for thermodynamic temperature. 
+    * Instances of :class:`.RatioScale` scales have an absolute zero, like the metre scale for length or the kelvin scale for thermodynamic temperature. 
     
-    * :class:`.Interval` scales are measurement scales with an arbitrary zero, like the Fahrenheit and Celsius temperature scales. 
+    * :class:`.IntervalScale` scales are measurement scales with an arbitrary zero, like the Fahrenheit and Celsius temperature scales. 
 
 .. contents::
    :local:

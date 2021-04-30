@@ -135,7 +135,7 @@ class RegisteredUnit(object):
         Return the conversion function from this unit to unit `B` 
         
         The conversion function takes a value argument 
-         `x` and returns the converted value on `B`
+        `x` and returns the converted value on `B`
         
         """
         A = self 
