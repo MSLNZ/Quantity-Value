@@ -2,7 +2,7 @@
 Release Notes
 =============
 
-Version 0.2.0 (?? April 2021)
+Version 0.2.0 (30 April 2021)
 =============================
 
     * Terminology has changed substantially. Use of the term 'dimension' in version 0.1.0 has been reconsidered and in many cases we now write 'signature' instead. This allows us to use the term 'dimension' correctly.
