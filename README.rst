@@ -2,7 +2,7 @@
 Quantity-Value
 ==============
 
-|docs| |travis| |appveyor| |pypi|
+|docs| |github tests| |pypi|
 
 This package provides Python support for physical quantities used in mathematical equations. 
 
@@ -64,11 +64,8 @@ The documentation for **Quantity-Value** can be found `here <https://quantity-va
     :target: https://quantity-value.readthedocs.io/en/stable/
     :alt: Documentation Status
 
-.. |travis| image:: https://img.shields.io/travis/MSLNZ/Quantity-Value/main.svg?label=Travis-CI
-    :target: https://travis-ci.org/MSLNZ/Quantity-Value
-
-.. |appveyor| image:: https://img.shields.io/appveyor/ci/jborbely/Quantity-Value/main.svg?label=AppVeyor
-    :target: https://ci.appveyor.com/project/jborbely/Quantity-Value/branch/main
+.. |github tests| image:: https://github.com/MSLNZ/Quantity-Value/actions/workflows/run-tests.yml/badge.svg
+   :target: https://github.com/MSLNZ/Quantity-Value/actions/workflows/run-tests.yml
 
 .. |pypi| image:: https://badge.fury.io/py/Quantity-Value.svg
     :target: https://badge.fury.io/py/Quantity-Value
