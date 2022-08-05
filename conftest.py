@@ -10,8 +10,12 @@ from doctest import NORMALIZE_WHITESPACE, ELLIPSIS
 import pytest
 
 from sybil import Sybil
-from sybil.parsers.codeblock import CodeBlockParser
 from sybil.parsers.doctest import DocTestParser
+try:
+    # in sybil 3.0.0, CodeBlockParser was renamed to PythonCodeBlockParser
+    from sybil.parsers.codeblock import PythonCodeBlockParser
+except ImportError:
+    from sybil.parsers.codeblock import CodeBlockParser as PythonCodeBlockParser
 
 from QV import *
 
@@ -30,7 +34,7 @@ def add_quantity_value(doctest_namespace):
 pytest_collect_file = Sybil(
     parsers=[
         DocTestParser(optionflags=NORMALIZE_WHITESPACE | ELLIPSIS),
-        CodeBlockParser(future_imports=['division']),
+        PythonCodeBlockParser(future_imports=['division']),
     ],
     pattern='*.rst',
     fixtures=['add_quantity_value']
