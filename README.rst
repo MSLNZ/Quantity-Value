@@ -60,7 +60,7 @@ Documentation
 The documentation for **Quantity-Value** can be found `here <https://quantity-value.readthedocs.io/en/stable/>`_.
 
 
-.. |docs| image:: https://readthedocs.org/projects/quantity-value/badge/?version=stable
+.. |docs| image:: https://readthedocs.org/projects/quantity-value/badge/?version=latest
    :target: https://quantity-value.readthedocs.io/en/stable/
    :alt: Documentation Status
 
