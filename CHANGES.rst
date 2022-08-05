@@ -2,8 +2,8 @@
 Release Notes
 =============
 
-Version 0.2.0 (30 April 2021)
-=============================
+Version 0.2.0 (2021-04-30)
+==========================
 
     * Terminology has changed substantially. Use of the term 'dimension' in version 0.1.0 has been reconsidered and in many cases we now write 'signature' instead. This allows us to use the term 'dimension' correctly.
 
@@ -17,8 +17,8 @@ Version 0.2.0 (30 April 2021)
 
     * Support for Python 2 has been dropped.
 
-Version 0.1.0 (24 Feb 2020)
-===========================
+Version 0.1.0 (2020-02-24)
+==========================
 
     * First release.
 
